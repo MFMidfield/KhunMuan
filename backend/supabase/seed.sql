@@ -17,6 +17,16 @@ update public.shop_settings
        closed_message = '[DEV] ปิดรับออเดอร์ชั่วคราว'
  where id = 1;
 
+-- --- Staff ------------------------------------------------------------------
+--
+-- The real allow-list is Q13 and has not been supplied. Two [DEV] accounts
+-- exist so the claim race and the "someone else has it" path can be exercised
+-- locally at all; neither is a real Google account.
+
+insert into public.admin_users (email, display_name, role) values
+  ('dev-staff-a@example.com', '[DEV] พนักงาน A', 'admin'),
+  ('dev-staff-b@example.com', '[DEV] พนักงาน B', 'admin');
+
 -- --- Fulfillment ------------------------------------------------------------
 
 insert into public.delivery_zones (id, name, fee, sort_order) values

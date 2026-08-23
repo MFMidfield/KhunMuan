@@ -428,6 +428,33 @@ export type Database = {
           },
         ]
       }
+      order_reject_reasons: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           cancelled_reason: string | null
@@ -451,6 +478,7 @@ export type Database = {
           note: string | null
           pickup_point_id: string | null
           pickup_slot_id: string | null
+          reject_reason_id: string | null
           service_date: string
           source: Database["public"]["Enums"]["order_source"]
           status: Database["public"]["Enums"]["order_status"]
@@ -481,6 +509,7 @@ export type Database = {
           note?: string | null
           pickup_point_id?: string | null
           pickup_slot_id?: string | null
+          reject_reason_id?: string | null
           service_date?: string
           source?: Database["public"]["Enums"]["order_source"]
           status?: Database["public"]["Enums"]["order_status"]
@@ -511,6 +540,7 @@ export type Database = {
           note?: string | null
           pickup_point_id?: string | null
           pickup_slot_id?: string | null
+          reject_reason_id?: string | null
           service_date?: string
           source?: Database["public"]["Enums"]["order_source"]
           status?: Database["public"]["Enums"]["order_status"]
@@ -553,6 +583,13 @@ export type Database = {
             columns: ["pickup_slot_id"]
             isOneToOne: false
             referencedRelation: "pickup_slots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_reject_reason_id_fkey"
+            columns: ["reject_reason_id"]
+            isOneToOne: false
+            referencedRelation: "order_reject_reasons"
             referencedColumns: ["id"]
           },
         ]
@@ -774,10 +811,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      advance_order: {
+        Args: {
+          p_code?: string
+          p_expected_version: number
+          p_note?: string
+          p_order_id: string
+          p_override_payment?: boolean
+          p_reason_id?: string
+          p_to_status: Database["public"]["Enums"]["order_status"]
+        }
+        Returns: Json
+      }
       cancel_order: {
         Args: { p_client_token: string; p_code: string }
         Returns: Json
       }
+      claim_order: { Args: { p_order_id: string }; Returns: Json }
       is_admin: { Args: never; Returns: boolean }
       is_superadmin: { Args: never; Returns: boolean }
       lookup_order: {
@@ -785,7 +835,24 @@ export type Database = {
         Returns: Json
       }
       place_order: { Args: { p_payload: Json }; Returns: Json }
+      release_order: { Args: { p_order_id: string }; Returns: Json }
+      set_payment: {
+        Args: {
+          p_note?: string
+          p_order_id: string
+          p_state: Database["public"]["Enums"]["payment_state"]
+        }
+        Returns: Json
+      }
+      set_stock: {
+        Args: { p_filling_id: string; p_qty_total: number }
+        Returns: Json
+      }
       shop_today: { Args: never; Returns: string }
+      toggle_shop: {
+        Args: { p_is_open: boolean; p_message?: string }
+        Returns: Json
+      }
     }
     Enums: {
       addon_group: "sauce" | "utensil" | "packaging"
