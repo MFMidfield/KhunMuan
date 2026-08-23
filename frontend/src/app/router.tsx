@@ -8,6 +8,8 @@ import { LoginPage } from '@/features/admin/LoginPage'
 import { BoardPage } from '@/features/admin/BoardPage'
 import { StockPage } from '@/features/admin/StockPage'
 import { NewOrderPage } from '@/features/admin/NewOrderPage'
+import { MenuAdminPage } from '@/features/admin/config/MenuAdminPage'
+import { StaffPage } from '@/features/admin/config/StaffPage'
 import { OrderDetailPage } from '@/features/admin/OrderDetailPage'
 import { SettingsPage } from '@/features/admin/SettingsPage'
 import { MenuPage } from '@/features/menu/MenuPage'
@@ -66,9 +68,9 @@ export const router = createBrowserRouter([
       {
         element: <AdminLayout />,
         children: [
-          { path: '/admin/menu', element: <Placeholder titleKey="adminMenu" phase={4} /> },
+          { path: '/admin/menu', element: <MenuAdminPage /> },
           { path: '/admin/reports', element: <Placeholder titleKey="reports" phase={4} /> },
-          { path: '/admin/staff', element: <Placeholder titleKey="staff" phase={4} /> },
+          { path: '/admin/staff', element: <StaffPage /> },
         ],
       },
     ],

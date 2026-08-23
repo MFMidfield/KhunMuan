@@ -322,7 +322,7 @@ form.
 An order placed on a phone lands in the database with the correct total, correct
 snapshots, stock decremented, and a code that survives being read aloud.
 
-## Phase 2 — Back office
+## Phase 2 — Back office ✅
 
 **Blocked on Q11, Q12, Q13, Q15.**
 

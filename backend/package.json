@@ -14,7 +14,9 @@
     "test:order-code": "docker exec -i supabase_db_backend psql -U postgres -d postgres -v ON_ERROR_STOP=1 < supabase/tests/order_code_property.sql",
     "test:orders": "supabase db reset >/dev/null && node tests/place_order.test.mjs",
     "test:back-office": "supabase db reset >/dev/null && node tests/back_office.test.mjs",
-    "test:tracking": "supabase db reset >/dev/null && node tests/tracking_broadcast.test.mjs"
+    "test:tracking": "supabase db reset >/dev/null && node tests/tracking_broadcast.test.mjs",
+    "test:config": "supabase db reset >/dev/null && node tests/config_crud.test.mjs",
+    "test": "npm run test:order-code && npm run test:orders && npm run test:back-office && npm run test:config && npm run test:tracking"
   },
   "devDependencies": {
     "supabase": "^2.60.4"
