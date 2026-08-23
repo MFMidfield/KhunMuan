@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KhunMuan - Set Builder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#e9f1ff",
+                    "surface-container-high": "#dde9fb",
+                    "outline": "#7e7667",
+                    "on-secondary-fixed-variant": "#404752",
+                    "primary-container": "#f5d68a",
+                    "secondary-container": "#dce3f0",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "on-primary-container": "#725c1c",
+                    "secondary-fixed-dim": "#c0c7d3",
+                    "primary": "#725c1c",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#dce3f0",
+                    "on-tertiary-container": "#5c5f61",
+                    "on-primary-fixed-variant": "#584404",
+                    "on-error": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-container": "#e4efff",
+                    "tertiary": "#5c5f60",
+                    "surface-container-low": "#eef4ff",
+                    "primary-fixed-dim": "#e1c379",
+                    "on-tertiary-fixed-variant": "#444749",
+                    "surface-container-highest": "#d7e4f5",
+                    "outline-variant": "#cfc5b4",
+                    "on-secondary-fixed": "#151c25",
+                    "surface-variant": "#d7e4f5",
+                    "background": "#f8f9ff",
+                    "surface": "#f8f9ff",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary-fixed": "#241a00",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-dim": "#cfdbed",
+                    "on-tertiary-fixed": "#191c1e",
+                    "on-surface": "#101c29",
+                    "tertiary-fixed": "#e1e2e4",
+                    "on-background": "#101c29",
+                    "secondary": "#585f6a",
+                    "surface-tint": "#725c1c",
+                    "on-surface-variant": "#4c4639",
+                    "on-secondary-container": "#5e6570",
+                    "inverse-primary": "#e1c379",
+                    "inverse-surface": "#26313f",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed-dim": "#c5c7c8",
+                    "primary-fixed": "#ffdf92",
+                    "border-width-primary": "1.5px",
+                    "tertiary-container": "#d8d9db"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "32px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "sm": "8px",
+                    "container-padding": "20px",
+                    "md": "16px",
+                    "base": "4px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "title-sm": ["IBM Plex Sans Thai"],
+                    "label-sm": ["IBM Plex Sans Thai"],
+                    "body-lg": ["IBM Plex Sans Thai"],
+                    "body-md": ["IBM Plex Sans Thai"],
+                    "mono-code": ["IBM Plex Mono"],
+                    "display-lg": ["IBM Plex Sans Thai"],
+                    "mono-price": ["IBM Plex Mono"],
+                    "headline-md": ["IBM Plex Sans Thai"]
+            },
+            "fontSize": {
+                    "title-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "mono-code": ["14px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "mono-price": ["16px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "title-sm-mobile": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-md-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans Thai', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased pb-32">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-surface border-b border-outline-variant transition-colors duration-200">
+<div class="flex items-center gap-md">
+<button aria-label="Back" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-low transition-colors duration-200">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A vibrant, minimalist portrait illustration of a friendly young man with a warm smile, set against a bright, solid gold circular background. He wears a simple, clean chef's or artisan's apron, radiating a welcoming, modern Thai brand personality. Soft, even lighting highlights his approachable expression, fitting a clean, light-mode food app UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjgj7GhCqN9sYnV6PrmRbZGxD1861GQDmeidrWBOABLLqvyPAmJA0tio1J1GrMdXZllX93v4Dwucx_mkt5DdZKbq0VlaMi5m1S7LewE423Qi1bxQM6-DRNpPpYr1afpzAfq48MR_bfKWMycXZMSBayuoz9J6tiExSH4H0P_Zk7ZQCvg3WxXa9y4g4mjOsNp02OmViG9dL7BmA9o0if2Fcc-hXNofRsA0clM57Q2r59ll4jh3VHRW3Gyg"/>
+</div>
+<h1 class="font-title-sm-mobile md:font-title-sm text-title-sm-mobile md:text-title-sm text-on-surface">หน้าเลือกไส้</h1>
+</div>
+<button aria-label="Shopping Cart" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200">
+<span class="material-symbols-outlined">shopping_cart</span>
+</button>
+</header>
+<!-- Sticky Header: Progress & Chosen Chips -->
+<div class="sticky top-16 z-40 bg-surface/95 backdrop-blur-sm border-b border-outline-variant pt-md pb-sm px-container-padding shadow-sm">
+<div class="flex justify-between items-center mb-sm">
+<h2 class="font-body-md text-body-md text-on-surface font-semibold">เลือกแล้ว 6 / 10 ชิ้น</h2>
+<span class="font-body-md text-body-md text-on-surface-variant">เหลืออีก 4 ชิ้น</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden mb-md">
+<div class="h-full bg-primary-container" style="width: 60%;"></div>
+</div>
+<!-- Chosen Chips Row -->
+<div class="flex gap-sm overflow-x-auto pb-xs scrollbar-hide">
+<div class="flex items-center gap-xs bg-surface-container rounded-full px-3 py-1 border border-outline-variant shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface">กุ้ง ×3</span>
+<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button>
+</div>
+<div class="flex items-center gap-xs bg-surface-container rounded-full px-3 py-1 border border-outline-variant shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface">หมู ×2</span>
+<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button>
+</div>
+<div class="flex items-center gap-xs bg-surface-container rounded-full px-3 py-1 border border-outline-variant shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface">ปูอัด ×1</span>
+<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined" style="font-size: 16px;">close</span></button>
+</div>
+</div>
+</div>
+<main class="pt-8 px-container-padding">
+<!-- Filling Grid -->
+<section class="mb-xl">
+<div class="grid grid-cols-2 gap-gutter">
+<!-- Item 1: กุ้ง -->
+<div class="bg-surface rounded-xl p-sm shadow-[0_1px_2px_rgba(16,23,32,0.04)] border border-transparent hover:border-outline-variant transition-colors flex flex-col group">
+<div class="aspect-square rounded-lg overflow-hidden mb-sm relative bg-surface-container-low">
+<img alt="กุ้ง" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A mouthwatering, close-up shot of fresh, plump raw shrimp perfectly arranged for suki-roll preparation, set on a pristine white minimalist ceramic plate. The scene is brightly lit with natural, soft daylight, emphasizing the appetizing pink and translucent textures of the premium seafood. The background is a clean, airy, light-mode setting with subtle warm tones, conveying absolute freshness and culinary quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVIBd3Cx_BXKw12C0pXR9b0mDqIJmuGyGUDPOhTY-jhsDEdQYNxq8WB5l7ABlIH0blrPng5lgBSwv_rmlx3d3ZBvRtNPXfBY62XImMjxeCy39JlTlIb1QoDHIfkE4kjdSw9LLcCHfRJwj8L7-cuPUUiwISGfDR-EN1qLQKUhPVBPbqUFiqsR1RQkV-ZNkr7utCsnDAjhC4oYwT_VlydSfhs95M2ecOTBCzw8WFhPViOPXELXFFSS3Sew"/>
+</div>
+<h3 class="font-body-md text-body-md text-on-surface font-medium mb-auto">กุ้ง</h3>
+<!-- Stepper -->
+<div class="flex items-center justify-between bg-primary-container/20 rounded-full mt-sm px-1 py-1">
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-primary hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="font-mono-code text-mono-code text-on-surface font-semibold">3</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-primary hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Item 2: หมู -->
+<div class="bg-surface rounded-xl p-sm shadow-[0_1px_2px_rgba(16,23,32,0.04)] border border-transparent hover:border-outline-variant transition-colors flex flex-col group">
+<div class="aspect-square rounded-lg overflow-hidden mb-sm relative bg-surface-container-low">
+<img alt="หมู" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A highly detailed, appetizing shot of thinly sliced, premium raw pork collar beautifully presented for a modern Thai suki experience. The meat, with its delicate marbling, rests on a minimalist light-colored slate or ceramic dish. High-key, soft studio lighting enhances the fresh red and white hues, maintaining a clean, calm, and approachable light-mode aesthetic suitable for a high-end food app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFFR4jQexHV_etBonnr6cA_81iqYi_0xGlYJJoDVeG8O9CY5_OZkNaIuFRwkBUul0U75kD_nPVKxZgzsRVsj3LnVjVcRDz675m_FR-n_IYL2W9JsCxXyT5pTHMpVnHHmGu7ivFSEPHPP779GoR6fdnWPhAxW4J9M_8zDLdtcWhi8fXpWjgmi8uwLwiwRLil5JbLC23q2971b1l8Z7i66bSa9GfjBX0CKlWYrbLZrOpdpyCVaQ0Qj1mgg"/>
+</div>
+<h3 class="font-body-md text-body-md text-on-surface font-medium mb-auto">หมู</h3>
+<!-- Stepper -->
+<div class="flex items-center justify-between bg-primary-container/20 rounded-full mt-sm px-1 py-1">
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-primary hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="font-mono-code text-mono-code text-on-surface font-semibold">2</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-primary hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Item 3: ปูอัด -->
+<div class="bg-surface rounded-xl p-sm shadow-[0_1px_2px_rgba(16,23,32,0.04)] border border-transparent hover:border-outline-variant transition-colors flex flex-col group">
+<div class="aspect-square rounded-lg overflow-hidden mb-sm relative bg-surface-container-low">
+<img alt="ปูอัด" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A clean, vibrant macro photograph of high-quality crab sticks (kanikama) neatly stacked on a minimalist white plate. The distinctive red and white layers of the crab sticks pop against the calm, bright, airy background. Soft, diffused lighting creates a fresh, appetizing look, perfectly aligned with a modern, light-theme mobile culinary interface emphasizing quality ingredients." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBC7qmtNiy-K7S9kIzWeNGG_VwciE8ZUI0ZbfMzUhjYvvxzEHWtRUIPenKh-fsbmeJbmobB4t57-x4rcIlBA2QfXTuHDVe8R6o9p2VBy0E8s2uFuNCOuyyM4vD9_KaZ0gvMXMYEnDmeG2GMkXVbNBy98BYRTYDM_rd7Mez9rSxs_RgCdoruDHu5TtYht0TsbddIgjP6Fci2yUKxuEcWLIrE-mYWglc09TQB8nnET93zjoPOjyieATceGA"/>
+</div>
+<h3 class="font-body-md text-body-md text-on-surface font-medium mb-auto">ปูอัด</h3>
+<!-- Stepper -->
+<div class="flex items-center justify-between bg-primary-container/20 rounded-full mt-sm px-1 py-1">
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-primary hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="font-mono-code text-mono-code text-on-surface font-semibold">1</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-primary hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Item 4: ไก่ (Sold Out) -->
+<div class="bg-surface rounded-xl p-sm shadow-[0_1px_2px_rgba(16,23,32,0.04)] border border-transparent flex flex-col opacity-60 pointer-events-none relative">
+<!-- Ribbon -->
+<div class="absolute top-2 -right-1 z-10 bg-error text-on-error font-label-sm text-label-sm px-2 py-0.5 rounded-l-md shadow-sm">
+                        หมดวันนี้
+                    </div>
+<div class="aspect-square rounded-lg overflow-hidden mb-sm relative bg-surface-container-low grayscale">
+<img alt="ไก่" class="w-full h-full object-cover" data-alt="A muted, slightly desaturated overhead shot of neatly arranged raw chicken pieces on a plain white dish. The image is purposefully dimmed to indicate a 'sold out' state, while still maintaining the clean, minimalist composition and bright ambient lighting characteristic of a modern, airy food application interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9bT3E6lkV2KWd395-A-l3WqMwlgrVHQeHItmi6sVPcIAv3ANPJuSu9-xnY6dXQyxyn5ZyW5RqK0ysECNZbyJ9xatlJcSzO0o0TX4iEWbCU_yiA5XS3ZN1qLSxr9nkMyccDbW6haq_oNBwKY8RrlVHYWpJBqN5-fxSmKlW_9J63aFh09Z4S3fe1tPyreWlTN_0Wu_6ukuBynTn90x-Jg5_uVTLyEUrR1q_F4ne8syyJ1Y0QQOXV8y1qw"/>
+</div>
+<h3 class="font-body-md text-body-md text-on-surface font-medium mb-auto">ไก่</h3>
+<!-- Disabled Stepper -->
+<div class="flex items-center justify-between bg-surface-container rounded-full mt-sm px-1 py-1">
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant/50" disabled="">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="font-mono-code text-mono-code text-on-surface-variant/50 font-semibold">0</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant/50" disabled="">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Options Section -->
+<section class="mb-xl bg-surface rounded-xl p-md shadow-[0_1px_2px_rgba(16,23,32,0.04)]">
+<!-- Sauces -->
+<div class="mb-lg border-b border-outline-variant pb-md">
+<h3 class="font-title-sm-mobile text-title-sm-mobile md:font-title-sm md:text-title-sm text-on-surface mb-sm">น้ำจิ้ม</h3>
+<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-sm">
+<div>
+<p class="font-body-md text-body-md text-on-surface">น้ำจิ้มสุกี้</p>
+<p class="font-mono-price text-mono-price text-on-surface-variant text-sm">+5฿</p>
+</div>
+<!-- Stepper -->
+<div class="flex items-center gap-2 bg-primary-container/20 rounded-full px-1 py-1">
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-primary hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<span class="font-mono-code text-mono-code text-on-surface font-semibold w-4 text-center">1</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-full text-primary hover:bg-primary-container/50 transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Utensils -->
+<div class="mb-lg border-b border-outline-variant pb-md">
+<h3 class="font-title-sm-mobile text-title-sm-mobile md:font-title-sm md:text-title-sm text-on-surface mb-sm">อุปกรณ์กิน</h3>
+<label class="flex items-center gap-sm cursor-pointer group">
+<div class="relative flex items-center justify-center w-5 h-5">
+<input class="peer appearance-none w-5 h-5 rounded border border-outline checked:bg-primary-container checked:border-primary-container transition-all cursor-pointer" type="checkbox"/>
+<span class="material-symbols-outlined text-on-primary-container absolute opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" style="font-size: 16px; font-weight: bold;">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface group-hover:text-primary transition-colors">รับช้อนส้อมพลาสติก</span>
+</label>
+</div>
+<!-- Note Field -->
+<div>
+<h3 class="font-title-sm-mobile text-title-sm-mobile md:font-title-sm md:text-title-sm text-on-surface mb-sm">หมายเหตุถึงร้านค้า</h3>
+<textarea class="w-full bg-surface border border-outline-variant rounded-xl p-sm font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:border-outline focus:ring-0 transition-colors resize-none h-24" placeholder="เช่น ไม่ใส่ผักชี เผ็ดน้อย"></textarea>
+</div>
+</section>
+</main>
+<!-- Sticky Bottom Bar -->
+<div class="fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant p-container-padding pb-6 shadow-[0_-4px_16px_rgba(16,23,32,0.05)]">
+<div class="flex items-center justify-between mb-sm">
+<span class="font-body-lg text-body-lg text-on-surface">ราคารวม</span>
+<span class="font-mono-price text-display-lg text-on-surface">฿259</span>
+</div>
+<!-- Primary Button (Disabled State as requested: 6/10 items selected) -->
+<button class="w-full bg-surface-container-highest text-on-surface-variant/50 font-body-lg text-body-lg font-semibold py-3 rounded-xl border border-outline-variant/30 flex justify-center items-center gap-2 cursor-not-allowed transition-all duration-200" disabled="">
+            เลือกอีก 4 ชิ้น
+        </button>
+</div>
+</body></html>

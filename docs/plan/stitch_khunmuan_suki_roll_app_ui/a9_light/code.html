@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>A9 — หน้าค้นหาออเดอร์ (Order Lookup)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "secondary-container": "#dce3f0",
+                            "on-error": "#ffffff",
+                            "primary-fixed-dim": "#e1c379",
+                            "on-primary": "#ffffff",
+                            "on-secondary-fixed-variant": "#404752",
+                            "inverse-surface": "#26313f",
+                            "outline-variant": "#cfc5b4",
+                            "on-surface-variant": "#4c4639",
+                            "primary": "#725c1c",
+                            "tertiary-fixed-dim": "#c5c7c8",
+                            "on-error-container": "#93000a",
+                            "secondary-fixed": "#dce3f0",
+                            "on-primary-fixed-variant": "#584404",
+                            "surface-tint": "#725c1c",
+                            "tertiary-fixed": "#e1e2e4",
+                            "surface-container-low": "#eef4ff",
+                            "tertiary": "#5c5f60",
+                            "secondary-fixed-dim": "#c0c7d3",
+                            "error": "#ba1a1a",
+                            "tertiary-container": "#d8d9db",
+                            "on-primary-fixed": "#241a00",
+                            "surface-container-lowest": "#ffffff",
+                            "surface-container-high": "#dde9fb",
+                            "on-secondary": "#ffffff",
+                            "on-background": "#101c29",
+                            "inverse-primary": "#e1c379",
+                            "on-tertiary-container": "#5c5f61",
+                            "on-tertiary": "#ffffff",
+                            "on-primary-container": "#725c1c",
+                            "background": "#f8f9ff",
+                            "secondary": "#585f6a",
+                            "on-tertiary-fixed-variant": "#444749",
+                            "on-tertiary-fixed": "#191c1e",
+                            "surface": "#f8f9ff",
+                            "outline": "#7e7667",
+                            "surface-container-highest": "#d7e4f5",
+                            "surface-dim": "#cfdbed",
+                            "inverse-on-surface": "#e9f1ff",
+                            "on-secondary-container": "#5e6570",
+                            "on-secondary-fixed": "#151c25",
+                            "primary-container": "#f5d68a",
+                            "surface-container": "#e4efff",
+                            "surface-bright": "#f8f9ff",
+                            "surface-variant": "#d7e4f5",
+                            "error-container": "#ffdad6",
+                            "primary-fixed": "#ffdf92",
+                            "border-width-primary": "1.5px",
+                            "on-surface": "#101c29"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "sm": "8px",
+                            "xs": "4px",
+                            "lg": "24px",
+                            "xl": "32px",
+                            "container-padding": "20px",
+                            "md": "16px",
+                            "base": "4px",
+                            "gutter": "16px"
+                    },
+                    "fontFamily": {
+                            "label-sm": [
+                                    "IBM Plex Sans Thai"
+                            ],
+                            "mono-code": [
+                                    "IBM Plex Mono"
+                            ],
+                            "headline-md": [
+                                    "IBM Plex Sans Thai"
+                            ],
+                            "display-lg": [
+                                    "IBM Plex Sans Thai"
+                            ],
+                            "mono-price": [
+                                    "IBM Plex Mono"
+                            ],
+                            "body-md": [
+                                    "IBM Plex Sans Thai"
+                            ],
+                            "body-lg": [
+                                    "IBM Plex Sans Thai"
+                            ],
+                            "title-sm": [
+                                    "IBM Plex Sans Thai"
+                            ]
+                    },
+                    "fontSize": {
+                            "label-sm": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "16px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "mono-code": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "18px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "headline-md": [
+                                    "24px",
+                                    {
+                                            "lineHeight": "32px",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "display-lg": [
+                                    "32px",
+                                    {
+                                            "lineHeight": "40px",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "mono-price": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "20px",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "body-md": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "20px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "body-lg": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "title-sm": [
+                                    "20px",
+                                    {
+                                            "lineHeight": "28px",
+                                            "fontWeight": "600"
+                                    }
+                            ]
+                    }
+            },
+                },
+        }
+    </script>
+<style>
+        body {
+            background-color: #f8f9ff;
+            color: #101c29;
+        }
+        
+        /* Modern minimalist input styling */
+        .otp-input {
+            width: 3.5rem;
+            height: 4.5rem;
+            text-align: center;
+            border: 1px solid #cfc5b4;
+            border-radius: 0.75rem;
+            background-color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            color: #101c29;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 1px 2px rgba(16, 23, 32, 0.04);
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: #725c1c;
+            border-width: 1.5px;
+            box-shadow: 0 0 0 4px rgba(245, 214, 138, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative pb-24 md:pb-0 pt-16">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-surface dark:bg-surface-dim border-b border-outline-variant flat no shadows">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant flex items-center justify-center">
+<img class="w-full h-full object-cover" data-alt="A detailed digital portrait of an Asian man with a friendly expression, styled in a minimalist, modern aesthetic with a gold disc logo background. The lighting is soft and bright, emphasizing clean lines and a warm, approachable mood suitable for a premium mobile app interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0ADVQC7GgpfYVzftK-vui8_vt13335pzg29jyugXwFXUUnia5ujFlrRoZg4RLc_aJCP68CYcmOA_yiU0XPR9zs1xtnPbUtkfGwSDIL4tGlEAukXubCpbNEu6xrb5P1J-Ryn9W8UlBw70-AVUSXK3J6GqwT6de-Ul6TCW22sSB11dBEqlljs_AhJz_Duuj5TE_t6MWsyOcgF86s3QnE4Jvpk1D1vRpm81UeVm6I-5jhbQOgG7YMDBkaQ"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">คุณม้วน</h1>
+</div>
+<button class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+</header>
+<main class="flex-grow flex flex-col md:flex-row w-full max-w-5xl mx-auto md:px-lg md:py-xl gap-xl">
+<!-- Search Section (Left Column on Desktop) -->
+<section class="flex-1 px-container-padding py-xl md:px-0 flex flex-col items-center justify-center min-h-[40vh] md:min-h-[60vh] bg-surface rounded-3xl shadow-sm md:shadow-md md:border border-outline-variant relative overflow-hidden">
+<!-- Decorative subtle background blob -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary-container rounded-full mix-blend-multiply filter blur-3xl opacity-20 -z-10 transform translate-x-1/2 -translate-y-1/2"></div>
+<div class="max-w-sm w-full space-y-xl text-center relative z-10">
+<div class="space-y-sm">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-container-high text-primary mb-md shadow-sm">
+<span class="material-symbols-outlined text-4xl" data-icon="search" style="font-variation-settings: 'FILL' 0;">search</span>
+</div>
+<h2 class="font-title-sm text-title-sm text-on-surface">ใส่รหัส 4 ตัวจากตอนสั่ง</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">เพื่อติดตามสถานะออเดอร์ของคุณ</p>
+</div>
+<form class="space-y-xl" id="searchForm">
+<div class="flex justify-center gap-md">
+<input aria-label="Digit 1" autofocus="" class="otp-input font-mono-code focus:ring-0" data-index="0" maxlength="1" type="text"/>
+<input aria-label="Digit 2" class="otp-input font-mono-code focus:ring-0" data-index="1" maxlength="1" type="text"/>
+<input aria-label="Digit 3" class="otp-input font-mono-code focus:ring-0" data-index="2" maxlength="1" type="text"/>
+<input aria-label="Digit 4" class="otp-input font-mono-code focus:ring-0" data-index="3" maxlength="1" type="text"/>
+</div>
+<button class="w-full h-12 bg-primary-container text-on-surface border-[1.5px] border-on-surface rounded-xl font-label-sm text-label-sm shadow-sm hover:bg-primary-fixed transition-colors active:scale-95" type="submit">
+                        ค้นหา
+                    </button>
+</form>
+</div>
+</section>
+<!-- History Section (Right Column on Desktop) -->
+<section class="flex-1 px-container-padding py-xl md:px-0">
+<div class="flex items-center justify-between mb-lg">
+<h3 class="font-title-sm text-title-sm text-on-surface">ออเดอร์ของฉัน</h3>
+<span class="font-body-md text-body-md text-on-surface-variant">ล่าสุด</span>
+</div>
+<div class="space-y-sm flex flex-col">
+<!-- Order Card 1: Cooking -->
+<div class="bg-surface rounded-xl p-md border border-outline-variant shadow-sm flex items-center justify-between hover:border-primary transition-colors cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+</div>
+<div>
+<div class="font-mono-code text-mono-code text-on-surface font-semibold tracking-wider">A82F</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-xs">วันนี้, 12:45</div>
+</div>
+</div>
+<div class="px-3 py-1 rounded-full bg-surface-container-highest text-secondary text-xs font-semibold">
+                        กำลังทำ
+                    </div>
+</div>
+<!-- Order Card 2: Ready -->
+<div class="bg-surface rounded-xl p-md border border-outline-variant shadow-sm flex items-center justify-between hover:border-primary transition-colors cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="local_mall">local_mall</span>
+</div>
+<div>
+<div class="font-mono-code text-mono-code text-on-surface font-semibold tracking-wider">B19X</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-xs">วันนี้, 11:30</div>
+</div>
+</div>
+<div class="px-3 py-1 rounded-full bg-[#d1fae5] text-[#065f46] text-xs font-semibold">
+                        รอรับ
+                    </div>
+</div>
+<!-- Order Card 3: Delivered -->
+<div class="bg-surface rounded-xl p-md border border-outline-variant shadow-sm flex items-center justify-between opacity-70 hover:opacity-100 transition-opacity cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-lowest border border-outline-variant flex items-center justify-center text-on-surface-variant group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</div>
+<div>
+<div class="font-mono-code text-mono-code text-on-surface font-semibold tracking-wider">C44Z</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mt-xs">เมื่อวาน, 18:20</div>
+</div>
+</div>
+<div class="px-3 py-1 rounded-full bg-secondary-fixed-dim text-on-secondary-fixed-variant text-xs font-semibold">
+                        ส่งมอบแล้ว
+                    </div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface dark:bg-surface-dim shadow-[0_-1px_2px_rgba(16,23,32,0.04)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-3 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">หน้าหลัก</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-3 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="shopping_bag">shopping_bag</span>
+<span class="font-label-sm text-label-sm">ตะกร้า</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-on-primary-container text-on-primary-container dark:text-primary-container rounded-xl px-3 py-1 scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="receipt_long" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-label-sm text-label-sm">ติดตาม</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-3 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">โปรไฟล์</span>
+</a>
+</nav>
+<script>
+        // OTP Input Logic
+        const inputs = document.querySelectorAll('.otp-input');
+        
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1) {
+                    if (index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                }
+                // Convert to uppercase automatically
+                e.target.value = e.target.value.toUpperCase();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value === '') {
+                    if (index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                }
+            });
+        });
+
+        // Form submission subtle effect
+        document.getElementById('searchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span>';
+            setTimeout(() => {
+                btn.innerText = originalText;
+                // Add your actual search logic here
+            }, 1000);
+        });
+    </script>
+</body></html>

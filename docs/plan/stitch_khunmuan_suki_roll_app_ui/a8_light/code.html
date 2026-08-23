@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KhunMuan - Order Tracking</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#e9f1ff",
+                        "surface-container-high": "#dde9fb",
+                        "outline": "#7e7667",
+                        "on-secondary-fixed-variant": "#404752",
+                        "primary-container": "#f5d68a",
+                        "secondary-container": "#dce3f0",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#725c1c",
+                        "secondary-fixed-dim": "#c0c7d3",
+                        "primary": "#725c1c",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#dce3f0",
+                        "on-tertiary-container": "#5c5f61",
+                        "on-primary-fixed-variant": "#584404",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#e4efff",
+                        "tertiary": "#5c5f60",
+                        "surface-container-low": "#eef4ff",
+                        "primary-fixed-dim": "#e1c379",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "surface-container-highest": "#d7e4f5",
+                        "outline-variant": "#cfc5b4",
+                        "on-secondary-fixed": "#151c25",
+                        "surface-variant": "#d7e4f5",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed": "#241a00",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#cfdbed",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-surface": "#101c29",
+                        "tertiary-fixed": "#e1e2e4",
+                        "on-background": "#101c29",
+                        "secondary": "#585f6a",
+                        "surface-tint": "#725c1c",
+                        "on-surface-variant": "#4c4639",
+                        "on-secondary-container": "#5e6570",
+                        "inverse-primary": "#e1c379",
+                        "inverse-surface": "#26313f",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "primary-fixed": "#ffdf92",
+                        "border-width-primary": "1.5px",
+                        "tertiary-container": "#d8d9db"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "container-padding": "20px",
+                        "md": "16px",
+                        "base": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "title-sm": ["IBM Plex Sans Thai", "sans-serif"],
+                        "label-sm": ["IBM Plex Sans Thai", "sans-serif"],
+                        "body-lg": ["IBM Plex Sans Thai", "sans-serif"],
+                        "body-md": ["IBM Plex Sans Thai", "sans-serif"],
+                        "mono-code": ["IBM Plex Mono", "monospace"],
+                        "display-lg": ["IBM Plex Sans Thai", "sans-serif"],
+                        "mono-price": ["IBM Plex Mono", "monospace"],
+                        "headline-md": ["IBM Plex Sans Thai", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "title-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "mono-code": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "mono-price": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .stepper-line { position: absolute; left: 15px; top: 32px; bottom: -8px; width: 2px; background-color: #E3E7EC; z-index: 0; }
+        .stepper-line.active { background-color: #725c1c; }
+        .pulse-ring { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(114, 92, 28, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(114, 92, 28, 0); } 100% { box-shadow: 0 0 0 0 rgba(114, 92, 28, 0); } }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-24 md:pb-0 pt-16">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-surface dark:bg-surface-dim border-b border-outline-variant">
+<div class="flex items-center gap-sm">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-primary-container">
+<img alt="Khun Muan Avatar" class="object-cover w-full h-full" data-alt="A smiling Thai man with short black hair wearing a modern yellow apron, depicted in a highly stylized, flat vector portrait style. Clean lines, minimalist aesthetic. Background is a solid warm gold." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAiTxU5zVmSTllLxzms_Z4zOaLU1F2F-eU9LkFqDfp2cDi8jDEU5mbnEkRAKlT9YMDgBapLoPgtEi7uGiyPA3lMY4mSvc4EU_XaVmEXU9msmPA7i--w7viJZjJzYR4uznXJzqok9JAgd0SlwCAgFmr17uQEdGpHpHClAEBMEo2vjULfy4Hf5H8khbgCG_cQn4AblifVNJBmMhdzKbzivHfRoMk0cimfytsNo2rk26A0ZWnUSPlWXjmOw"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">คุณม้วน</h1>
+</div>
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="shopping_cart">shopping_cart</span>
+</button>
+</header>
+<main class="max-w-2xl mx-auto px-container-padding py-xl flex flex-col gap-xl">
+<!-- Order Code Header -->
+<section class="bg-surface-container-lowest p-lg rounded-xl shadow-sm border border-outline-variant/30 flex flex-col items-center justify-center gap-xs">
+<p class="font-label-sm text-label-sm text-on-surface-variant">รหัสออเดอร์ของคุณ</p>
+<div class="flex items-center gap-sm">
+<h2 class="font-display-lg text-display-lg text-on-surface tracking-wider">K7P2</h2>
+<button class="p-2 text-primary hover:bg-primary-container/20 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="content_copy">content_copy</span>
+</button>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-sm">สุกี้โรลพร้อมทาน 3 รายการ</p>
+</section>
+<!-- Vertical Stepper -->
+<section class="bg-surface-container-lowest p-lg rounded-xl shadow-sm border border-outline-variant/30 relative">
+<h3 class="font-title-sm text-title-sm mb-lg">สถานะออเดอร์</h3>
+<div class="flex flex-col gap-md relative">
+<!-- Node 1: รอยืนยัน -->
+<div class="flex gap-md relative">
+<div class="stepper-line active"></div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]" data-icon="check">check</span>
+</div>
+</div>
+<div class="flex-1 pb-md">
+<h4 class="font-body-lg text-body-lg font-medium text-on-surface">รอยืนยัน</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">12:00</p>
+</div>
+</div>
+<!-- Node 2: รับแล้ว -->
+<div class="flex gap-md relative">
+<div class="stepper-line active"></div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]" data-icon="check">check</span>
+</div>
+</div>
+<div class="flex-1 pb-md">
+<h4 class="font-body-lg text-body-lg font-medium text-on-surface">รับแล้ว</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">ร้านค้ายืนยันออเดอร์แล้ว • 12:05</p>
+</div>
+</div>
+<!-- Node 3: กำลังทำ (Current) -->
+<div class="flex gap-md relative">
+<div class="stepper-line"></div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center pulse-ring">
+<span class="material-symbols-outlined text-[16px]" data-icon="restaurant">restaurant</span>
+</div>
+</div>
+<div class="flex-1 pb-md">
+<h4 class="font-body-lg text-body-lg font-medium text-primary">กำลังทำ</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">คุณม้วนกำลังเตรียมอาหารอย่างตั้งใจ</p>
+</div>
+</div>
+<!-- Node 4: รอรับ -->
+<div class="flex gap-md relative">
+<div class="stepper-line"></div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant bg-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-outline-variant" data-icon="storefront">storefront</span>
+</div>
+</div>
+<div class="flex-1 pb-md opacity-50">
+<h4 class="font-body-lg text-body-lg font-medium text-on-surface-variant">รอรับ</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">เตรียมพร้อมที่จุดรับ</p>
+</div>
+</div>
+<!-- Node 5: ส่งมอบแล้ว -->
+<div class="flex gap-md relative">
+<div class="relative z-10 flex flex-col items-center">
+<div class="w-8 h-8 rounded-full border-2 border-outline-variant bg-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-outline-variant" data-icon="done_all">done_all</span>
+</div>
+</div>
+<div class="flex-1 opacity-50">
+<h4 class="font-body-lg text-body-lg font-medium text-on-surface-variant">ส่งมอบแล้ว</h4>
+</div>
+</div>
+</div>
+<div class="mt-lg pt-lg border-t border-outline-variant/30 flex gap-sm items-start">
+<span class="material-symbols-outlined text-outline text-[18px] mt-1" data-icon="info">info</span>
+<p class="font-label-sm text-label-sm text-outline">ร้านรับออเดอร์แล้ว ยกเลิกเองไม่ได้ ติดต่อร้านได้ที่ <a class="text-primary underline" href="tel:0812345678">08x-xxx-xxxx</a></p>
+</div>
+</section>
+<!-- Order Details -->
+<section class="bg-surface-container-lowest p-lg rounded-xl shadow-sm border border-outline-variant/30 flex flex-col gap-md">
+<h3 class="font-title-sm text-title-sm border-b border-outline-variant/30 pb-sm">รายละเอียดคำสั่งซื้อ</h3>
+<!-- Items -->
+<div class="flex flex-col gap-sm">
+<div class="flex justify-between items-center">
+<span class="font-body-md text-on-surface"><span class="font-mono-code mr-2">x2</span> สุกี้โรลหมูชาชู (เซ็ต)</span>
+<span class="font-mono-price text-on-surface">฿178</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-on-surface"><span class="font-mono-code mr-2">x1</span> สุกี้โรลเนื้อวากิว</span>
+<span class="font-mono-price text-on-surface">฿129</span>
+</div>
+</div>
+<div class="h-px bg-outline-variant/30 my-xs"></div>
+<!-- Summary -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center font-label-sm text-on-surface-variant">
+<span>จุดรับสินค้า</span>
+<span class="text-on-surface">หน้าร้าน สาขาหลัก</span>
+</div>
+<div class="flex justify-between items-center font-label-sm text-on-surface-variant">
+<span>สถานะการชำระเงิน</span>
+<span class="text-primary bg-primary-container/20 px-2 py-1 rounded-full text-[10px] font-bold">ชำระเงินแล้ว (PromptPay)</span>
+</div>
+<div class="flex justify-between items-center mt-sm pt-sm border-t border-outline-variant/30">
+<span class="font-title-sm text-title-sm">ยอดรวม</span>
+<span class="font-mono-price text-title-sm text-primary">฿307</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Hidden on MD+, active on 'ติดตาม' based on intent) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface dark:bg-surface-dim shadow-[0_-1px_2px_rgba(16,23,32,0.04)] md:hidden rounded-t-xl pb-6 pt-2">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-3 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 active:scale-90 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">หน้าหลัก</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-3 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 active:scale-90 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="shopping_bag">shopping_bag</span>
+<span class="font-label-sm text-label-sm">ตะกร้า</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-on-primary-container text-on-primary-container dark:text-primary-container px-3 py-1 scale-95 active:scale-90 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="receipt_long" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-label-sm text-label-sm">ติดตาม</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline px-3 py-1 hover:bg-surface-container-high dark:hover:bg-surface-container-highest scale-95 active:scale-90 transition-transform duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">โปรไฟล์</span>
+</a>
+</nav>
+</body></html>

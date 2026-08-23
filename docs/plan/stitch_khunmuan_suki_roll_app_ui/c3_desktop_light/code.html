@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Khun Muan Culinary - Order Board</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "border-width-primary": "1.5px",
+                      "on-secondary-fixed": "#151c25",
+                      "surface-container": "#e4efff",
+                      "tertiary-fixed-dim": "#c5c7c8",
+                      "surface-container-highest": "#d7e4f5",
+                      "tertiary-fixed": "#e1e2e4",
+                      "error": "#ba1a1a",
+                      "on-tertiary": "#ffffff",
+                      "surface-bright": "#f8f9ff",
+                      "primary-container": "#f5d68a",
+                      "inverse-surface": "#26313f",
+                      "on-error": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "secondary-fixed": "#dce3f0",
+                      "background": "#f8f9ff",
+                      "outline-variant": "#cfc5b4",
+                      "surface-container-low": "#eef4ff",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#d8d9db",
+                      "secondary": "#585f6a",
+                      "surface-variant": "#d7e4f5",
+                      "primary-fixed-dim": "#e1c379",
+                      "on-secondary-container": "#5e6570",
+                      "on-background": "#101c29",
+                      "surface-container-high": "#dde9fb",
+                      "primary-fixed": "#ffdf92",
+                      "secondary-fixed-dim": "#c0c7d3",
+                      "secondary-container": "#dce3f0",
+                      "on-surface-variant": "#4c4639",
+                      "surface-tint": "#725c1c",
+                      "on-error-container": "#93000a",
+                      "inverse-on-surface": "#e9f1ff",
+                      "surface-dim": "#cfdbed",
+                      "on-secondary-fixed-variant": "#404752",
+                      "on-tertiary-fixed": "#191c1e",
+                      "outline": "#7e7667",
+                      "on-primary": "#ffffff",
+                      "on-primary-container": "#725c1c",
+                      "on-primary-fixed-variant": "#584404",
+                      "surface": "#f8f9ff",
+                      "on-tertiary-container": "#5c5f61",
+                      "tertiary": "#5c5f60",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "on-primary-fixed": "#241a00",
+                      "on-surface": "#101c29",
+                      "inverse-primary": "#e1c379",
+                      "primary": "#725c1c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "sm": "8px",
+                      "lg": "24px",
+                      "container-padding": "20px",
+                      "xl": "32px",
+                      "gutter": "16px",
+                      "xs": "4px",
+                      "md": "16px"
+              },
+              "fontFamily": {
+                      "mono-code": [
+                              "IBM Plex Mono"
+                      ],
+                      "mono-price": [
+                              "IBM Plex Mono"
+                      ],
+                      "body-md": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "headline-md": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "label-sm": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "body-lg": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "title-sm": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "display-lg": [
+                              "IBM Plex Sans Thai"
+                      ]
+              },
+              "fontSize": {
+                      "mono-code": [
+                              "14px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "mono-price": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "title-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: theme('colors.tertiary-container');
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.secondary-fixed-dim');
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-on-surface font-body-md antialiased bg-background">
+<!-- SideNavBar -->
+<nav class="h-screen w-64 hidden lg:flex flex-col sticky left-0 top-0 bg-surface-container-low dark:bg-inverse-surface border-r border-outline-variant dark:border-outline p-md gap-sm">
+<div class="flex items-center gap-sm mb-lg px-sm">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="A minimalist logo for a Thai modern culinary brand named Khun Muan. The logo features a stylized friendly character face embedded in a circular sticker format with a gold wash background, conveying a sense of quality, precision, and youthfulness. The overall aesthetic is clean and appetizing." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNh0z1NpZGyngrssJSEpD6UMyDqCp_fWPCCJjgoRAWIp_A3kWovsawW_uiBbiagYXQ6MjLrZWA9d0ixcUj8a_OqSCe-nKDD7GAkl0LdxuTvkG2ExTomJuMJP-fOFniojFqNcVP06V_2raf22PwRC-UYVvgZuP6vWw9Cj2CbNtbJprcY8cpTcY5HFt18Qalwq0b0ZWxQSnejILiymfL4Tpcdtsigok7eYbHD_LfDfOI7Ucaj7aOcEcMPw"/>
+<div>
+<h1 class="font-title-sm text-title-sm text-on-surface">Back Office</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Kitchen Management</p>
+</div>
+</div>
+<button class="bg-primary-container text-on-primary-container rounded-xl py-2 px-4 font-title-sm text-title-sm font-bold flex items-center justify-center gap-sm mb-md shadow-[0_1px_2px_rgba(16,23,32,0.04)] border-[1.5px] border-on-surface hover:bg-primary-fixed transition-colors">
+            Shop Open
+        </button>
+<div class="flex-1 flex flex-col gap-xs">
+<a class="bg-primary-container text-on-primary-container rounded-lg font-bold flex items-center gap-sm px-4 py-3" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                Order Board
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center gap-sm px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">restaurant_menu</span>
+                Menu Management
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center gap-sm px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">badge</span>
+                Staff Management
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center gap-sm px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+                Reports
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center gap-sm px-4 py-3 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">inventory_2</span>
+                Inventory
+            </a>
+</div>
+<div class="mt-auto flex flex-col gap-xs pt-md border-t border-outline-variant">
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center gap-sm px-4 py-3 transition-all font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span>
+                Help
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center gap-sm px-4 py-3 transition-all font-label-sm text-label-sm" href="#">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+                Logout
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full lg:w-[calc(100%-16rem)] z-50 bg-surface border-b border-outline-variant shadow-sm flex justify-between items-center px-container-padding h-16">
+<div class="flex items-center gap-md">
+<h1 class="font-headline-md text-headline-md text-primary">Khun Muan Culinary</h1>
+<div class="hidden md:flex items-center gap-2 bg-surface-container-lowest border border-outline-variant rounded-full px-3 py-1 shadow-[0_1px_2px_rgba(16,23,32,0.04)]">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">เชื่อมต่ออยู่</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-2 rounded-full text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border border-surface"></span>
+</button>
+<button class="p-2 rounded-full text-secondary hover:bg-surface-container-high transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full border border-outline-variant overflow-hidden ml-2 cursor-pointer hover:opacity-80 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="A clear, professional headshot avatar of a restaurant staff member, shot with soft, flattering lighting against a clean white background. The staff member is wearing a neat uniform, smiling subtly, representing a friendly and approachable modern Thai minimalist brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwCNUZuYC7CeqLgkN-9KN0tl1u1voki9uH4_WWg9o49hhZD37TdFt_yZ2VSUvr8zjusVCBvPSJx4_G5gmmMRRmy8iOQIXHJ7RVB1QktRUG2A0MfHFjbMW8x2hVuCc-NH9ukvnta7lxsd6vFvVK3LahaEcR6f-QZe4rQmEAKxArqC7WZczJroax888AJyS2s2JO0qEvgnPV5aoiywUgzJlKWgO52RqZqGo1SuklN0wzU-FC1oCQCmh0_w"/>
+</div>
+</div>
+</header>
+<!-- Kanban Board Area -->
+<div class="flex-1 overflow-x-auto overflow-y-hidden pt-16 px-container-padding pb-lg custom-scrollbar">
+<div class="flex h-full gap-xl min-w-max pt-lg">
+<!-- Column 1: รอยืนยัน (Pending) -->
+<div class="w-80 flex flex-col h-full">
+<div class="flex justify-between items-center mb-sm px-2">
+<h2 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                            รอยืนยัน
+                            <span class="bg-surface-container-high text-on-surface-variant rounded-full px-2 py-0.5 font-mono-code text-mono-code text-[12px]">3</span>
+</h2>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-sm pb-4 px-2">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0_1px_2px_rgba(16,23,32,0.04)] border border-outline-variant hover:border-outline transition-colors group cursor-pointer relative">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary rounded-l-xl opacity-50"></div>
+<div class="flex justify-between items-start mb-sm">
+<span class="font-mono-code text-mono-code text-on-surface">K7P2</span>
+<span class="bg-surface-container-highest text-on-surface-variant px-2 py-1 rounded-lg font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">timer</span> 3 min
+                                </span>
+</div>
+<div class="mb-sm">
+<p class="font-body-md text-body-md font-medium text-on-surface">เซตใหญ่ 10 ชิ้น <span class="text-primary font-bold">x1</span></p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 text-[13px] leading-snug">
+                                    กุ้ง x3, หมู x4, ปูอัด x3
+                                </p>
+</div>
+<div class="bg-surface-bright rounded-lg p-2 mb-sm border border-surface-container-highest flex flex-col gap-1">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">location_on</span> หน้าตึก 3
+                                </div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 12:00-12:15
+                                </div>
+</div>
+<div class="flex justify-between items-center mb-md pt-2 border-t border-surface-container-high">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                                    โอน - รอตรวจสลิป
+                                </span>
+<span class="font-mono-price text-mono-price text-on-surface">฿259</span>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container rounded-lg py-2 font-body-md text-body-md font-semibold border-[1.5px] border-on-surface hover:bg-primary-fixed transition-colors">
+                                รับออเดอร์
+                            </button>
+</div>
+</div>
+</div>
+<!-- Column 2: รับแล้ว (Accepted) -->
+<div class="w-80 flex flex-col h-full">
+<div class="flex justify-between items-center mb-sm px-2">
+<h2 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                            รับแล้ว
+                            <span class="bg-surface-container-high text-on-surface-variant rounded-full px-2 py-0.5 font-mono-code text-mono-code text-[12px]">1</span>
+</h2>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-sm pb-4 px-2">
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0_1px_2px_rgba(16,23,32,0.04)] border border-outline-variant hover:border-outline transition-colors group cursor-pointer relative">
+<div class="absolute top-0 left-0 w-1 h-full bg-[#00838f] rounded-l-xl opacity-70"></div>
+<div class="flex justify-between items-start mb-sm">
+<span class="font-mono-code text-mono-code text-on-surface">K7P4</span>
+<span class="bg-surface-container-highest text-on-surface-variant px-2 py-1 rounded-lg font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">timer</span> 8 min
+                                </span>
+</div>
+<div class="mb-sm">
+<p class="font-body-md text-body-md font-medium text-on-surface">เซตกลาง 6 ชิ้น <span class="text-primary font-bold">x2</span></p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 text-[13px] leading-snug">
+                                    หมู x6, ไก่ x6
+                                </p>
+</div>
+<div class="bg-surface-bright rounded-lg p-2 mb-sm border border-surface-container-highest flex flex-col gap-1">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">location_on</span> โรงอาหารกลาง
+                                </div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 12:15-12:30
+                                </div>
+</div>
+<div class="flex justify-between items-center mb-md pt-2 border-t border-surface-container-high">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 text-[#00695c]">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> โอนสำเร็จ
+                                </span>
+<span class="font-mono-price text-mono-price text-on-surface">฿318</span>
+</div>
+<button class="w-full bg-surface-container-high text-on-surface rounded-lg py-2 font-body-md text-body-md font-semibold hover:bg-surface-variant transition-colors border border-outline-variant">
+                                เริ่มทำ
+                            </button>
+</div>
+</div>
+</div>
+<!-- Column 3: กำลังทำ (Cooking) -->
+<div class="w-80 flex flex-col h-full">
+<div class="flex justify-between items-center mb-sm px-2">
+<h2 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                            กำลังทำ
+                            <span class="bg-surface-container-high text-on-surface-variant rounded-full px-2 py-0.5 font-mono-code text-mono-code text-[12px]">2</span>
+</h2>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-sm pb-4 px-2">
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0_1px_2px_rgba(16,23,32,0.04)] border border-outline-variant hover:border-outline transition-colors group cursor-pointer relative">
+<div class="absolute top-0 left-0 w-1 h-full bg-[#1976d2] rounded-l-xl opacity-70"></div>
+<div class="flex justify-between items-start mb-sm">
+<span class="font-mono-code text-mono-code text-on-surface">K7P1</span>
+<span class="bg-surface-container-highest text-on-surface-variant px-2 py-1 rounded-lg font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">timer</span> 12 min
+                                </span>
+</div>
+<div class="mb-sm">
+<p class="font-body-md text-body-md font-medium text-on-surface">เซตเล็ก 4 ชิ้น <span class="text-primary font-bold">x1</span></p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 text-[13px] leading-snug">
+                                    กุ้ง x2, ปูอัด x2
+                                </p>
+</div>
+<div class="bg-surface-bright rounded-lg p-2 mb-sm border border-surface-container-highest flex flex-col gap-1">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">location_on</span> รับหน้าร้าน
+                                </div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">schedule</span> ทันที
+                                </div>
+</div>
+<div class="flex justify-between items-center mb-md pt-2 border-t border-surface-container-high">
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1 text-[#00695c]">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> จ่ายแล้ว
+                                </span>
+<span class="font-mono-price text-mono-price text-on-surface">฿89</span>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container rounded-lg py-2 font-body-md text-body-md font-semibold border-[1.5px] border-on-surface hover:bg-primary-fixed transition-colors">
+                                เสร็จแล้ว
+                            </button>
+</div>
+</div>
+</div>
+<!-- Column 4: รอรับ (Ready) -->
+<div class="w-80 flex flex-col h-full">
+<div class="flex justify-between items-center mb-sm px-2">
+<h2 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+                            รอรับ
+                            <span class="bg-surface-container-high text-on-surface-variant rounded-full px-2 py-0.5 font-mono-code text-mono-code text-[12px]">0</span>
+</h2>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-sm pb-4 px-2">
+<div class="h-32 border-2 border-dashed border-outline-variant rounded-xl flex items-center justify-center text-on-surface-variant font-body-md text-body-md opacity-50">
+                            ไม่มีออเดอร์
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Hidden on Desktop) -->
+<nav class="lg:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 pb-safe bg-surface dark:bg-inverse-surface shadow-lg border-t border-outline-variant z-50 rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined text-[24px]">view_kanban</span>
+<span class="font-label-sm text-label-sm-mobile mt-1">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-container hover:bg-surface-variant rounded-xl px-4 py-1 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined text-[24px]">menu_book</span>
+<span class="font-label-sm text-label-sm-mobile mt-1">Menu</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-container hover:bg-surface-variant rounded-xl px-4 py-1 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined text-[24px]">group</span>
+<span class="font-label-sm text-label-sm-mobile mt-1">Staff</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-secondary-container hover:bg-surface-variant rounded-xl px-4 py-1 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined text-[24px]">insert_chart</span>
+<span class="font-label-sm text-label-sm-mobile mt-1">Reports</span>
+</a>
+</nav>
+</body></html>

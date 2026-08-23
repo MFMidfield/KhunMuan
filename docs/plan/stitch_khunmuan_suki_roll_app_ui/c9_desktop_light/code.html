@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Khun Muan Culinary - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "border-width-primary": "1.5px",
+                        "on-secondary-fixed": "#151c25",
+                        "surface-container": "#e4efff",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "surface-container-highest": "#d7e4f5",
+                        "tertiary-fixed": "#e1e2e4",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#f5d68a",
+                        "inverse-surface": "#26313f",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#dce3f0",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#cfc5b4",
+                        "surface-container-low": "#eef4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#d8d9db",
+                        "secondary": "#585f6a",
+                        "surface-variant": "#d7e4f5",
+                        "primary-fixed-dim": "#e1c379",
+                        "on-secondary-container": "#5e6570",
+                        "on-background": "#101c29",
+                        "surface-container-high": "#dde9fb",
+                        "primary-fixed": "#ffdf92",
+                        "secondary-fixed-dim": "#c0c7d3",
+                        "secondary-container": "#dce3f0",
+                        "on-surface-variant": "#4c4639",
+                        "surface-tint": "#725c1c",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#e9f1ff",
+                        "surface-dim": "#cfdbed",
+                        "on-secondary-fixed-variant": "#404752",
+                        "on-tertiary-fixed": "#191c1e",
+                        "outline": "#7e7667",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#725c1c",
+                        "on-primary-fixed-variant": "#584404",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-container": "#5c5f61",
+                        "tertiary": "#5c5f60",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-primary-fixed": "#241a00",
+                        "on-surface": "#101c29",
+                        "inverse-primary": "#e1c379",
+                        "primary": "#725c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "container-padding": "20px",
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "xs": "4px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "mono-code": ["IBM Plex Mono"],
+                        "mono-price": ["IBM Plex Mono"],
+                        "body-md": ["IBM Plex Sans Thai"],
+                        "headline-md": ["IBM Plex Sans Thai"],
+                        "label-sm": ["IBM Plex Sans Thai"],
+                        "body-lg": ["IBM Plex Sans Thai"],
+                        "title-sm": ["IBM Plex Sans Thai"],
+                        "display-lg": ["IBM Plex Sans Thai"]
+                    },
+                    "fontSize": {
+                        "mono-code": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "mono-price": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f8f9ff;
+            color: #101c29;
+        }
+        .shadow-near-invisible {
+            box-shadow: 0 1px 2px rgba(16, 23, 32, 0.04);
+        }
+        /* Custom Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #f5d68a;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #f5d68a;
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(100%);
+            border-color: white;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased bg-background">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary font-body-md text-body-md fixed top-0 w-full z-50 border-b border-outline-variant dark:border-outline shadow-sm flex justify-between items-center px-container-padding h-16 w-full">
+<div class="flex items-center gap-sm">
+<span class="font-headline-md text-headline-md text-primary dark:text-inverse-primary font-bold tracking-tight">Khun Muan Culinary</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="text-secondary dark:text-secondary-fixed hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 duration-150 p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-primary font-bold border-b-2 border-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 duration-150 p-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span>
+</button>
+<img alt="Staff Avatar" class="w-8 h-8 rounded-full object-cover shadow-sm border border-outline-variant ml-sm" data-alt="A small circular avatar of a staff member. Modern Thai Minimalist style, clean and bright, white background, conveying professionalism and approachability in a food service setting. High quality, well-lit." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJTRXNLyyK44tLG6G6HC3kB4JGSKDhkDsOI7Ok66_0226EKo8VhL70uLfQlmgPg-inCqtviM3FTA-PbWAodkoCUBA9sZuyxTgu-3hWBiJpqzbS9E82lSddtdFlJeAcbdqnq_oPW2wDJszfX21C2HjgIGk6iXoLwmDIty60FUOsazIY4OeJzx2t7X37FzA7oi3-r0yNlfWhLtdZ2X9WHTtr3JQhaawDK20CDB9EvMJSbaVpQ33jWQyguA"/>
+</div>
+</header>
+<div class="flex pt-16 h-screen overflow-hidden">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-low dark:bg-inverse-surface text-primary dark:text-inverse-primary font-label-sm text-label-sm h-screen w-64 hidden lg:flex flex-col sticky left-0 top-0 border-r border-outline-variant dark:border-outline flex flex-col p-md gap-sm">
+<div class="flex flex-col items-center mb-lg pt-sm">
+<img alt="Khun Muan Logo" class="w-16 h-16 rounded-full mb-sm shadow-sm" data-alt="Khun Muan character logo, friendly, precise, youthful, circular sticker style. Modern Thai Minimalist, clean vector style, warm gold and white palette. High contrast, clean edges." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOuJG1-GgxUz_XeGy4mKmbsQ1v3E7k2wwLGEX3Cq2sbkWpMLc5TPwYlhKj-JHGJYZjACAwpfc_DRlkflAwfY_n_G-dxZzB5zIewYTQuGS80OMjIYN02LNU4pzJQJqWRHhdOr7NtAiMzHX8nXQkHmVrnHl_HfEJayT8Qjso-G9epziBFykdsCxqruBndtCC4F3o8C7Og4xuPlub6kL5DYbDXMJtHYwz36eGy_I57cQcSGWh53oXtRqPXQ"/>
+<div class="font-title-sm text-title-sm text-on-surface text-center font-bold">Back Office</div>
+<div class="text-secondary text-center">Kitchen Management</div>
+<div class="mt-sm bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-bold shadow-sm">Shop Open</div>
+</div>
+<div class="flex-1 flex flex-col gap-xs overflow-y-auto">
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg active:translate-x-1 duration-200 flex items-center p-3 gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                    Order Board
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg active:translate-x-1 duration-200 flex items-center p-3 gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+                    Menu Management
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg active:translate-x-1 duration-200 flex items-center p-3 gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+                    Staff Management
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg active:translate-x-1 duration-200 flex items-center p-3 gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                    Reports
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg active:translate-x-1 duration-200 flex items-center p-3 gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+                    Inventory
+                </a>
+</div>
+<div class="mt-auto border-t border-outline-variant pt-sm flex flex-col gap-xs">
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg active:translate-x-1 duration-200 flex items-center p-3 gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                    Help
+                </a>
+<a class="text-on-surface-variant hover:bg-surface-container-highest transition-all rounded-lg active:translate-x-1 duration-200 flex items-center p-3 gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                    Logout
+                </a>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto p-xl bg-background">
+<div class="max-w-4xl mx-auto space-y-xl">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-background mb-2">ตั้งค่าร้าน</h1>
+<p class="text-secondary font-body-lg text-body-lg">Manage your store's operational settings.</p>
+</div>
+<!-- Bento Grid Layout for Settings -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Store Status (Big Switch) -->
+<section class="bg-surface rounded-xl p-lg border border-outline-variant shadow-near-invisible flex flex-col justify-center items-center col-span-1 md:col-span-2">
+<div class="flex items-center justify-between w-full max-w-md">
+<div>
+<h2 class="font-title-sm text-title-sm text-on-surface">สถานะร้าน (Store Status)</h2>
+<p class="text-secondary mt-1">Currently open and accepting orders.</p>
+</div>
+<!-- Custom Toggle -->
+<div class="relative inline-block w-16 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-8 h-8 rounded-full bg-white border-4 appearance-none cursor-pointer border-outline-variant z-10 transition-all duration-300" id="store-toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-8 rounded-full bg-surface-container-highest cursor-pointer transition-colors duration-300" for="store-toggle"></label>
+</div>
+</div>
+</section>
+<!-- Delivery Fee -->
+<section class="bg-surface rounded-xl p-lg border border-outline-variant shadow-near-invisible">
+<h2 class="font-title-sm text-title-sm text-on-surface mb-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="local_shipping">local_shipping</span>
+                            ค่าส่ง (Delivery Fee)
+                        </h2>
+<p class="text-secondary mb-md">Set the flat rate delivery fee for orders.</p>
+<div class="relative mt-2 rounded-md shadow-sm">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="text-secondary sm:text-sm font-mono-price text-mono-price">฿</span>
+</div>
+<input class="block w-full rounded-xl border-0 py-3 pl-10 pr-20 text-on-surface ring-1 ring-inset ring-outline-variant placeholder:text-outline focus:ring-2 focus:ring-inset focus:ring-primary-container sm:text-sm sm:leading-6 bg-surface-container-lowest font-mono-price text-mono-price" id="delivery_fee" name="delivery_fee" placeholder="0.00" type="number" value="45.00"/>
+</div>
+</section>
+<!-- Collection Points -->
+<section class="bg-surface rounded-xl p-lg border border-outline-variant shadow-near-invisible md:col-span-2">
+<div class="flex justify-between items-center mb-md">
+<div>
+<h2 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+                                    จุดนัดรับ (Collection Points)
+                                </h2>
+<p class="text-secondary mt-1">Manage where customers can pick up their orders.</p>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity border border-[#101720]">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                                Add Location
+                            </button>
+</div>
+<div class="space-y-sm">
+<!-- List Item 1 -->
+<div class="flex justify-between items-center p-sm bg-surface-container-low rounded-lg border border-outline-variant">
+<div>
+<div class="font-bold text-on-surface">หน้ามหาลัย (University Gate)</div>
+<div class="text-secondary text-sm">Zone A</div>
+</div>
+<button class="text-error hover:bg-error-container p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+<!-- List Item 2 -->
+<div class="flex justify-between items-center p-sm bg-surface-container-low rounded-lg border border-outline-variant">
+<div>
+<div class="font-bold text-on-surface">ตึกคณะวิทย์ (Science Building)</div>
+<div class="text-secondary text-sm">Zone B</div>
+</div>
+<button class="text-error hover:bg-error-container p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Time Slots -->
+<section class="bg-surface rounded-xl p-lg border border-outline-variant shadow-near-invisible md:col-span-2">
+<div class="flex justify-between items-center mb-md">
+<div>
+<h2 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="schedule">schedule</span>
+                                    ช่วงเวลารับ (Time Slots &amp; Capacity)
+                                </h2>
+<p class="text-secondary mt-1">Set available pickup times and maximum orders per slot.</p>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity border border-[#101720]">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                                Add Slot
+                            </button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-sm">
+<!-- Slot 1 -->
+<div class="p-md bg-surface-container-low rounded-lg border border-outline-variant flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-bold text-on-surface">11:30 - 12:00</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-xs font-bold">Active</span>
+</div>
+<div class="flex items-center justify-between mt-2">
+<span class="text-secondary text-sm">Capacity:</span>
+<div class="flex items-center bg-surface-container-highest rounded-lg border border-outline-variant">
+<button class="px-2 py-1 text-on-surface hover:bg-surface-variant rounded-l-lg">-</button>
+<span class="px-3 font-mono-price">15</span>
+<button class="px-2 py-1 text-on-surface hover:bg-surface-variant rounded-r-lg">+</button>
+</div>
+</div>
+</div>
+<!-- Slot 2 -->
+<div class="p-md bg-surface-container-low rounded-lg border border-outline-variant flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-bold text-on-surface">12:00 - 12:30</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-xs font-bold">Active</span>
+</div>
+<div class="flex items-center justify-between mt-2">
+<span class="text-secondary text-sm">Capacity:</span>
+<div class="flex items-center bg-surface-container-highest rounded-lg border border-outline-variant">
+<button class="px-2 py-1 text-on-surface hover:bg-surface-variant rounded-l-lg">-</button>
+<span class="px-3 font-mono-price">20</span>
+<button class="px-2 py-1 text-on-surface hover:bg-surface-variant rounded-r-lg">+</button>
+</div>
+</div>
+</div>
+<!-- Slot 3 -->
+<div class="p-md bg-surface-container-low rounded-lg border border-outline-variant opacity-70 flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<span class="font-bold text-on-surface">12:30 - 13:00</span>
+<span class="bg-surface-variant text-secondary px-2 py-0.5 rounded text-xs font-bold">Inactive</span>
+</div>
+<div class="flex items-center justify-between mt-2">
+<span class="text-secondary text-sm">Capacity:</span>
+<div class="flex items-center bg-surface-container-highest rounded-lg border border-outline-variant">
+<button class="px-2 py-1 text-on-surface hover:bg-surface-variant rounded-l-lg">-</button>
+<span class="px-3 font-mono-price">10</span>
+<button class="px-2 py-1 text-on-surface hover:bg-surface-variant rounded-r-lg">+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</body></html>

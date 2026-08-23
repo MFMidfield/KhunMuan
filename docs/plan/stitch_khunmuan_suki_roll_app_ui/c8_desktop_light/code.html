@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>C8 — สต็อกวันนี้ (Desktop Light)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "border-width-primary": "1.5px",
+                        "on-secondary-fixed": "#151c25",
+                        "surface-container": "#e4efff",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "surface-container-highest": "#d7e4f5",
+                        "tertiary-fixed": "#e1e2e4",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#f5d68a",
+                        "inverse-surface": "#26313f",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#dce3f0",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#cfc5b4",
+                        "surface-container-low": "#eef4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#d8d9db",
+                        "secondary": "#585f6a",
+                        "surface-variant": "#d7e4f5",
+                        "primary-fixed-dim": "#e1c379",
+                        "on-secondary-container": "#5e6570",
+                        "on-background": "#101c29",
+                        "surface-container-high": "#dde9fb",
+                        "primary-fixed": "#ffdf92",
+                        "secondary-fixed-dim": "#c0c7d3",
+                        "secondary-container": "#dce3f0",
+                        "on-surface-variant": "#4c4639",
+                        "surface-tint": "#725c1c",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#e9f1ff",
+                        "surface-dim": "#cfdbed",
+                        "on-secondary-fixed-variant": "#404752",
+                        "on-tertiary-fixed": "#191c1e",
+                        "outline": "#7e7667",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#725c1c",
+                        "on-primary-fixed-variant": "#584404",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-container": "#5c5f61",
+                        "tertiary": "#5c5f60",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-primary-fixed": "#241a00",
+                        "on-surface": "#101c29",
+                        "inverse-primary": "#e1c379",
+                        "primary": "#725c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "container-padding": "20px",
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "xs": "4px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "mono-code": ["IBM Plex Mono"],
+                        "mono-price": ["IBM Plex Mono"],
+                        "body-md": ["IBM Plex Sans Thai"],
+                        "headline-md": ["IBM Plex Sans Thai"],
+                        "label-sm": ["IBM Plex Sans Thai"],
+                        "body-lg": ["IBM Plex Sans Thai"],
+                        "title-sm": ["IBM Plex Sans Thai"],
+                        "display-lg": ["IBM Plex Sans Thai"]
+                    },
+                    "fontSize": {
+                        "mono-code": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "mono-price": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar for minimalist look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cfc5b4;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7e7667;
+        }
+        .table-row-hover:hover {
+            box-shadow: 0 1px 2px rgba(16, 23, 32, 0.04);
+            border-color: #cfc5b4;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex antialiased">
+<!-- SideNavBar (from JSON) -->
+<nav class="bg-surface-container-low dark:bg-inverse-surface text-primary dark:text-inverse-primary font-label-sm text-label-sm h-screen w-64 hidden lg:flex flex-col sticky left-0 top-0 border-r border-outline-variant dark:border-outline p-md gap-sm">
+<div class="mb-xl px-sm pt-sm flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+<img alt="Khun Muan Logo" class="w-full h-full object-cover rounded-full" data-alt="A clean, minimalist vector logo of a friendly Thai character face, 'Khun Muan', rendered with thin, precise dark ink lines on a solid gold background. Modern, approachably professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-wyYOba4mjxW0XUFeUx3uVokZAlyy72zG-1KvTLq9x3xj2P8V48c26faDYwI8agvrBsIJh4qUFcZOsT2llvLfuUFzFFxQxVUnpkxC_uPZC2MEQc2hPUwfoq96p4-qhIqn3qQP75Sf5-4otF88lFYYLcCUbjDFQ7Eh3mZFCOo4ydVoqh-T46EP84jlS6SRIc_nuY2ZwzbXXxv84ddyWTPJlbPgXcAFigUJjcM52LDfrtOgNxg1GtLN8Q"/>
+</div>
+<div>
+<h1 class="font-title-sm text-title-sm text-on-surface">Back Office</h1>
+<p class="text-on-surface-variant opacity-80">Kitchen Management</p>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-xs">
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg p-sm flex items-center gap-sm transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Order Board</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg p-sm flex items-center gap-sm transition-all" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span>Menu Management</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg p-sm flex items-center gap-sm transition-all" href="#">
+<span class="material-symbols-outlined">badge</span>
+<span>Staff Management</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg p-sm flex items-center gap-sm transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span>Reports</span>
+</a>
+<a class="bg-primary-container text-on-primary-container rounded-lg font-bold p-sm flex items-center gap-sm transition-all" href="#">
+<span class="material-symbols-outlined icon-filled">inventory_2</span>
+<span>Inventory</span>
+</a>
+</div>
+<div class="mt-auto flex flex-col gap-xs border-t border-outline-variant pt-sm">
+<div class="px-sm py-xs mb-sm">
+<span class="inline-flex items-center gap-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold tracking-wider uppercase">Shop Open</span>
+</div>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg p-sm flex items-center gap-sm transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Help</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg p-sm flex items-center gap-sm transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-surface">
+<!-- TopAppBar (from JSON) -->
+<header class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary font-body-md text-body-md border-b border-outline-variant dark:border-outline shadow-sm flex justify-between items-center px-container-padding h-16 w-full shrink-0">
+<div class="font-headline-md text-headline-md text-primary dark:text-inverse-primary font-bold">
+                Khun Muan Culinary
+            </div>
+<div class="flex items-center gap-sm">
+<div class="relative">
+<span class="material-symbols-outlined text-secondary hover:bg-surface-container-high p-2 rounded-full cursor-pointer transition-colors active:scale-95 duration-150">search</span>
+</div>
+<span class="material-symbols-outlined text-secondary hover:bg-surface-container-high p-2 rounded-full cursor-pointer transition-colors active:scale-95 duration-150">notifications</span>
+<span class="material-symbols-outlined text-secondary hover:bg-surface-container-high p-2 rounded-full cursor-pointer transition-colors active:scale-95 duration-150">settings</span>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant ml-sm">
+<img alt="Staff Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a young Thai male chef in a clean white uniform, smiling warmly against a bright, minimalist background. High-key lighting, modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBb1qTZKBngFxIRAF_fz-RvgPHrvk3tCkKm6mxdGwE-pG24KvHuWKQeMPcccp0Jh8uTLUvhc_iU9L7pk9HrYN8GYea-MeLg5o9QT6Xro92Xtf51hnrMhqn0o771tdLVYJR5geP6p7fYALjtZGLg713FhPoe1f4DBIRGdRRHJWa6EqSYg8c4cBIpm76OA8L_NudsvqGrpQsurBKJI4afkc0LN_WRU7zJuaNY4BFQ2GYZlu2E3QEcUoXEtA"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<div class="flex-1 overflow-y-auto p-container-padding lg:px-xl py-lg">
+<!-- Page Header -->
+<div class="flex items-center justify-between mb-xl">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-surface mb-xs">สต็อกวันที่ 21 ส.ค.</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage your daily ingredient inventory.</p>
+</div>
+<button class="bg-surface-container text-on-background px-lg py-sm rounded-lg border border-outline hover:border-outline-variant transition-colors flex items-center gap-xs font-label-sm text-label-sm active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+                    รีเซ็ตสต็อกวันนี้
+                </button>
+</div>
+<!-- Content Area (Table-like Grid for Desktop) -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-sm overflow-hidden flex flex-col">
+<!-- Table Header -->
+<div class="grid grid-cols-12 gap-sm p-md bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<div class="col-span-5">รายการ (Item)</div>
+<div class="col-span-2 text-center">คงเหลือ (Left)</div>
+<div class="col-span-3 text-center">ปรับปรุง (Adjust)</div>
+<div class="col-span-2 text-right">สถานะ (Status)</div>
+</div>
+<!-- Table Rows -->
+<div class="flex-1 overflow-y-auto p-sm gap-xs flex flex-col bg-background">
+<!-- Row 1: Normal -->
+<div class="grid grid-cols-12 gap-sm p-sm items-center bg-surface border border-transparent rounded-lg table-row-hover transition-all">
+<div class="col-span-5 flex items-center gap-md">
+<div class="w-12 h-12 rounded-md overflow-hidden bg-surface-container shrink-0 border border-outline-variant">
+<img alt="Salmon" class="w-full h-full object-cover" data-alt="A top-down view of fresh, vibrant raw salmon slices arranged neatly on a pristine white ceramic square plate. Soft, natural daylight, minimalist Thai culinary style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjr-5Ly17kykMwoOR7GAmL_Alc1NcJcss5vcgqQgp0YsSTtFS9Nda3wCW74VuKfVH58-yaBdUqF5YW0S4TTKRNdxQaQo7eqHAWl1OkTPUA5RRlC7lq7hpz-JgV3Yl0klIuZjn5YxaalG-XgCHjssrkcysD6AynC7kxRhHPoR0YwoE597Z6g0Hy8UthjErMDYbOIcQ4jU9Ru8k-AzuDEQadsPhf9tuWp2Oudo8HtrFudzqMmI6GmClRlA"/>
+</div>
+<span class="font-title-sm text-title-sm text-on-surface truncate">ปลาแซลมอน (Salmon)</span>
+</div>
+<div class="col-span-2 text-center">
+<span class="font-mono-price text-mono-price text-on-background">42</span>
+<span class="font-body-md text-body-md text-on-surface-variant ml-1">ถาด</span>
+</div>
+<div class="col-span-3 flex justify-center">
+<div class="flex items-center bg-primary-container/20 rounded-lg p-1 border border-primary-container">
+<button class="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors active:scale-95"><span class="material-symbols-outlined text-[20px]">remove</span></button>
+<div class="w-12 text-center font-mono-code text-mono-code text-on-background">42</div>
+<button class="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors active:scale-95"><span class="material-symbols-outlined text-[20px]">add</span></button>
+</div>
+</div>
+<div class="col-span-2 flex justify-end items-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-outline-variant"></div>
+<span class="ml-2 font-label-sm text-label-sm text-on-surface-variant">หมดแล้ว</span>
+</label>
+</div>
+</div>
+<!-- Row 2: Normal -->
+<div class="grid grid-cols-12 gap-sm p-sm items-center bg-surface border border-transparent rounded-lg table-row-hover transition-all">
+<div class="col-span-5 flex items-center gap-md">
+<div class="w-12 h-12 rounded-md overflow-hidden bg-surface-container shrink-0 border border-outline-variant">
+<img alt="Beef" class="w-full h-full object-cover" data-alt="Thinly sliced premium wagyu beef with rich marbling, arranged gracefully on a white rectangular dish. Bright, clean lighting emphasizing the freshness and texture. Modern minimalist food photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCY0oXgGCujQf4irnZ2KjSHsjZoDZkjUCPSbNWlSKsKChMD8Cb5nYSL9bEfEHseGM4bbu2rJrszkPzccufdPDAf5VdGI--dZn7czeDC7Wm8hw84vhk8yPkYqhHtjBglPNnbvZLA0p6Sz0DdJxfQxzyNCHYmqPl16M7EZrJVbH9amzacjhCHbeHSbxWd9jPaA7NpUk5tMmskNu5oQs76nfskFk_9XJvFQxzZY1xB8lTinmbMX1T6cDeZAw"/>
+</div>
+<span class="font-title-sm text-title-sm text-on-surface truncate">เนื้อวากิวสไลด์ (Wagyu)</span>
+</div>
+<div class="col-span-2 text-center">
+<span class="font-mono-price text-mono-price text-on-background">18</span>
+<span class="font-body-md text-body-md text-on-surface-variant ml-1">ถาด</span>
+</div>
+<div class="col-span-3 flex justify-center">
+<div class="flex items-center bg-primary-container/20 rounded-lg p-1 border border-primary-container">
+<button class="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors active:scale-95"><span class="material-symbols-outlined text-[20px]">remove</span></button>
+<div class="w-12 text-center font-mono-code text-mono-code text-on-background">18</div>
+<button class="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors active:scale-95"><span class="material-symbols-outlined text-[20px]">add</span></button>
+</div>
+</div>
+<div class="col-span-2 flex justify-end items-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-outline-variant"></div>
+<span class="ml-2 font-label-sm text-label-sm text-on-surface-variant">หมดแล้ว</span>
+</label>
+</div>
+</div>
+<!-- Row 3: Sold Out (Dimmed with Ribbon) -->
+<div class="grid grid-cols-12 gap-sm p-sm items-center bg-surface border border-outline/20 rounded-lg opacity-60 relative overflow-hidden transition-all grayscale-[0.2]">
+<!-- Ribbon -->
+<div class="absolute -left-[30px] top-[15px] -rotate-45 bg-error text-on-error font-label-sm text-[10px] uppercase font-bold py-1 px-8 shadow-sm tracking-widest z-10">
+                            Sold Out
+                        </div>
+<div class="col-span-5 flex items-center gap-md pl-xl">
+<div class="w-12 h-12 rounded-md overflow-hidden bg-surface-container shrink-0 border border-outline-variant/50">
+<img alt="Mushrooms" class="w-full h-full object-cover" data-alt="Fresh enoki mushrooms bundled together on a small white minimalist plate. Soft diffuse lighting, clean background, indicating fresh raw ingredients for suki." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_SoW0yZNcQ7msB08P-mFDAf6kIu1BQ5mKP7RY_ZudtaREXl8T1AC_L6W5C8lWjP2eq3mvsQ6bRbKpDl5JWMSKVxsOVq_6CsRGa-Ri-pwJGl41jge0jYrvS412aJoNUuDEIxV2LsxQqWD3Quenbcyactw-60mM0n3OITTCPNcKCnKZxnyPvVss4zhsm6XU11FS0u5QsA5vV6nMXQXeMGblPmm6pye98L7xp0IQQevo_bBhD-9IXlGwoQ"/>
+</div>
+<span class="font-title-sm text-title-sm text-on-surface truncate line-through decoration-error/50">เห็ดเข็มทอง (Enoki)</span>
+</div>
+<div class="col-span-2 text-center">
+<span class="font-mono-price text-mono-price text-on-background">0</span>
+<span class="font-body-md text-body-md text-on-surface-variant ml-1">ถาด</span>
+</div>
+<div class="col-span-3 flex justify-center">
+<div class="flex items-center bg-surface-container-high rounded-lg p-1 border border-outline/30 cursor-not-allowed">
+<button class="w-8 h-8 flex items-center justify-center text-tertiary-fixed-dim rounded-md" disabled=""><span class="material-symbols-outlined text-[20px]">remove</span></button>
+<div class="w-12 text-center font-mono-code text-mono-code text-on-surface-variant">0</div>
+<button class="w-8 h-8 flex items-center justify-center text-tertiary-fixed-dim rounded-md" disabled=""><span class="material-symbols-outlined text-[20px]">add</span></button>
+</div>
+</div>
+<div class="col-span-2 flex justify-end items-center">
+<label class="relative inline-flex items-center cursor-not-allowed">
+<input checked="" class="sr-only peer" disabled="" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-error/80 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+<span class="ml-2 font-label-sm text-label-sm text-error font-bold">หมดแล้ว</span>
+</label>
+</div>
+</div>
+<!-- Row 4: Normal -->
+<div class="grid grid-cols-12 gap-sm p-sm items-center bg-surface border border-transparent rounded-lg table-row-hover transition-all">
+<div class="col-span-5 flex items-center gap-md">
+<div class="w-12 h-12 rounded-md overflow-hidden bg-surface-container shrink-0 border border-outline-variant">
+<img alt="Morning Glory" class="w-full h-full object-cover" data-alt="A pristine bowl of fresh green morning glory leaves, washed and ready for cooking. Top-down view, crisp white background, vibrant natural green colors, minimalist Thai food prep." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLkB_vHrEzi1T-4yh8Ohr5e6Q2UO-FVhl-HU5oe9NHNBfP0BjwrKTG6TMrPYqtjMoijMLUpeyZj58baICJXfM6lvyPC8j-GksspoYpYzWCMJCpXpfrafV-DLs7xsJnjOw8dZ04XCxlEQDkZB_an-qiMTWl70knGepT7bHMWngXyhSabVQMGm5WlQmML0ABK7DcdcGX4H38z-gF7eAxxFEol845cw8n0h3JD8ZKAzznNPa62D9nQmOdmw"/>
+</div>
+<span class="font-title-sm text-title-sm text-on-surface truncate">ผักบุ้ง (Morning Glory)</span>
+</div>
+<div class="col-span-2 text-center">
+<span class="font-mono-price text-mono-price text-on-background">120</span>
+<span class="font-body-md text-body-md text-on-surface-variant ml-1">ที่</span>
+</div>
+<div class="col-span-3 flex justify-center">
+<div class="flex items-center bg-primary-container/20 rounded-lg p-1 border border-primary-container">
+<button class="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors active:scale-95"><span class="material-symbols-outlined text-[20px]">remove</span></button>
+<div class="w-12 text-center font-mono-code text-mono-code text-on-background">120</div>
+<button class="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary-container rounded-md transition-colors active:scale-95"><span class="material-symbols-outlined text-[20px]">add</span></button>
+</div>
+</div>
+<div class="col-span-2 flex justify-end items-center">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-outline-variant"></div>
+<span class="ml-2 font-label-sm text-label-sm text-on-surface-variant">หมดแล้ว</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

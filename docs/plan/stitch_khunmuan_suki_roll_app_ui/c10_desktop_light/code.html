@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reports - Khun Muan Culinary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "border-width-primary": "1.5px",
+                        "on-secondary-fixed": "#151c25",
+                        "surface-container": "#e4efff",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "surface-container-highest": "#d7e4f5",
+                        "tertiary-fixed": "#e1e2e4",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#f5d68a",
+                        "inverse-surface": "#26313f",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#dce3f0",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#cfc5b4",
+                        "surface-container-low": "#eef4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#d8d9db",
+                        "secondary": "#585f6a",
+                        "surface-variant": "#d7e4f5",
+                        "primary-fixed-dim": "#e1c379",
+                        "on-secondary-container": "#5e6570",
+                        "on-background": "#101c29",
+                        "surface-container-high": "#dde9fb",
+                        "primary-fixed": "#ffdf92",
+                        "secondary-fixed-dim": "#c0c7d3",
+                        "secondary-container": "#dce3f0",
+                        "on-surface-variant": "#4c4639",
+                        "surface-tint": "#725c1c",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#e9f1ff",
+                        "surface-dim": "#cfdbed",
+                        "on-secondary-fixed-variant": "#404752",
+                        "on-tertiary-fixed": "#191c1e",
+                        "outline": "#7e7667",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#725c1c",
+                        "on-primary-fixed-variant": "#584404",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-container": "#5c5f61",
+                        "tertiary": "#5c5f60",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-primary-fixed": "#241a00",
+                        "on-surface": "#101c29",
+                        "inverse-primary": "#e1c379",
+                        "primary": "#725c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "container-padding": "20px",
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "xs": "4px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "mono-code": ["IBM Plex Mono"],
+                        "mono-price": ["IBM Plex Mono"],
+                        "body-md": ["IBM Plex Sans Thai"],
+                        "headline-md": ["IBM Plex Sans Thai"],
+                        "label-sm": ["IBM Plex Sans Thai"],
+                        "body-lg": ["IBM Plex Sans Thai"],
+                        "title-sm": ["IBM Plex Sans Thai"],
+                        "display-lg": ["IBM Plex Sans Thai"]
+                    },
+                    "fontSize": {
+                        "mono-code": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "mono-price": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar (Desktop Navigation) -->
+<nav class="h-screen w-64 hidden lg:flex flex-col sticky left-0 top-0 bg-surface-container-low dark:bg-inverse-surface text-primary dark:text-inverse-primary border-r border-outline-variant dark:border-outline p-md gap-sm">
+<!-- Header -->
+<div class="flex items-center gap-md mb-xl px-sm">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-primary-container flex-shrink-0">
+<img alt="Khun Muan Logo" class="w-full h-full object-cover" data-alt="A clean, minimalist vector illustration of 'Khun Muan', a friendly Thai character logo, using warm gold and dark ink lines on a pristine white background. The style is modern, youthful, and precise, fitting a high-end food delivery app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1kUapw0oyv4WDMkJcVvPcRumIrrmLK1OpkJwQe0yq8q9BhV9jLklt3r_G-NMxVV6-BbS8ROqeXQV5GMHJZlJDrV-K6jDwK4rNFe9YDRgFaLhZm4XB3Jodl-DQ-s6LuR_WTC_4rSmlhJuoGD5kG5ww0WDsf2O7zZiKsUgpS4bp7BmdtfAfLao-gH9gW4gFbguyavZUOZ1dqOnHw9sL5m6aP2g0mIRH-ID25eW98SUkLuvNzSbX1MhAVw"/>
+</div>
+<div>
+<h1 class="font-title-sm text-title-sm text-on-surface">Back Office</h1>
+<p class="font-label-sm text-label-sm text-secondary">Kitchen Management</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-sm mb-lg">
+<button class="w-full bg-primary-container text-on-primary-container border-[1.5px] border-on-background py-sm rounded-lg font-label-sm text-label-sm hover:bg-surface-variant transition-colors flex items-center justify-center gap-sm">
+<span class="w-2 h-2 rounded-full bg-on-background block"></span> Shop Open
+            </button>
+</div>
+<!-- Navigation Links -->
+<div class="flex flex-col gap-xs flex-1">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-lg hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm">Order Board</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-lg hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="font-label-sm text-label-sm">Menu Management</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-lg hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">badge</span>
+<span class="font-label-sm text-label-sm">Staff Management</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm bg-primary-container text-on-primary-container rounded-lg font-bold hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined icon-filled">analytics</span>
+<span class="font-label-sm text-label-sm">Reports</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-lg hover:bg-surface-container-highest transition-all active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-sm text-label-sm">Inventory</span>
+</a>
+</div>
+<!-- Footer Links -->
+<div class="flex flex-col gap-xs mt-auto pt-lg border-t border-outline-variant">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-sm text-label-sm">Help</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-error hover:bg-error-container rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-sm text-label-sm">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col relative w-full lg:w-[calc(100%-256px)] overflow-y-auto">
+<!-- TopAppBar (Desktop Search/Actions) -->
+<header class="hidden lg:flex justify-between items-center px-container-padding h-16 w-full sticky top-0 z-40 bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline">
+<div class="font-headline-md text-headline-md text-primary dark:text-inverse-primary">
+                 Khun Muan Culinary
+             </div>
+<div class="flex items-center gap-md">
+<!-- Search Bar -->
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container rounded-full border-none focus:ring-1 focus:ring-outline-variant font-body-md text-body-md text-on-surface placeholder:text-secondary h-10" placeholder="Search reports..." type="text"/>
+</div>
+<!-- Actions -->
+<button class="p-2 text-secondary hover:bg-surface-container-high rounded-full transition-colors active:scale-95 duration-150 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border border-surface"></span>
+</button>
+<button class="p-2 text-secondary hover:bg-surface-container-high rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<!-- Profile -->
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant ml-sm">
+<img alt="Staff Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a restaurant staff member, clean and bright lighting, minimalist background, friendly expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVB1cdGU8HK3QiMMBRjF6WLp-ihmdNwSSg7mh42Zza57-kJhXJesSJWi6VZE29OrSBrT3RTaBnGtAnHfbeRprjToi7JxOQ7tKZ0rQ_V4eMY_NTGdkRUIr_bXAgjNF1pg6vBXoW7Mayxo2jevH4Vk18Hd1k8UXKtisX-qTrcFGsde6GPxIc3tedfRZxG9PKOlbL85MUqg8LgIFXniNMu1qQUHNCEf-5GDG6-gfeI9n95OsIPcUYYPIkGg"/>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<div class="p-container-padding lg:p-xl max-w-7xl mx-auto w-full flex flex-col gap-xl">
+<!-- Page Title -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-background">รายงานประจำวัน</h2>
+<p class="font-body-md text-body-md text-secondary mt-xs">ข้อมูลอัปเดตล่าสุด: วันนี้ 14:30 น.</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-md py-sm bg-surface-container rounded-lg font-label-sm text-label-sm text-on-surface flex items-center gap-sm hover:bg-surface-variant transition-colors border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                        วันนี้
+                    </button>
+<button class="px-md py-sm bg-surface-container rounded-lg font-label-sm text-label-sm text-on-surface flex items-center gap-sm hover:bg-surface-variant transition-colors border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        ส่งออก
+                    </button>
+</div>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Stat 1: ยอดขายวันนี้ -->
+<div class="bg-surface rounded-xl p-lg border border-outline-variant shadow-[0_1px_2px_rgba(16,23,32,0.04)] flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-secondary">ยอดขายวันนี้</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">payments</span>
+</div>
+<div class="flex items-baseline gap-sm">
+<span class="font-mono-price text-[28px] leading-[36px] font-semibold text-on-background">฿12,450</span>
+<span class="font-label-sm text-label-sm text-[#006A60] flex items-center bg-[#CCE8E4] px-1.5 py-0.5 rounded-sm"><span class="material-symbols-outlined text-[12px]">trending_up</span> +8%</span>
+</div>
+</div>
+<!-- Stat 2: จำนวนออเดอร์ -->
+<div class="bg-surface rounded-xl p-lg border border-outline-variant shadow-[0_1px_2px_rgba(16,23,32,0.04)] flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-secondary">จำนวนออเดอร์</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">receipt_long</span>
+</div>
+<div class="flex items-baseline gap-sm">
+<span class="font-mono-price text-[28px] leading-[36px] font-semibold text-on-background">142</span>
+<span class="font-label-sm text-label-sm text-secondary">รายการ</span>
+</div>
+</div>
+<!-- Stat 3: เงินสด -->
+<div class="bg-surface rounded-xl p-lg border border-outline-variant shadow-[0_1px_2px_rgba(16,23,32,0.04)] flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-secondary">เงินสด</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">account_balance_wallet</span>
+</div>
+<div class="flex items-baseline gap-sm">
+<span class="font-mono-price text-[28px] leading-[36px] font-semibold text-on-background">฿3,200</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-secondary h-full" style="width: 25%"></div>
+</div>
+</div>
+<!-- Stat 4: โอน -->
+<div class="bg-surface rounded-xl p-lg border border-outline-variant shadow-[0_1px_2px_rgba(16,23,32,0.04)] flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-secondary">โอน/QR</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">qr_code_scanner</span>
+</div>
+<div class="flex items-baseline gap-sm">
+<span class="font-mono-price text-[28px] leading-[36px] font-semibold text-on-background">฿9,250</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-[#006874] h-full" style="width: 75%"></div>
+</div>
+</div>
+</div>
+<!-- Bento Layout for Charts and Lists -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-xl">
+<!-- Main Chart: Daily Sales -->
+<div class="lg:col-span-2 bg-surface rounded-xl p-lg border border-outline-variant shadow-[0_1px_2px_rgba(16,23,32,0.04)] flex flex-col h-[400px]">
+<div class="flex justify-between items-center mb-lg">
+<h3 class="font-title-sm text-title-sm text-on-background">ยอดขายตามช่วงเวลา</h3>
+<div class="flex gap-sm">
+<div class="flex items-center gap-xs font-label-sm text-label-sm text-secondary">
+<div class="w-2 h-2 rounded-full bg-[#006874]"></div> วันนี้
+                             </div>
+<div class="flex items-center gap-xs font-label-sm text-label-sm text-secondary">
+<div class="w-2 h-2 rounded-full bg-surface-dim"></div> เมื่อวาน
+                             </div>
+</div>
+</div>
+<!-- CSS Bar Chart (Mock) -->
+<div class="flex-1 flex items-end gap-2 md:gap-4 pt-4 border-b border-l border-outline-variant pb-2 pl-2 relative">
+<!-- Y-Axis Labels -->
+<div class="absolute left-[-40px] top-0 bottom-2 flex flex-col justify-between items-end font-mono-code text-[10px] text-secondary">
+<span>10k</span>
+<span>7.5k</span>
+<span>5k</span>
+<span>2.5k</span>
+<span>0</span>
+</div>
+<!-- Grid lines -->
+<div class="absolute left-2 right-0 top-0 border-t border-surface-container border-dashed"></div>
+<div class="absolute left-2 right-0 top-[25%] border-t border-surface-container border-dashed"></div>
+<div class="absolute left-2 right-0 top-[50%] border-t border-surface-container border-dashed"></div>
+<div class="absolute left-2 right-0 top-[75%] border-t border-surface-container border-dashed"></div>
+<!-- Bars -->
+<div class="flex-1 flex flex-col justify-end items-center group relative h-full z-10">
+<div class="w-full max-w-[24px] bg-[#006874] rounded-t-sm h-[30%] opacity-90 group-hover:opacity-100 transition-opacity"></div>
+<div class="w-full max-w-[24px] bg-surface-dim rounded-t-sm h-[20%] absolute bottom-0 -z-10 translate-x-2 hidden md:block"></div>
+<span class="absolute -bottom-6 font-mono-code text-[10px] text-secondary">10:00</span>
+</div>
+<div class="flex-1 flex flex-col justify-end items-center group relative h-full z-10">
+<div class="w-full max-w-[24px] bg-[#006874] rounded-t-sm h-[55%] opacity-90 group-hover:opacity-100 transition-opacity"></div>
+<div class="w-full max-w-[24px] bg-surface-dim rounded-t-sm h-[40%] absolute bottom-0 -z-10 translate-x-2 hidden md:block"></div>
+<span class="absolute -bottom-6 font-mono-code text-[10px] text-secondary">11:00</span>
+</div>
+<div class="flex-1 flex flex-col justify-end items-center group relative h-full z-10">
+<div class="w-full max-w-[24px] bg-[#006874] rounded-t-sm h-[85%] opacity-90 group-hover:opacity-100 transition-opacity"></div>
+<div class="w-full max-w-[24px] bg-surface-dim rounded-t-sm h-[60%] absolute bottom-0 -z-10 translate-x-2 hidden md:block"></div>
+<span class="absolute -bottom-6 font-mono-code text-[10px] text-secondary">12:00</span>
+</div>
+<div class="flex-1 flex flex-col justify-end items-center group relative h-full z-10">
+<div class="w-full max-w-[24px] bg-[#006874] rounded-t-sm h-[70%] opacity-90 group-hover:opacity-100 transition-opacity"></div>
+<div class="w-full max-w-[24px] bg-surface-dim rounded-t-sm h-[80%] absolute bottom-0 -z-10 translate-x-2 hidden md:block"></div>
+<span class="absolute -bottom-6 font-mono-code text-[10px] text-secondary">13:00</span>
+</div>
+<div class="flex-1 flex flex-col justify-end items-center group relative h-full z-10">
+<div class="w-full max-w-[24px] bg-[#006874] rounded-t-sm h-[40%] opacity-90 group-hover:opacity-100 transition-opacity"></div>
+<div class="w-full max-w-[24px] bg-surface-dim rounded-t-sm h-[45%] absolute bottom-0 -z-10 translate-x-2 hidden md:block"></div>
+<span class="absolute -bottom-6 font-mono-code text-[10px] text-secondary">14:00</span>
+</div>
+<div class="flex-1 flex flex-col justify-end items-center group relative h-full z-10">
+<div class="w-full max-w-[24px] bg-surface-container rounded-t-sm h-[20%] opacity-90"></div>
+<span class="absolute -bottom-6 font-mono-code text-[10px] text-secondary">15:00</span>
+</div>
+<div class="flex-1 flex flex-col justify-end items-center group relative h-full z-10">
+<div class="w-full max-w-[24px] bg-surface-container rounded-t-sm h-[15%] opacity-90"></div>
+<span class="absolute -bottom-6 font-mono-code text-[10px] text-secondary">16:00</span>
+</div>
+</div>
+</div>
+<!-- Side Lists (Best/Worst Fillings) -->
+<div class="flex flex-col gap-lg h-[400px]">
+<!-- Best Selling -->
+<div class="flex-1 bg-surface rounded-xl p-md border border-outline-variant shadow-[0_1px_2px_rgba(16,23,32,0.04)] flex flex-col">
+<h3 class="font-title-sm text-[16px] text-on-background mb-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-[#006A60]">thumb_up</span>
+                             ไส้ขายดี
+                        </h3>
+<ul class="flex flex-col gap-2 overflow-y-auto pr-2">
+<li class="flex justify-between items-center bg-surface-container-lowest p-2 border border-surface-container rounded-lg">
+<div class="flex items-center gap-2">
+<span class="font-mono-code text-[12px] text-secondary w-4 text-center">1</span>
+<span class="font-body-md text-[14px] text-on-background">หมูสับเห็ดหอม</span>
+</div>
+<span class="font-mono-code text-[14px] text-on-surface font-semibold">45</span>
+</li>
+<li class="flex justify-between items-center bg-surface-container-lowest p-2 border border-surface-container rounded-lg">
+<div class="flex items-center gap-2">
+<span class="font-mono-code text-[12px] text-secondary w-4 text-center">2</span>
+<span class="font-body-md text-[14px] text-on-background">กุ้งเด้ง</span>
+</div>
+<span class="font-mono-code text-[14px] text-on-surface font-semibold">38</span>
+</li>
+<li class="flex justify-between items-center bg-surface-container-lowest p-2 border border-surface-container rounded-lg">
+<div class="flex items-center gap-2">
+<span class="font-mono-code text-[12px] text-secondary w-4 text-center">3</span>
+<span class="font-body-md text-[14px] text-on-background">หมูเด้งสาหร่าย</span>
+</div>
+<span class="font-mono-code text-[14px] text-on-surface font-semibold">32</span>
+</li>
+</ul>
+</div>
+<!-- Worst Selling -->
+<div class="flex-1 bg-surface rounded-xl p-md border border-outline-variant shadow-[0_1px_2px_rgba(16,23,32,0.04)] flex flex-col">
+<h3 class="font-title-sm text-[16px] text-on-background mb-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">trending_down</span>
+                             ไส้ที่ควรปรับปรุง
+                        </h3>
+<ul class="flex flex-col gap-2 overflow-y-auto pr-2">
+<li class="flex justify-between items-center bg-surface-container-lowest p-2 border border-surface-container rounded-lg opacity-80">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-error">warning</span>
+<span class="font-body-md text-[14px] text-on-background">ไก่พริกไทยดำ</span>
+</div>
+<span class="font-mono-code text-[14px] text-secondary">4</span>
+</li>
+<li class="flex justify-between items-center bg-surface-container-lowest p-2 border border-surface-container rounded-lg opacity-80">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-outline">remove</span>
+<span class="font-body-md text-[14px] text-on-background">ปลาหมึกทรงเครื่อง</span>
+</div>
+<span class="font-mono-code text-[14px] text-secondary">7</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- Average Time Table -->
+<div class="bg-surface rounded-xl p-lg border border-outline-variant shadow-[0_1px_2px_rgba(16,23,32,0.04)] overflow-hidden">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-title-sm text-title-sm text-on-background">เวลาเฉลี่ยแต่ละสถานะ (วันนี้)</h3>
+<button class="text-secondary hover:text-on-background transition-colors p-1">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant font-label-sm text-label-sm text-secondary">
+<th class="py-sm px-2 font-medium">ขั้นตอน</th>
+<th class="py-sm px-2 font-medium">เวลาเฉลี่ย (นาที)</th>
+<th class="py-sm px-2 font-medium">เกณฑ์มาตรฐาน</th>
+<th class="py-sm px-2 font-medium">สถานะ</th>
+</tr>
+</thead>
+<tbody class="font-mono-code text-[14px] text-on-surface">
+<tr class="border-b border-surface-container hover:bg-surface-bright transition-colors">
+<td class="py-md px-2 font-body-md">รอยืนยัน -&gt; รับแล้ว</td>
+<td class="py-md px-2">1:12</td>
+<td class="py-md px-2 text-secondary">2:00</td>
+<td class="py-md px-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-[#CCE8E4] text-[#005047] font-medium">
+                                        ดีเยี่ยม
+                                    </span>
+</td>
+</tr>
+<tr class="border-b border-surface-container hover:bg-surface-bright transition-colors">
+<td class="py-md px-2 font-body-md">รับแล้ว -&gt; กำลังทำ</td>
+<td class="py-md px-2">4:30</td>
+<td class="py-md px-2 text-secondary">5:00</td>
+<td class="py-md px-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-[#D3E3FD] text-[#041E49] font-medium">
+                                        ปกติ
+                                    </span>
+</td>
+</tr>
+<tr class="border-b border-surface-container hover:bg-surface-bright transition-colors">
+<td class="py-md px-2 font-body-md">กำลังทำ -&gt; รอรับ</td>
+<td class="py-md px-2 text-error font-semibold">12:45</td>
+<td class="py-md px-2 text-secondary">10:00</td>
+<td class="py-md px-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-error-container text-on-error-container font-medium">
+                                        ล่าช้า
+                                    </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-bright transition-colors">
+<td class="py-md px-2 font-body-md font-semibold">รวมเวลาทั้งหมด (เฉลี่ย)</td>
+<td class="py-md px-2 font-semibold">18:27</td>
+<td class="py-md px-2 text-secondary">17:00</td>
+<td class="py-md px-2"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Spacer for bottom padding -->
+<div class="h-8"></div>
+</div>
+</main>
+</body></html>

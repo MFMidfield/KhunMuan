@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KhunMuan - ชำระเงิน</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-on-surface": "#e9f1ff",
+                      "surface-container-high": "#dde9fb",
+                      "outline": "#7e7667",
+                      "on-secondary-fixed-variant": "#404752",
+                      "primary-container": "#f5d68a",
+                      "secondary-container": "#dce3f0",
+                      "error": "#ba1a1a",
+                      "error-container": "#ffdad6",
+                      "on-primary-container": "#725c1c",
+                      "secondary-fixed-dim": "#c0c7d3",
+                      "primary": "#725c1c",
+                      "on-tertiary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed": "#dce3f0",
+                      "on-tertiary-container": "#5c5f61",
+                      "on-primary-fixed-variant": "#584404",
+                      "on-error": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "surface-container": "#e4efff",
+                      "tertiary": "#5c5f60",
+                      "surface-container-low": "#eef4ff",
+                      "primary-fixed-dim": "#e1c379",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "surface-container-highest": "#d7e4f5",
+                      "outline-variant": "#cfc5b4",
+                      "on-secondary-fixed": "#151c25",
+                      "surface-variant": "#d7e4f5",
+                      "background": "#f8f9ff",
+                      "surface": "#f8f9ff",
+                      "surface-bright": "#f8f9ff",
+                      "on-primary-fixed": "#241a00",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-dim": "#cfdbed",
+                      "on-tertiary-fixed": "#191c1e",
+                      "on-surface": "#101c29",
+                      "tertiary-fixed": "#e1e2e4",
+                      "on-background": "#101c29",
+                      "secondary": "#585f6a",
+                      "surface-tint": "#725c1c",
+                      "on-surface-variant": "#4c4639",
+                      "on-secondary-container": "#5e6570",
+                      "inverse-primary": "#e1c379",
+                      "inverse-surface": "#26313f",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#c5c7c8",
+                      "primary-fixed": "#ffdf92",
+                      "border-width-primary": "1.5px",
+                      "tertiary-container": "#d8d9db"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xl": "32px",
+                      "xs": "4px",
+                      "lg": "24px",
+                      "sm": "8px",
+                      "container-padding": "20px",
+                      "md": "16px",
+                      "base": "4px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "title-sm": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "label-sm": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "body-lg": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "body-md": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "mono-code": [
+                              "IBM Plex Mono"
+                      ],
+                      "display-lg": [
+                              "IBM Plex Sans Thai"
+                      ],
+                      "mono-price": [
+                              "IBM Plex Mono"
+                      ],
+                      "headline-md": [
+                              "IBM Plex Sans Thai"
+                      ]
+              },
+              "fontSize": {
+                      "title-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "mono-code": [
+                              "14px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "mono-price": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f7f8fa; /* Custom ground color */
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased pb-24 md:pb-0">
+<!-- Top App Bar (Modified for transactional flow) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-padding h-16 bg-surface dark:bg-surface-dim shadow-[0_1px_2px_rgba(16,23,32,0.04)]">
+<button aria-label="Back" class="flex items-center justify-center p-2 text-on-surface hover:bg-surface-container-low transition-colors rounded-full">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">ชำระเงิน</h1>
+<div class="w-10"></div> <!-- Spacer for center alignment -->
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 px-container-padding pb-32 max-w-2xl mx-auto flex flex-col gap-xl">
+<!-- Delivery/Pickup Segmented Control -->
+<section class="flex bg-secondary-container rounded-lg p-1 shadow-sm">
+<button class="flex-1 py-2 font-title-sm text-title-sm bg-surface text-on-surface rounded-lg shadow-[0_1px_2px_rgba(16,23,32,0.04)] transition-all">มารับเอง</button>
+<button class="flex-1 py-2 font-title-sm text-title-sm text-on-secondary-container hover:text-on-surface transition-all">ให้ไปส่ง</button>
+</section>
+<!-- Pickup Location -->
+<section class="flex flex-col gap-md">
+<h2 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">location_on</span>
+                จุดรับของ
+            </h2>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-sm">
+<!-- Selected Location -->
+<button class="flex flex-col items-center justify-center p-4 bg-surface rounded-xl border-[1.5px] border-primary shadow-sm relative overflow-hidden transition-all group">
+<div class="absolute inset-0 bg-primary-container opacity-10"></div>
+<span class="material-symbols-outlined filled text-primary mb-1">storefront</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold">หน้าตึก 3</span>
+<div class="absolute top-2 right-2 text-primary">
+<span class="material-symbols-outlined filled text-sm">check_circle</span>
+</div>
+</button>
+<!-- Unselected Locations -->
+<button class="flex flex-col items-center justify-center p-4 bg-surface rounded-xl border border-outline-variant hover:border-outline shadow-[0_1px_2px_rgba(16,23,32,0.04)] transition-all">
+<span class="material-symbols-outlined text-outline mb-1">restaurant</span>
+<span class="font-body-md text-body-md text-on-surface-variant">โรงอาหาร</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 bg-surface rounded-xl border border-outline-variant hover:border-outline shadow-[0_1px_2px_rgba(16,23,32,0.04)] transition-all">
+<span class="material-symbols-outlined text-outline mb-1">apartment</span>
+<span class="font-body-md text-body-md text-on-surface-variant">หอพัก A</span>
+</button>
+</div>
+</section>
+<!-- Pickup Time -->
+<section class="flex flex-col gap-md">
+<h2 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">schedule</span>
+                เวลารับ
+            </h2>
+<div class="flex flex-wrap gap-sm">
+<!-- Selected Time -->
+<button class="px-4 py-2 bg-primary-container text-on-primary-container font-mono-code text-mono-code rounded-full border-[1.5px] border-on-surface font-semibold shadow-sm transition-transform active:scale-95">
+                    12:00–12:15
+                </button>
+<!-- Unselected Time -->
+<button class="px-4 py-2 bg-surface text-on-surface-variant font-mono-code text-mono-code rounded-full border border-outline-variant hover:border-outline hover:text-on-surface shadow-[0_1px_2px_rgba(16,23,32,0.04)] transition-all">
+                    12:15–12:30
+                </button>
+<!-- Disabled Time -->
+<button class="px-4 py-2 bg-surface-variant text-outline font-mono-code text-mono-code rounded-full border border-transparent opacity-60 cursor-not-allowed flex items-center gap-1" disabled="">
+                    12:30–12:45
+                    <span class="font-label-sm text-label-sm text-error ml-1">(เต็มแล้ว)</span>
+</button>
+</div>
+</section>
+<!-- Payment Method -->
+<section class="flex flex-col gap-md">
+<h2 class="font-title-sm text-title-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">payments</span>
+                วิธีชำระเงิน
+            </h2>
+<div class="flex flex-col gap-sm">
+<!-- Selected Payment (Cash) -->
+<label class="flex items-center p-4 bg-surface rounded-xl border-[1.5px] border-primary shadow-sm cursor-pointer relative overflow-hidden group">
+<div class="absolute inset-0 bg-primary-container opacity-5"></div>
+<div class="w-6 h-6 rounded-full border-[1.5px] border-primary flex items-center justify-center mr-4">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface font-semibold">เงินสด</span>
+<span class="font-body-md text-body-md text-on-surface-variant">จ่ายตอนรับของ</span>
+</div>
+<span class="material-symbols-outlined filled text-primary ml-auto text-3xl opacity-20 group-hover:opacity-100 transition-opacity">monetization_on</span>
+</label>
+<!-- Unselected Payment (Transfer) -->
+<label class="flex items-center p-4 bg-surface rounded-xl border border-outline-variant hover:border-outline shadow-[0_1px_2px_rgba(16,23,32,0.04)] cursor-pointer transition-all">
+<div class="w-6 h-6 rounded-full border border-outline mr-4 flex items-center justify-center"></div>
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface">โอน</span>
+<span class="font-body-md text-body-md text-on-surface-variant">อัปสลิปหลังสั่ง</span>
+</div>
+<span class="material-symbols-outlined text-outline ml-auto text-3xl opacity-40">qr_code_scanner</span>
+</label>
+</div>
+</section>
+<!-- Order Summary (Minimal) -->
+<section class="flex flex-col gap-sm bg-surface p-6 rounded-2xl shadow-[0_1px_2px_rgba(16,23,32,0.04)] border border-surface-dim">
+<h2 class="font-title-sm text-title-sm text-on-surface mb-2">สรุปคำสั่งซื้อ</h2>
+<div class="flex justify-between items-center py-2 border-b border-surface-dim">
+<span class="font-body-md text-body-md text-on-surface-variant">สุกี้โรลรวมหมู x 2</span>
+<span class="font-mono-price text-mono-price text-on-surface">118 ฿</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-surface-dim">
+<span class="font-body-md text-body-md text-on-surface-variant">น้ำจิ้มสุกี้ (เพิ่ม) x 1</span>
+<span class="font-mono-price text-mono-price text-on-surface">10 ฿</span>
+</div>
+<div class="flex justify-between items-center pt-4">
+<span class="font-title-sm text-title-sm text-on-surface">ยอดรวมทั้งหมด</span>
+<span class="font-display-lg text-display-lg text-primary">128 ฿</span>
+</div>
+</section>
+</main>
+<!-- Bottom Action Area (Sticky) -->
+<div class="fixed bottom-0 w-full bg-surface/90 backdrop-blur-md border-t border-outline-variant px-container-padding py-4 z-50 flex flex-col items-center">
+<button class="w-full max-w-sm py-4 bg-primary-container text-on-surface border-[1.5px] border-on-surface rounded-xl font-headline-md text-headline-md shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2">
+            ยืนยันสั่งซื้อ
+            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</body></html>

@@ -1,0 +1,86 @@
+# KhunMuan — System Plan
+
+Draft v0.1 · 2026-08-21
+
+Ordering web app for a custom suki-roll shop operating inside a university campus.
+Customers build sets from a free-choice filling quota, pay cash or bank transfer,
+and follow their order status live. Staff run the kitchen from a shared back-office
+board that prevents duplicated and dropped orders.
+
+## Documents
+
+| # | File | Contents |
+|---|------|----------|
+| 00 | [overview.md](./00-overview.md) | Goals, users, scope, non-goals, tech stack |
+| 01 | [data-model.md](./01-data-model.md) | Tables, relationships, constraints, seed data |
+| 02 | [order-lifecycle.md](./02-order-lifecycle.md) | State machine, claiming, stock, cancellation |
+| 03 | [order-code.md](./03-order-code.md) | 4-character code generation and its security model |
+| 04 | [frontend.md](./04-frontend.md) | Routes, screens, component tree, design tokens |
+| 05 | [backend-security.md](./05-backend-security.md) | Auth, RLS, realtime, storage, edge functions |
+| 06 | [roadmap-open-questions.md](./06-roadmap-open-questions.md) | Build phases and what is still undecided |
+| 07 | [build-plan.md](./07-build-plan.md) | The working checklist: files, order, exit tests |
+
+## Status of this draft
+
+Requirements were gathered in a structured interview. Everything marked
+**DECIDED** below came from that interview. Everything in document 06 is still
+open and must be answered before the corresponding phase starts.
+
+### Decided so far
+
+- Real shop, real usage. No hard deadline.
+- Single product line: suki rolls, sold as sets.
+- A set is a **piece quota**: buy a 10-piece set, choose the filling of each of
+  the 10 pieces independently. All fillings cost the same; the price lives on
+  the set.
+- Add-ons beyond fillings: dipping sauces (type + quantity), eating utensils /
+  packaging, and a free-text note. Whether each add-on costs extra is
+  configured per add-on in the back office.
+- Cart: one order may contain several sets, paid together.
+- Two fulfillment modes: **pickup** at a shop-defined meeting point with a
+  shop-defined time slot, or **delivery** where the customer names their own
+  location and pays a fee. The fee comes from a `delivery_zones` table seeded
+  with one row; the checkout hides the zone selector while only one zone is
+  active, so per-zone pricing later costs a back-office row, not a migration.
+- Identity: pickup customers enter nothing. Delivery customers enter name,
+  room/class and phone. No customer login at all.
+- Order identity: a single 4-character code, globally unique forever, alphabet
+  `A–Z 2–9` minus `I L O 0 1`, and **every code mixes letters and digits** —
+  which makes all-letter profanity, repeated characters and all-digit unlucky
+  numbers structurally impossible. 639,584 usable codes. Alphabet, length and
+  blocklist are superadmin-configurable. The code is both the label and the
+  tracking key; there is no token in the link.
+- Code lookup is rate limited hard: 5 per minute per IP, three misses triggers a
+  15-minute block, signed-in staff exempt, superadmin can see and unblock.
+  Code-only lookups never reveal a customer's name, room or phone.
+- Payment: cash on handover, or bank/PromptPay transfer where the customer
+  uploads a slip and an admin confirms it manually.
+- Status flow: `pending_confirmation → accepted → cooking → ready → handed_over`.
+- Customers may cancel only before the shop accepts.
+- Handover may require the customer's code to be read back before staff can mark
+  `handed_over` — `shop_settings.require_code_on_handover`, default on, enforced
+  inside `advance_order`.
+- The shop is **คุณม้วน** in the interface, **khunmuan** in Latin.
+- Customer tracking page updates live (Supabase Realtime). No push, no SMS.
+- Back office: Google OAuth, allow-listed emails only. Two roles: `superadmin`
+  (one hard-locked email, editable only in the DB) and `admin`.
+- Six staff work concurrently on a mix of phones and desktops.
+- Duplicate/dropped-order prevention: explicit **claim** ("รับงาน") that shows
+  who owns each order.
+- New-order alerting: in-browser sound, card highlight, and a LINE OA push to
+  the staff group.
+- Stock: per-filling daily remaining quantity, decremented the moment an order
+  is placed successfully.
+- Shop open/closed is a manual switch in the back office.
+- Every filling has a real photo, uploadable from the back office.
+- UI language: Thai first, i18n scaffolding in place for a future English pass.
+  Typeface: IBM Plex Sans Thai, with IBM Plex Mono for codes and figures.
+- Deployment: Supabase Cloud + Vercel (local Supabase for development).
+- Visual identity **locked**: soft gold `#F5D68A` as a fill only, `#B45309` as
+  the gold used for text, near-black `#101720` ink, slate-biased neutrals, all
+  status colours cool. Primary button is gold with a 1.5px dark outline — the
+  same construction the logo uses on its letterforms, and the only way a soft
+  yellow control meets the 3:1 non-text contrast rule. 16px card corners, 12px
+  buttons, near-hairline shadows, square 1:1 filling photos, logo used whole
+  everywhere including the favicon. Light and dark both ship; first load follows
+  the device, with a manual toggle on both surfaces.

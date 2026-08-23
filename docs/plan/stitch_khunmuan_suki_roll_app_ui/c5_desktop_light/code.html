@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Details - Khun Muan Culinary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&amp;family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "border-width-primary": "1.5px",
+                        "on-secondary-fixed": "#151c25",
+                        "surface-container": "#e4efff",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "surface-container-highest": "#d7e4f5",
+                        "tertiary-fixed": "#e1e2e4",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#f5d68a",
+                        "inverse-surface": "#26313f",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#dce3f0",
+                        "background": "#f8f9ff",
+                        "outline-variant": "#cfc5b4",
+                        "surface-container-low": "#eef4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#d8d9db",
+                        "secondary": "#585f6a",
+                        "surface-variant": "#d7e4f5",
+                        "primary-fixed-dim": "#e1c379",
+                        "on-secondary-container": "#5e6570",
+                        "on-background": "#101c29",
+                        "surface-container-high": "#dde9fb",
+                        "primary-fixed": "#ffdf92",
+                        "secondary-fixed-dim": "#c0c7d3",
+                        "secondary-container": "#dce3f0",
+                        "on-surface-variant": "#4c4639",
+                        "surface-tint": "#725c1c",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#e9f1ff",
+                        "surface-dim": "#cfdbed",
+                        "on-secondary-fixed-variant": "#404752",
+                        "on-tertiary-fixed": "#191c1e",
+                        "outline": "#7e7667",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#725c1c",
+                        "on-primary-fixed-variant": "#584404",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-container": "#5c5f61",
+                        "tertiary": "#5c5f60",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-primary-fixed": "#241a00",
+                        "on-surface": "#101c29",
+                        "inverse-primary": "#e1c379",
+                        "primary": "#725c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "container-padding": "20px",
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "xs": "4px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "mono-code": ["IBM Plex Mono"],
+                        "mono-price": ["IBM Plex Mono"],
+                        "body-md": ["IBM Plex Sans Thai"],
+                        "headline-md": ["IBM Plex Sans Thai"],
+                        "label-sm": ["IBM Plex Sans Thai"],
+                        "body-lg": ["IBM Plex Sans Thai"],
+                        "title-sm": ["IBM Plex Sans Thai"],
+                        "display-lg": ["IBM Plex Sans Thai"]
+                    },
+                    "fontSize": {
+                        "mono-code": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "mono-price": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col md:flex-row">
+<!-- Desktop Side Nav -->
+<nav class="bg-surface-container-low dark:bg-inverse-surface text-primary dark:text-inverse-primary font-label-sm text-label-sm h-screen w-64 hidden lg:flex flex-col sticky left-0 top-0 border-r border-outline-variant dark:border-outline flex flex-col p-md gap-sm">
+<div class="mb-lg px-sm">
+<h1 class="font-title-sm text-title-sm text-on-surface">Back Office</h1>
+<p class="text-on-surface-variant mt-xs">Kitchen Management</p>
+</div>
+<div class="flex-1 flex flex-col gap-sm">
+<a class="bg-primary-container text-on-primary-container rounded-lg font-bold flex items-center p-sm gap-sm" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Order Board
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center p-sm gap-sm transition-all hover:bg-surface-container-highest active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+                Menu Management
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center p-sm gap-sm transition-all hover:bg-surface-container-highest active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">badge</span>
+                Staff Management
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center p-sm gap-sm transition-all hover:bg-surface-container-highest active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                Reports
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center p-sm gap-sm transition-all hover:bg-surface-container-highest active:translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                Inventory
+            </a>
+</div>
+<div class="mt-auto flex flex-col gap-sm pt-md border-t border-outline-variant">
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center p-sm gap-sm transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+                Help
+            </a>
+<a class="text-on-surface-variant hover:bg-surface-container-high rounded-lg flex items-center p-sm gap-sm transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Logout
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col w-full min-h-screen">
+<!-- Top App Bar (Mobile & Desktop) -->
+<header class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary font-body-md text-body-md fixed top-0 w-full z-50 border-b border-outline-variant dark:border-outline shadow-sm flex justify-between items-center px-container-padding h-16 w-full lg:hidden">
+<div class="font-headline-md text-headline-md text-primary dark:text-inverse-primary">Khun Muan Culinary</div>
+<div class="flex gap-md items-center">
+<button class="hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 duration-150 p-sm rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors active:scale-95 duration-150 p-sm rounded-full">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="Staff Avatar" class="w-8 h-8 rounded-full bg-surface-container" data-alt="A small, circular avatar portrait of a modern restaurant staff member in a clean, brightly lit setting. Light, clean aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiMK79GohAb1nGT6urA5JBoLhQifQ9HVDd9ziCy20RpGfnBHfHMm3lamKJjceoN30l9G0XilmKQAm_8i5pXgrrAXo5a__8Q9o_FAdKS8ZTsGRGhFJhojWzZljn38kGMgj-GU1E34fwbBVgv6gPT-EkEQQ8fk8wA01TSro-buymsuCHjM-OCZqUuf5mMWK1lUnCnuzIKmIF0chWzqmpeKERo4WR2iuZ1XahvLRlVeqvPy47LxX62qPxqw"/>
+</div>
+</header>
+<!-- Main Content (Desktop top bar) -->
+<header class="bg-surface border-b border-outline-variant hidden lg:flex h-16 items-center justify-between px-lg sticky top-0 z-40">
+<div class="font-title-sm text-title-sm">Order Details #A-1042</div>
+<div class="flex gap-md items-center">
+<button class="p-sm rounded-full hover:bg-surface-container-high transition-colors text-secondary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-sm rounded-full hover:bg-surface-container-high transition-colors text-secondary">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="Staff Avatar" class="w-8 h-8 rounded-full bg-surface-container border border-outline-variant" data-alt="A small, circular avatar portrait of a modern restaurant staff member in a clean, brightly lit setting. Light, clean aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPeQqCmmQ2KuxEjAex4sxnaNetlghMAKjHXZOJ9qYqcH6PVfkxfuJalEBKcQI7vNj0pPytV4PgeCe03dQCvYeBSBbAnIjbQbRHIZgdfTmo8rSVsb9LorqHiJH6kr8FxeIVATVRDQlvSK6bhZpJShpDKRGQrPjkkw_dnegTqWmK9sHQJh5dsO3zH7tJoo4ljzWbuJEUv_wEXyYZWyWqVDf-X_ezLmC__a6tBhfDeoY0KVdtR-JxAOJAcQ"/>
+</div>
+</header>
+<main class="flex-1 p-container-padding lg:p-xl pt-20 lg:pt-xl overflow-y-auto max-w-7xl mx-auto w-full">
+<div class="flex items-center gap-sm mb-lg">
+<a class="text-secondary hover:text-on-background transition-colors flex items-center" href="#">
+<span class="material-symbols-outlined">arrow_back</span>
+</a>
+<h2 class="font-headline-md text-headline-md">ออเดอร์ #A-1042</h2>
+<span class="bg-slate-500/10 text-slate-700 px-3 py-1 rounded-full font-label-sm text-label-sm border border-slate-500/20">รอยืนยัน</span>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-lg">
+<!-- Left Column: Order Items -->
+<div class="xl:col-span-2 flex flex-col gap-lg">
+<!-- Customer Info Card -->
+<div class="bg-surface rounded-xl p-lg border border-outline-variant/50 shadow-[0_1px_2px_rgba(16,23,32,0.04)]">
+<h3 class="font-title-sm text-title-sm mb-md text-on-surface border-b border-outline-variant pb-sm">ข้อมูลลูกค้า</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div>
+<p class="text-secondary font-label-sm text-label-sm">ชื่อลูกค้า</p>
+<p class="font-body-lg text-body-lg text-on-surface">คุณสมรักษ์</p>
+</div>
+<div>
+<p class="text-secondary font-label-sm text-label-sm">เบอร์ติดต่อ</p>
+<p class="font-body-lg text-body-lg text-on-surface">081-234-5678</p>
+</div>
+<div class="md:col-span-2">
+<p class="text-secondary font-label-sm text-label-sm">หมายเหตุเพิ่มเติม</p>
+<p class="font-body-lg text-body-lg text-on-surface bg-surface-bright p-sm rounded-lg mt-xs">ขอช้อนส้อมเพิ่ม 2 คู่ครับ และแยกน้ำจิ้ม</p>
+</div>
+</div>
+</div>
+<!-- Items Card -->
+<div class="bg-surface rounded-xl p-lg border border-outline-variant/50 shadow-[0_1px_2px_rgba(16,23,32,0.04)]">
+<div class="flex justify-between items-center mb-md border-b border-outline-variant pb-sm">
+<h3 class="font-title-sm text-title-sm text-on-surface">รายการอาหาร</h3>
+<span class="text-secondary font-body-md text-body-md">รวม 3 ชิ้น</span>
+</div>
+<div class="flex flex-col gap-md">
+<!-- Item 1 -->
+<div class="flex items-start gap-md pb-md border-b border-outline-variant border-dashed last:border-0 last:pb-0">
+<div class="w-16 h-16 rounded-lg bg-surface-container flex items-center justify-center text-primary overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A close up shot of a minimalist Thai suki roll set on a pristine white ceramic plate. Clean, airy, soft natural lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHZ2kXvsiRTWQfm-D-VvUAn6E1CeL0MT7MC85hHjRN1Uf5vOSoUPyQcbLi8_IxFBF9b4S6uxcc6MrQFYLaShQTAKeFmdvzvof5qxONW8soANmzh30E9SQEBrxkQUapeagI_8y3eAFqI97s2Sk85t9LQ_IGtMTfu51EoHAOYAK64IjUgE7AgLBgBvzhb0oZy4UmYasTb2mCosYYvKsR6Dx7hNjQ4FF6dYuwfYS5Ol43DSgzlBrofm_dwQ"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h4 class="font-body-lg text-body-lg font-medium text-on-surface">ชุดสุกี้โรลหมูคุโรบูตะ</h4>
+<span class="font-mono-price text-mono-price text-on-surface">฿159</span>
+</div>
+<p class="text-secondary text-sm mt-xs">ไส้: หมูสับ, เห็ดเข็มทอง, แครอท</p>
+<p class="text-secondary text-sm">น้ำจิ้ม: พอนสึ</p>
+</div>
+<div class="shrink-0 text-center px-sm py-xs bg-surface-bright rounded border border-outline-variant">
+<span class="block text-secondary font-label-sm text-label-sm">จำนวน</span>
+<span class="font-body-lg text-body-lg font-medium">1</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-start gap-md pb-md border-b border-outline-variant border-dashed last:border-0 last:pb-0">
+<div class="w-16 h-16 rounded-lg bg-surface-container flex items-center justify-center text-primary overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A close up shot of a delicate seafood suki roll on a simple white plate. Minimalist, modern presentation, soft daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1g7tYtM9B78MrtY-kySLUtJhctTTdJGFnX5BoJ-5n4Nc1wk7qLk5nukXlqR4ergmz_rIOUrJi_xBweWg_cXKP67oEvFTIAJydYlx8QM3KUssxALPlnGPUo67J2pYeAh8DbI4Hss9J9tmlwjr_WWxSCggNaiIUUCoYbS_VRKHaMrKzC3_k7VGuqM83N8OG8I-eMdMJpntkIfxg5zsPBh5UbcZ4b794WU5jOgRhTMqitCKbDPUDs2BemA"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h4 class="font-body-lg text-body-lg font-medium text-on-surface">ชุดสุกี้โรลทะเลรวม</h4>
+<span class="font-mono-price text-mono-price text-on-surface">฿398</span>
+</div>
+<p class="text-secondary text-sm mt-xs">ไส้: กุ้ง, ปลาหมึก, ผักกาดขาว</p>
+<p class="text-secondary text-sm">น้ำจิ้ม: ซีฟู้ด</p>
+</div>
+<div class="shrink-0 text-center px-sm py-xs bg-surface-bright rounded border border-outline-variant">
+<span class="block text-secondary font-label-sm text-label-sm">จำนวน</span>
+<span class="font-body-lg text-body-lg font-medium">2</span>
+</div>
+</div>
+</div>
+<!-- Totals -->
+<div class="mt-lg pt-md border-t border-outline-variant">
+<div class="flex justify-between py-xs text-secondary">
+<span>ยอดรวมค่าอาหาร</span>
+<span class="font-mono-code text-mono-code">฿557</span>
+</div>
+<div class="flex justify-between py-xs text-secondary">
+<span>ค่าจัดส่ง</span>
+<span class="font-mono-code text-mono-code">฿0</span>
+</div>
+<div class="flex justify-between py-sm mt-sm border-t border-outline-variant border-dashed font-title-sm text-title-sm text-on-surface">
+<span>ยอดสุทธิ</span>
+<span class="font-mono-price text-mono-price text-primary">฿557</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Actions & Timeline -->
+<div class="flex flex-col gap-lg">
+<!-- Payment & Actions -->
+<div class="bg-surface rounded-xl p-lg border border-outline-variant/50 shadow-[0_1px_2px_rgba(16,23,32,0.04)]">
+<h3 class="font-title-sm text-title-sm mb-md text-on-surface border-b border-outline-variant pb-sm">การชำระเงิน</h3>
+<div class="mb-md">
+<p class="text-secondary font-label-sm text-label-sm mb-sm">หลักฐานการโอน (สลิป)</p>
+<div class="aspect-[3/4] bg-surface-bright rounded-lg border border-outline-variant overflow-hidden cursor-pointer hover:border-primary transition-colors relative group">
+<img class="w-full h-full object-cover" data-alt="A clean, minimalist digital rendering of a mobile banking transfer slip. Soft white background, neat layout, blurred sensitive data." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEUWKWuYh4ERFlKEeDGK1QkeRltSJ5vkTU2V5SmOYpsyn-xuXktQt3UNWKoSD3oyaoZqStUopV7Z1MgIrIiJx98FHgu44OT3UVxrV2KL8O7opN8RoDsoxC9OUoN0xItLIfX_MVoHHHNFs_T9wWDO-iUjnTKyLa0nyKrdapOQzKzeQ7qQ6kaDnyt5f3Do4CSw--YwLqrgjgTwpea9nVf30ISu-0EztI8M3b7TzRsLldY44k8nTdKBL_Vw"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-white text-3xl">zoom_in</span>
+</div>
+</div>
+<p class="text-center font-label-sm text-label-sm text-secondary mt-xs">ธนาคารกสิกรไทย • 10 ม.ค. 67, 12:00</p>
+</div>
+<div class="flex flex-col gap-sm">
+<button class="w-full bg-primary-container text-[#101720] border-[1.5px] border-[#101720] py-sm px-md rounded-xl font-body-lg text-body-lg font-medium hover:bg-primary-fixed-dim transition-colors flex justify-center items-center gap-sm">
+<span class="material-symbols-outlined">check_circle</span>
+                                ยืนยันการชำระเงิน
+                            </button>
+<button class="w-full bg-transparent text-[#101720]/70 py-sm px-md rounded-xl font-body-lg text-body-lg hover:bg-surface-container-high transition-colors flex justify-center items-center gap-sm">
+                                ยกเลิกออเดอร์
+                            </button>
+</div>
+</div>
+<!-- Timeline -->
+<div class="bg-surface rounded-xl p-lg border border-outline-variant/50 shadow-[0_1px_2px_rgba(16,23,32,0.04)]">
+<h3 class="font-title-sm text-title-sm mb-md text-on-surface border-b border-outline-variant pb-sm">ประวัติสถานะ</h3>
+<div class="relative pl-6 space-y-md before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-outline-variant">
+<!-- Entry 1 -->
+<div class="relative">
+<div class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-surface border-2 border-primary z-10"></div>
+<p class="font-label-sm text-label-sm text-secondary mb-xs">12:00 น.</p>
+<p class="font-body-md text-body-md text-on-surface">ลูกค้าสร้างออเดอร์ และแนบสลิป</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

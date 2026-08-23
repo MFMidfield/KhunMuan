@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Board - Khun Muan Culinary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "border-width-primary": "1.5px",
+                        "on-secondary-fixed": "#151c25",
+                        "surface-container": "#e4efff",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "surface-container-highest": "#d7e4f5",
+                        "tertiary-fixed": "#e1e2e4",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#f5d68a",
+                        "inverse-surface": "#26313f",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#dce3f0",
+                        "background": "#0E1319",
+                        "outline-variant": "#cfc5b4",
+                        "surface-container-low": "#eef4ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#d8d9db",
+                        "secondary": "#585f6a",
+                        "surface-variant": "#d7e4f5",
+                        "primary-fixed-dim": "#e1c379",
+                        "on-secondary-container": "#5e6570",
+                        "on-background": "#E6EAF0",
+                        "surface-container-high": "#dde9fb",
+                        "primary-fixed": "#ffdf92",
+                        "secondary-fixed-dim": "#c0c7d3",
+                        "secondary-container": "#dce3f0",
+                        "on-surface-variant": "#4c4639",
+                        "surface-tint": "#725c1c",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#e9f1ff",
+                        "surface-dim": "#cfdbed",
+                        "on-secondary-fixed-variant": "#404752",
+                        "on-tertiary-fixed": "#191c1e",
+                        "outline": "#7e7667",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#725c1c",
+                        "on-primary-fixed-variant": "#584404",
+                        "surface": "#161D26",
+                        "on-tertiary-container": "#5c5f61",
+                        "tertiary": "#5c5f60",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-primary-fixed": "#241a00",
+                        "on-surface": "#E6EAF0",
+                        "inverse-primary": "#e1c379",
+                        "primary": "#725c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "12": "12px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "container-padding": "20px",
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "xs": "4px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "mono-code": ["IBM Plex Mono"],
+                        "mono-price": ["IBM Plex Mono"],
+                        "body-md": ["IBM Plex Sans Thai"],
+                        "headline-md": ["IBM Plex Sans Thai"],
+                        "label-sm": ["IBM Plex Sans Thai"],
+                        "body-lg": ["IBM Plex Sans Thai"],
+                        "title-sm": ["IBM Plex Sans Thai"],
+                        "display-lg": ["IBM Plex Sans Thai"]
+                    },
+                    "fontSize": {
+                        "mono-code": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "mono-price": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #0E1319; color: #E6EAF0; }
+        .surface-card { background-color: #161D26; border: 1.5px solid #2A3644; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+        .chip-pending { background-color: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); }
+        .chip-accepted { background-color: rgba(6, 182, 212, 0.2); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.4); }
+        .chip-cooking { background-color: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .chip-ready { background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .btn-primary { background-color: #F5D68A; color: #101720; border: 1.5px solid #101720; }
+        .kanban-col { background-color: #111820; border: 1px solid #2A3644; }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<nav class="h-screen w-64 hidden lg:flex flex-col sticky left-0 top-0 bg-surface dark:bg-inverse-surface border-r border-outline-variant dark:border-outline p-md gap-sm z-40">
+<div class="flex items-center gap-sm mb-lg">
+<img class="w-12 h-12 rounded-full border border-outline-variant" data-alt="A minimalist logo for Khun Muan Culinary featuring a friendly, modern Thai character illustration in clean vector lines, dark mode optimized with light gold accents on a deep dark slate background, conveying quality and care." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2bp46KGPkv_nugavRRSf5tSdcipCvBUiehj4l1uR1hKt0USltPzITY35K4Fs34-ovunK0Il1hg5uH29Waf4uOph67iz1hp8QbYyN4IJQd7zV0cojEfVK7H0Z1sAYOr6bMxpNBB4vcUQ_HK8JasdLlvydtxO3kEy3nN9mGrdyonylon9lwBKzYkbOi0KMJ9-62x-mDc89484IzxMAOOnJI9m_qpX-nIOiWXCe1pvfTFLaniGpoZCYlpQ"/>
+<div>
+<h1 class="font-title-sm text-title-sm text-primary dark:text-inverse-primary">Back Office</h1>
+<p class="font-label-sm text-label-sm text-on-surface">Kitchen Management</p>
+</div>
+</div>
+<button class="btn-primary rounded-12 py-2 px-4 mb-md font-body-md shadow-sm transition-transform active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">storefront</span>
+            Shop Open
+        </button>
+<div class="flex-1 flex flex-col gap-xs">
+<a class="flex items-center gap-sm px-4 py-3 bg-primary-container text-on-primary-container rounded-lg font-bold" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Order Board
+            </a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+                Menu Management
+            </a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">badge</span>
+                Staff Management
+            </a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                Reports
+            </a>
+<a class="flex items-center gap-sm px-4 py-3 text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                Inventory
+            </a>
+</div>
+<div class="mt-auto flex flex-col gap-xs border-t border-outline-variant pt-md">
+<a class="flex items-center gap-sm px-4 py-2 text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">help</span>
+                Help
+            </a>
+<a class="flex items-center gap-sm px-4 py-2 text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Logout
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-container-padding h-16 w-full bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline shadow-sm z-30 shrink-0">
+<div class="font-headline-md text-headline-md text-primary dark:text-inverse-primary tracking-tight">
+                Khun Muan Culinary
+            </div>
+<div class="flex items-center gap-md">
+<div class="hidden md:flex items-center bg-background rounded-full px-4 py-2 border border-outline-variant focus-within:border-primary-fixed-dim transition-colors w-64">
+<input class="bg-transparent border-none outline-none text-body-md w-full text-on-surface placeholder-on-secondary-container" placeholder="Search orders..." type="text"/>
+<span class="material-symbols-outlined text-secondary ml-2">search</span>
+</div>
+<button class="p-2 text-secondary hover:bg-surface-container-highest rounded-full transition-colors active:scale-95 duration-150 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 text-secondary hover:bg-surface-container-highest rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img class="w-8 h-8 rounded-full border border-outline-variant object-cover ml-2" data-alt="A minimalist avatar portrait of a modern restaurant staff member, clean vector illustration style with subtle lighting, optimized for dark mode UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDl2ro4xGMmqwhJaiJD_VI98un8zRg2lrYqa8MS8rSVZUIJOYACyCbhDck4i3ajkhuAqSGcN9sQSnZQo-A2qvFKkYRf73ox925BYKQzqwvWjVHSrVtggzyqQYULjjAUP24U6Ml8Hshw1-9b6u4p6F3Fv-_eVqmAFKEAa6f-O4OcY3V_r9we2w70mbrF2Eic8EBKw2PsE6IFo0vURUQw_K9pW4Jq1H_uxzjCNHaG9yQpLPuDajVrhh1iFQ"/>
+</div>
+</header>
+<!-- Kanban Board Area -->
+<main class="flex-1 overflow-x-auto overflow-y-hidden p-container-padding">
+<div class="flex gap-lg h-full min-w-max pb-4">
+<!-- Column: Pending -->
+<div class="w-80 flex flex-col h-full kanban-col rounded-xl p-md">
+<div class="flex justify-between items-center mb-md shrink-0">
+<h2 class="font-title-sm text-title-sm flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-slate-400"></span>
+                            รอยืนยัน (Pending)
+                        </h2>
+<span class="font-mono-code text-mono-code bg-surface-variant text-on-surface px-2 py-1 rounded-md">2</span>
+</div>
+<div class="flex-1 overflow-y-auto pr-2 flex flex-col gap-sm custom-scrollbar">
+<!-- Order Card -->
+<div class="surface-card rounded-12 p-md flex flex-col gap-sm transition-all hover:-translate-y-1 hover:shadow-md cursor-grab active:cursor-grabbing">
+<div class="flex justify-between items-start">
+<span class="font-mono-price text-mono-price">#A042</span>
+<span class="font-label-sm text-label-sm text-on-secondary-container">2m ago</span>
+</div>
+<div class="text-body-md">
+<p class="font-semibold mb-1">Table 12</p>
+<p class="text-on-secondary-container text-sm">3x Suki Roll Original, 1x Thai Tea</p>
+</div>
+<div class="flex justify-between items-center mt-2 pt-2 border-t border-outline-variant/30">
+<span class="chip-pending px-3 py-1 rounded-full font-label-sm text-label-sm inline-block">รอยืนยัน</span>
+<button class="btn-primary rounded-lg px-4 py-1.5 font-label-sm active:scale-95 transition-transform">Accept</button>
+</div>
+</div>
+<!-- Order Card -->
+<div class="surface-card rounded-12 p-md flex flex-col gap-sm transition-all hover:-translate-y-1 hover:shadow-md cursor-grab active:cursor-grabbing">
+<div class="flex justify-between items-start">
+<span class="font-mono-price text-mono-price">#A043</span>
+<span class="font-label-sm text-label-sm text-on-secondary-container">Just now</span>
+</div>
+<div class="text-body-md">
+<p class="font-semibold mb-1">Takeaway</p>
+<p class="text-on-secondary-container text-sm">5x Suki Roll Spicy, 2x Jasmine Rice</p>
+</div>
+<div class="flex justify-between items-center mt-2 pt-2 border-t border-outline-variant/30">
+<span class="chip-pending px-3 py-1 rounded-full font-label-sm text-label-sm inline-block">รอยืนยัน</span>
+<button class="btn-primary rounded-lg px-4 py-1.5 font-label-sm active:scale-95 transition-transform">Accept</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Cooking -->
+<div class="w-80 flex flex-col h-full kanban-col rounded-xl p-md">
+<div class="flex justify-between items-center mb-md shrink-0">
+<h2 class="font-title-sm text-title-sm flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-blue-400"></span>
+                            กำลังทำ (Cooking)
+                        </h2>
+<span class="font-mono-code text-mono-code bg-surface-variant text-on-surface px-2 py-1 rounded-md">1</span>
+</div>
+<div class="flex-1 overflow-y-auto pr-2 flex flex-col gap-sm custom-scrollbar">
+<!-- Order Card -->
+<div class="surface-card rounded-12 p-md flex flex-col gap-sm transition-all hover:-translate-y-1 hover:shadow-md cursor-grab active:cursor-grabbing border-l-2 border-l-blue-400">
+<div class="flex justify-between items-start">
+<span class="font-mono-price text-mono-price">#A039</span>
+<span class="font-label-sm text-label-sm text-on-secondary-container">12m ago</span>
+</div>
+<div class="text-body-md">
+<p class="font-semibold mb-1">Table 04</p>
+<p class="text-on-secondary-container text-sm">2x Suki Roll Mixed, 1x Tom Yum Soup</p>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-1.5 mt-2 overflow-hidden">
+<div class="bg-blue-400 h-1.5 rounded-full" style="width: 60%"></div>
+</div>
+<div class="flex justify-between items-center mt-2 pt-2 border-t border-outline-variant/30">
+<span class="chip-cooking px-3 py-1 rounded-full font-label-sm text-label-sm inline-block">กำลังทำ</span>
+<button class="bg-surface-container-high text-on-surface rounded-lg px-4 py-1.5 font-label-sm hover:bg-surface-container-highest transition-colors">Ready</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Column: Ready -->
+<div class="w-80 flex flex-col h-full kanban-col rounded-xl p-md">
+<div class="flex justify-between items-center mb-md shrink-0">
+<h2 class="font-title-sm text-title-sm flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                            รอรับ (Ready)
+                        </h2>
+<span class="font-mono-code text-mono-code bg-surface-variant text-on-surface px-2 py-1 rounded-md">0</span>
+</div>
+<div class="flex-1 overflow-y-auto pr-2 flex flex-col gap-sm custom-scrollbar items-center justify-center opacity-50">
+<span class="material-symbols-outlined text-4xl mb-2 text-on-secondary-container">check_circle</span>
+<p class="font-body-md text-on-secondary-container">No orders ready for pickup</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+<style>
+        /* Custom Scrollbar for Kanban columns */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2A3644;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #404752;
+        }
+    </style>
+</body></html>

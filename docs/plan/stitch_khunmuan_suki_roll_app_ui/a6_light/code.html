@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="th"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Confirmed - KhunMuan</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#e9f1ff",
+                        "surface-container-high": "#dde9fb",
+                        "outline": "#7e7667",
+                        "on-secondary-fixed-variant": "#404752",
+                        "primary-container": "#f5d68a",
+                        "secondary-container": "#dce3f0",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#725c1c",
+                        "secondary-fixed-dim": "#c0c7d3",
+                        "primary": "#725c1c",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#dce3f0",
+                        "on-tertiary-container": "#5c5f61",
+                        "on-primary-fixed-variant": "#584404",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#e4efff",
+                        "tertiary": "#5c5f60",
+                        "surface-container-low": "#eef4ff",
+                        "primary-fixed-dim": "#e1c379",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "surface-container-highest": "#d7e4f5",
+                        "outline-variant": "#cfc5b4",
+                        "on-secondary-fixed": "#151c25",
+                        "surface-variant": "#d7e4f5",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed": "#241a00",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#cfdbed",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-surface": "#101c29",
+                        "tertiary-fixed": "#e1e2e4",
+                        "on-background": "#101c29",
+                        "secondary": "#585f6a",
+                        "surface-tint": "#725c1c",
+                        "on-surface-variant": "#4c4639",
+                        "on-secondary-container": "#5e6570",
+                        "inverse-primary": "#e1c379",
+                        "inverse-surface": "#26313f",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "primary-fixed": "#ffdf92",
+                        "border-width-primary": "1.5px",
+                        "tertiary-container": "#d8d9db"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "32px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "container-padding": "20px",
+                        "md": "16px",
+                        "base": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "title-sm": ["IBM Plex Sans Thai"],
+                        "label-sm": ["IBM Plex Sans Thai"],
+                        "body-lg": ["IBM Plex Sans Thai"],
+                        "body-md": ["IBM Plex Sans Thai"],
+                        "mono-code": ["IBM Plex Mono"],
+                        "display-lg": ["IBM Plex Sans Thai"],
+                        "mono-price": ["IBM Plex Mono"],
+                        "headline-md": ["IBM Plex Sans Thai"]
+                    },
+                    "fontSize": {
+                        "title-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "mono-code": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "mono-price": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col items-center justify-center p-container-padding">
+<!-- Top App Bar - Suppressed for transactional screen -->
+<main class="w-full max-w-[400px] flex flex-col gap-xl">
+<!-- Large Gold Card -->
+<div class="bg-primary-container border-[1.5px] border-on-background rounded-xl p-xl flex flex-col items-center text-center shadow-[0_4px_0px_#101c29] transform -translate-y-1">
+<span class="material-symbols-outlined text-[#101c29] text-5xl mb-md">check_circle</span>
+<p class="font-title-sm text-title-sm text-[#101c29] mb-md">สั่งสำเร็จแล้ว</p>
+<div class="font-mono-code text-[48px] leading-tight font-bold text-[#101c29] tracking-widest mb-md">
+                K7P2
+            </div>
+<p class="font-body-md text-body-md text-[#101c29] opacity-90 max-w-[200px] mx-auto">
+                จำรหัสนี้ไว้ ใช้เช็คสถานะออเดอร์
+            </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-md">
+<div class="grid grid-cols-2 gap-sm">
+<!-- Secondary Button 1 -->
+<button class="bg-secondary-container text-[#101c29] font-label-sm text-label-sm rounded-xl py-3 flex items-center justify-center gap-xs hover:bg-surface-dim transition-colors">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+                    คัดลอกรหัส
+                </button>
+<!-- Secondary Button 2 -->
+<button class="bg-secondary-container text-[#101c29] font-label-sm text-label-sm rounded-xl py-3 flex items-center justify-center gap-xs hover:bg-surface-dim transition-colors">
+<span class="material-symbols-outlined text-[16px]">download</span>
+                    บันทึกภาพ
+                </button>
+</div>
+<!-- Muted Context -->
+<p class="font-label-sm text-label-sm text-outline text-center px-lg">
+                บันทึกไว้ในเครื่องแล้ว เปิดเว็บนี้อีกครั้งก็เจอ
+            </p>
+</div>
+<!-- Primary Action -->
+<div class="mt-auto">
+<button class="w-full bg-primary-container text-[#101c29] border-[1.5px] border-[#101c29] font-title-sm text-title-sm rounded-xl py-4 flex items-center justify-center hover:bg-primary-fixed transition-colors">
+                ดูสถานะออเดอร์
+            </button>
+</div>
+</main>
+<!-- Bottom Nav Bar - Suppressed for transactional screen -->
+</body></html>
