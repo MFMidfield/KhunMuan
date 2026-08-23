@@ -338,15 +338,43 @@ snapshots, stock decremented, and a code that survives being read aloud.
 
 ## Phase 3 — Operations hardening
 
-**Blocked on Q16, Q17, Q18.**
+Q17 resolved (one static QR). Q18 became configuration. **Q16 is the only thing
+still outstanding, and it does not block the code.**
 
-- [ ] Rate limiting: 5 lookups/min/IP, 15-minute block after three misses,
-      signed-in staff exempt, superadmin can see and unblock
-- [ ] `track` Edge Function — code-only lookups never return name, room or phone
-- [ ] Slip upload via signed URLs; retention job
-- [ ] LINE OA outbox table + `line-notify` Edge Function
-- [ ] Daily rollover job seeding tomorrow's `filling_stock_daily`
-- [ ] **Exit:** paper backup retired
+- [x] Rate limiting: 5 lookups/min/IP, a 15-minute block after three misses
+      inside one minute, a global circuit breaker, signed-in staff exempt,
+      superadmin can see the blocked list and clear it
+- [x] `track` Edge Function — the only caller that sees an IP. `lookup_order` is
+      no longer reachable by anon at all, which is the half that makes the limit
+      real rather than decorative
+- [x] Slip upload via signed URLs scoped to one path per order; staff read
+      through a one-minute signed URL; retention configurable, defaulting to 90
+      days, pruned through the storage API rather than by deleting metadata rows
+- [x] LINE outbox + `line-notify`. The queue fills whether or not LINE is
+      configured; the drain answers `LINE_NOT_CONFIGURED` and leaves the message
+      pending rather than pretending. Q16 changes two environment variables
+- [x] Daily rollover at 04:00 Asia/Bangkok, idempotent, never overwriting a
+      number a human set, plus a manual trigger for the filling added at 09:00
+- [ ] **Exit:** paper backup retired — reachable once someone has actually run a
+      shift on it
+
+**Six defects found by running each piece, not by reading it:**
+
+1. `revoke ... from anon` on a function does nothing. EXECUTE is granted to
+   PUBLIC at creation and anon inherits it, so the rate limit sat in front of a
+   door that was still open
+2. The ledger counted zero misses forever: the miss was inserted inside an
+   exception handler that then re-raised, and the abort took the insert with it
+3. `ORDER_EXPIRED` told a stranger a code had once been real — the single fact
+   the endpoint exists to withhold. It collapses into `ORDER_NOT_FOUND` for anon
+4. `service_role` had no SELECT on `orders`. `auto_expose_new_tables` strips DML
+   from all three roles and service_role had been forgotten everywhere. The
+   missing grant returned zero rows and read as "no such order"
+5. anon still held TRUNCATE on every table — the residue Supabase leaves when it
+   strips DML
+6. Every LINE message carried an empty set summary. The trigger ran at
+   `after insert on orders`, before `place_order` had written the items, and the
+   comment above it confidently claimed otherwise
 
 ## Phase 4 — Reporting and polish
 

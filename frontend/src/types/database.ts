@@ -242,6 +242,50 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_outbox: {
+        Row: {
+          attempts: number
+          created_at: string
+          id: number
+          kind: string
+          last_error: string | null
+          order_id: string | null
+          payload: Json
+          sent_at: string | null
+          state: Database["public"]["Enums"]["outbox_state"]
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          id?: never
+          kind: string
+          last_error?: string | null
+          order_id?: string | null
+          payload: Json
+          sent_at?: string | null
+          state?: Database["public"]["Enums"]["outbox_state"]
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          id?: never
+          kind?: string
+          last_error?: string | null
+          order_id?: string | null
+          payload?: Json
+          sent_at?: string | null
+          state?: Database["public"]["Enums"]["outbox_state"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_outbox_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_code_blocklist: {
         Row: {
           created_at: string
@@ -900,8 +944,33 @@ export type Database = {
         Args: { p_client_token: string; p_code: string; p_ip_hash: string }
         Returns: Json
       }
+      outbox_settle: {
+        Args: { p_error?: string; p_id: number; p_ok: boolean }
+        Returns: undefined
+      }
+      outbox_take: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          created_at: string
+          id: number
+          kind: string
+          last_error: string | null
+          order_id: string | null
+          payload: Json
+          sent_at: string | null
+          state: Database["public"]["Enums"]["outbox_state"]
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notification_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       place_order: { Args: { p_payload: Json }; Returns: Json }
       release_order: { Args: { p_order_id: string }; Returns: Json }
+      run_daily_rollover: { Args: never; Returns: Json }
       set_payment: {
         Args: {
           p_note?: string
@@ -934,6 +1003,7 @@ export type Database = {
         | "handed_over"
         | "cancelled"
         | "rejected"
+      outbox_state: "pending" | "sent" | "failed"
       payment_method: "cash" | "transfer"
       payment_state: "unpaid" | "slip_uploaded" | "paid" | "refunded"
     }
@@ -1079,6 +1149,7 @@ export const Constants = {
         "cancelled",
         "rejected",
       ],
+      outbox_state: ["pending", "sent", "failed"],
       payment_method: ["cash", "transfer"],
       payment_state: ["unpaid", "slip_uploaded", "paid", "refunded"],
     },

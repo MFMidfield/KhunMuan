@@ -16,9 +16,10 @@
     "test:back-office": "supabase db reset >/dev/null && node tests/back_office.test.mjs",
     "test:tracking": "supabase db reset >/dev/null && node tests/tracking_broadcast.test.mjs",
     "test:config": "supabase db reset >/dev/null && node tests/config_crud.test.mjs",
-    "test": "npm run test:order-code && npm run test:orders && npm run test:back-office && npm run test:config && npm run test:tracking && npm run test:rate-limit && npm run test:slips",
+    "test": "npm run test:order-code && npm run test:orders && npm run test:back-office && npm run test:config && npm run test:tracking && npm run test:rate-limit && npm run test:slips && npm run test:ops",
     "test:rate-limit": "supabase db reset >/dev/null && node tests/rate_limit.test.mjs",
-    "test:slips": "supabase db reset >/dev/null && node tests/slips.test.mjs"
+    "test:slips": "supabase db reset >/dev/null && node tests/slips.test.mjs",
+    "test:ops": "supabase db reset >/dev/null && node tests/ops.test.mjs"
   },
   "devDependencies": {
     "supabase": "^2.60.4"

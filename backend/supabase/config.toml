@@ -397,6 +397,10 @@ deno_version = 2
 # is not anonymisation: there are only four billion of them, so a plain SHA-256
 # is reversible with a lookup table anyone can build in an afternoon.
 LOOKUP_IP_SALT = "env(LOOKUP_IP_SALT)"
+# Q16 is still open. Until both are set, line-notify answers
+# {"skipped":"LINE_NOT_CONFIGURED"} rather than pretending the shop was told.
+LINE_CHANNEL_ACCESS_TOKEN = "env(LINE_CHANNEL_ACCESS_TOKEN)"
+LINE_TARGET_ID = "env(LINE_TARGET_ID)"
 
 [analytics]
 enabled = true
