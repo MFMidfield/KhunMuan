@@ -230,19 +230,51 @@ migration and worth knowing about before reading the sketch again:
    one in `declare`. The pattern index was therefore NULL by the time the
    mixed-radix decomposition needed it. The loop is hand-rolled instead.
 
-### 1.2 Ordering
+### 1.2 Ordering — backend done, frontend next
 
-- [ ] `seed.sql` — real sets, fillings, addons, the one delivery zone (Q4–Q7)
-- [ ] `place_order` (`SECURITY DEFINER`): validate the cart, recompute every
-      price server-side, lock `filling_stock_daily` rows, decrement, enforce
-      `sum(fillings.qty) = piece_quota` per item, snapshot names and prices,
-      resolve the zone fee, allocate the code, write `order_events.created`,
-      honour an idempotency key
-- [ ] `cancel_order` — customer-side, permitted only while
-      `pending_confirmation`
+Migration `0011_place_order.sql`, tests `backend/tests/place_order.test.mjs`,
+run with `npm run test:orders`.
+
+- [x] `place_order` (`SECURITY DEFINER`): validates the cart, recomputes every
+      price server-side, locks `filling_stock_daily` in `filling_id` order,
+      decrements, enforces `sum(fillings.qty) = piece_quota` per item, snapshots
+      names and prices, resolves the zone fee, allocates the code, writes
+      `order_events.created`, and honours an idempotency key
+- [x] `cancel_order(code, client_token)` — only while `pending_confirmation`,
+      restores stock through `private.restore_stock`, and answers identically
+      whether the code or the token was wrong so a prober learns nothing
+- [x] `orders.client_request_id` (unique) and `orders.client_token`, returned
+      once by the RPC and never selectable
+- [x] `sets.daily_limit` and `pickup_slots.capacity` actually enforced — both
+      columns existed and neither did anything
+- [ ] `seed.sql` holds a **[DEV] fixture, not shop data**. Q4–Q7 and Q11–Q12 are
+      still open, and the prefix is what will make the replacement obvious
 - [ ] Menu screen, set builder (doc 04 §2), cart, checkout
 - [ ] Checkout hides the zone selector while exactly one zone is active
 - [ ] Tracking page on Realtime, code stored in `localStorage` for "my orders"
+
+**35 assertions, all passing, exercised over REST as the anonymous client** —
+not through psql as a superuser, which would skip the grants and RLS that are
+half of what makes the function safe. Covers the happy path, idempotent replay,
+a lying `client_total`, add-on and delivery-fee arithmetic, ten validation
+rejections, stock decrement and restoration, and case-insensitive cancellation.
+
+The concurrency assertions are the ones worth keeping:
+
+```
+12 concurrent orders, 3 in stock → exactly 3 succeed
+the losers all get OUT_OF_STOCK, none get a deadlock or a 500
+stock lands on exactly zero
+every winner got a distinct code
+slot capacity 2 holds under 6 concurrent orders
+a daily set limit of 2 holds under 5 concurrent orders
+```
+
+The last two only pass because of a fix the tests forced: **counting and then
+checking is not a limit**. Six simultaneous orders all read "zero taken" and all
+six got into a slot with capacity 2. Both caps now take an advisory lock first,
+in a fixed global order — slot, then sets, then the stock rows — so no cycle can
+form.
 
 ### 1.3 Exit test
 

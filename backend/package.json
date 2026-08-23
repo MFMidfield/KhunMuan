@@ -11,7 +11,8 @@
     "diff": "supabase db diff",
     "new": "supabase migration new",
     "types": "supabase gen types typescript --local > ../frontend/src/types/database.ts",
-    "test:order-code": "docker exec -i supabase_db_backend psql -U postgres -d postgres -v ON_ERROR_STOP=1 < supabase/tests/order_code_property.sql"
+    "test:order-code": "docker exec -i supabase_db_backend psql -U postgres -d postgres -v ON_ERROR_STOP=1 < supabase/tests/order_code_property.sql",
+    "test:orders": "supabase db reset >/dev/null && node tests/place_order.test.mjs"
   },
   "devDependencies": {
     "supabase": "^2.60.4"

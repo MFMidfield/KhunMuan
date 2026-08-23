@@ -433,6 +433,8 @@ export type Database = {
           cancelled_reason: string | null
           claimed_at: string | null
           claimed_by: string | null
+          client_request_id: string | null
+          client_token: string
           code: string
           code_epoch: number
           code_seq: number
@@ -461,6 +463,8 @@ export type Database = {
           cancelled_reason?: string | null
           claimed_at?: string | null
           claimed_by?: string | null
+          client_request_id?: string | null
+          client_token?: string
           code: string
           code_epoch?: number
           code_seq: number
@@ -489,6 +493,8 @@ export type Database = {
           cancelled_reason?: string | null
           claimed_at?: string | null
           claimed_by?: string | null
+          client_request_id?: string | null
+          client_token?: string
           code?: string
           code_epoch?: number
           code_seq?: number
@@ -768,8 +774,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_order: {
+        Args: { p_client_token: string; p_code: string }
+        Returns: Json
+      }
       is_admin: { Args: never; Returns: boolean }
       is_superadmin: { Args: never; Returns: boolean }
+      place_order: { Args: { p_payload: Json }; Returns: Json }
       shop_today: { Args: never; Returns: string }
     }
     Enums: {
