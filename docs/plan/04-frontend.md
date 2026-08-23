@@ -62,15 +62,25 @@ too easy to lose track of.
 
 Layout is **responsive by role of the device, not by breakpoint alone**:
 
+- **Phone (<768px):** a single scrollable list with a sticky status filter chip
+  row — `ทั้งหมด` plus one chip per column, each carrying its count — newest
+  relevant first. Six staff on phones need one column and big tap targets, not
+  four squeezed ones. The chip row sticks under the header, so the filter stays
+  reachable however far the list has been scrolled.
+- **Tablet (768–1023px):** **two** Kanban columns, with a two-button switch
+  above them selecting which pair is on screen: `รอยืนยัน · รับแล้ว` or
+  `กำลังทำ · รอรับ`. An iPad in portrait has room for two real columns and not
+  for four; giving it the phone list wasted the second half of the screen, and
+  giving it four made every card unreadable.
 - **Desktop (≥1024px):** four Kanban columns — `รอยืนยัน`, `รับแล้ว`, `กำลังทำ`,
   `รอรับ`. Drag is *not* the primary interaction; each card has explicit action
   buttons. Drag-and-drop on a shared realtime board with six users invites
   accidents.
-- **Mobile (<1024px):** a single scrollable list with a sticky status filter
-  chip row, newest-relevant first. Six staff on phones need one column and big
-  tap targets, not four squeezed ones.
 
-The same data, two presentations, one `useOrderBoard()` hook.
+The same data, three presentations, one `useOrderBoard()` hook. The board is one
+of the few places allowed to branch on a JS breakpoint rather than CSS, because
+the three layouts are genuinely different DOM — rendering all three and hiding
+two would triple the card count and the realtime subscribers. See §9.
 
 ### Card anatomy
 
@@ -295,3 +305,90 @@ worse than building it.
   palette work has to account for that from the start.
 - Full keyboard operation of the back office. Six staff, some on laptops, and
   keyboard-driven claiming is measurably faster than a trackpad.
+
+## 9. Responsive system
+
+**Mobile first, and that is an authoring rule, not a slogan.** Base styles
+describe the phone. Every larger screen is an additive `sm:` / `md:` / `lg:`
+override. `max-*` variants that shrink a desktop design down are not used
+anywhere; if a rule needs one, the base was written for the wrong device.
+
+Both audiences need all three sizes. Customers order on phones but check on
+laptops. Staff run the shift on phones in the kitchen, on an iPad at the
+counter, and on a desktop when the owner does the books.
+
+### Breakpoints
+
+| Name | Width | Device it is really about |
+|------|-------|---------------------------|
+| base | <640px | Phone, portrait. **The default.** |
+| `sm` | ≥640px | Large phone, phone landscape, small tablet portrait |
+| `md` | ≥768px | Tablet — iPad portrait |
+| `lg` | ≥1024px | Desktop, iPad landscape with a keyboard |
+
+Nothing branches below `sm`. A 320px phone and a 430px phone get the same
+layout with a fluid width.
+
+### Rules that apply to every screen
+
+- **Touch targets ≥44px everywhere**, not only in the back office. Buttons are
+  `min-h-11`; so is every input, chip and icon button.
+- **Inputs are ≥16px.** iOS zooms the whole page when a focused field is
+  smaller, and the page never zooms back.
+- **Safe areas.** `viewport-fit=cover` on the meta tag, and `pt-safe` /
+  `pb-safe` / `pb-tabbar` utilities. The bottom inset is the one that matters:
+  without it the admin tab bar sits on the iPhone home indicator, and staff
+  mis-tap in a rush.
+- **The page never scrolls sideways.** Anything intrinsically wide — a Kanban
+  row, a report table, a long code — scrolls inside its own container.
+- **Sticky, not fixed, for headers.** The one fixed element in the whole app is
+  the admin tab bar.
+- **Text wraps, containers do not.** Long set names, notes and email addresses
+  get `break-words`; a card must never be widened by its contents.
+- **One thumb.** Anything a phone user taps repeatedly — steppers, claim
+  buttons, the primary action — sits in the lower half of the screen.
+
+### Per-screen behaviour
+
+**Customer.** Container widens in steps to `max-w-5xl`; individual screens
+narrow further where a single reading column beats spreading out.
+
+| Screen | Phone | Tablet | Desktop |
+|--------|-------|--------|---------|
+| Menu | 1 set card per row, full-bleed photo | 2 per row | 3 per row |
+| Set builder | 2 filling cards per row, sticky quota header, sticky total bar above the safe area | 3 per row, quota header still sticky | 4 per row, quota header and summary in a right-hand rail |
+| Cart | Stacked rows, quantity stepper right-aligned | Same, wider | Same, capped width |
+| Checkout | One column, one section per card, sticky total + submit bar | One column, wider cards | Two columns — form left, order summary sticky right |
+| Slip upload | Full-width camera/file button, QR fills the width | Centred, capped | Centred, capped |
+| Tracking | Vertical stepper full width, code centred and large | Same, capped `max-w-xl` | Same, capped |
+| My orders | Stacked cards | 2 per row | 2 per row, capped |
+
+**Back office.**
+
+| Screen | Phone | Tablet | Desktop |
+|--------|-------|--------|---------|
+| Shell | Sticky header + **fixed bottom tab bar**: `บอร์ด`, `คีย์ออเดอร์`, `สต็อก`, `เพิ่มเติม` | Same tab bar, wider content | No tab bar; every link inline in the header |
+| Board | 1 list + sticky filter chips | 2 Kanban columns + pair switch | 4 Kanban columns |
+| Order detail | Full-screen, actions in a sticky bottom bar | Full-screen, wider | Two columns — ticket left, actions and history right |
+| Key in an order | One field per row, one section at a time | Two fields per row | Two columns |
+| Stock | One filling per row, stepper right-aligned, ≥44px | 2 per row | Table |
+| Settings / staff / menu admin | Stacked cards, one field per row | 2 per row | Table with inline edit |
+| Reports | Stacked figure cards, charts full width and scrollable | 2 per row | Grid |
+
+### The tab bar
+
+Seven back-office links do not fit a phone. The three a cook touches during a
+shift — board, key in an order, stock — get a thumb-reachable tab each; the
+owner's four sit behind one `เพิ่มเติม` sheet. The sheet also carries sign-out,
+so it is shown even to a plain admin whose sheet would otherwise be empty —
+otherwise there is no way to sign out of a phone at all.
+
+Above `lg` the bar disappears and the links move inline into the header, where a
+mouse is already travelling and vertical space is worth more than reach.
+
+### Testing floor
+
+Before a screen is considered done it is checked at **360×640** (small Android),
+**390×844** (iPhone), **768×1024** (iPad portrait) and **1440×900**, in light
+and dark, with the phone width also checked in landscape. A screen that has only
+ever been seen in a desktop browser window is not finished.

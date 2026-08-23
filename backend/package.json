@@ -1,0 +1,18 @@
+{
+  "name": "khunmuan-backend",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Supabase project for KhunMuan — migrations, edge functions, seed",
+  "scripts": {
+    "start": "supabase start",
+    "stop": "supabase stop",
+    "status": "supabase status",
+    "reset": "supabase db reset",
+    "diff": "supabase db diff",
+    "new": "supabase migration new",
+    "types": "supabase gen types typescript --local > ../frontend/src/types/database.ts"
+  },
+  "devDependencies": {
+    "supabase": "^2.60.4"
+  }
+}

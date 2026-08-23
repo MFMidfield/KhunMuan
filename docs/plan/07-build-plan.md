@@ -9,14 +9,15 @@ they win and this file is wrong.
 
 ## 0. Where the repository actually stands
 
+Phase 0 is **complete**. See §Phase 0 below for what each step produced and what
+was verified.
+
 | | State |
 |---|---|
-| `frontend/` | Vite + React 19 + TS scaffold, untouched `App.tsx`/`App.css` |
-| `backend/supabase/` | `config.toml` only — no `migrations/`, no `functions/`, no `seed.sql` |
-| Version control | **not initialised** — `git log` reports "not a git repository" |
-| `docs/PROJECT_MAP.md` | does not exist yet |
-
-So Phase 0 starts from a genuinely empty backend, and step one is `git init`.
+| Version control | `main`, remote `github.com/MFMidfield/KhunMuan` |
+| `backend/supabase/` | migrations 0001–0009, `db reset` clean from empty |
+| `frontend/` | Tailwind v4 + router + Query + i18n + tokens + auth guard; `npm run build` clean |
+| `docs/PROJECT_MAP.md` | written |
 
 ## 1. Data still needed from the shop
 
@@ -56,73 +57,122 @@ plausible-looking guess.
 - **Superadmin email** — placeholder in the migration until the owner supplies
   the real one. Doc 06 Q2.
 
-## Phase 0 — Foundations
-
-**Buildable today, start to finish.** Nothing here waits on shop data.
+## Phase 0 — Foundations ✅
 
 ### 0.1 Repository
 
-- [ ] `git init`, `.gitignore` at the root covering `node_modules/`, `.DS_Store`,
-      `backend/supabase/.branches/`, `backend/supabase/.temp/`,
-      `backend/supabase/.env`, `frontend/.env*`
-- [ ] Confirm `backend/supabase/.env` is untracked — it exists on disk already
-- [ ] First commit of the plan docs as they stand
+- [x] Root `.gitignore` covering `node_modules/`, `.DS_Store`, `dist/`, every
+      `.env*` except `.env.example`, and the Supabase local state directories
+- [x] `.DS_Store` untracked (`git rm --cached`); `backend/supabase/.env`
+      confirmed never tracked
+- [x] Repo already existed on `main` with a GitHub remote — no `git init` needed
 
 ### 0.2 Backend skeleton
 
-- [ ] `supabase start` against the existing `config.toml`; record the local
-      anon key and API URL
-- [ ] `backend/supabase/migrations/0001_enums.sql` — the seven enums from doc 01 §5
-- [ ] `0002_config.sql` — `shop_settings` (with `require_code_on_handover`),
-      `admin_users` + the one-superadmin partial unique index, `shop_today()`
-- [ ] `0003_locations.sql` — `pickup_points`, `pickup_slots`, `delivery_zones`
-- [ ] `0004_menu.sql` — `sets`, `fillings`, `addons`, `filling_stock_daily`
-- [ ] `0005_orders.sql` — `orders` (incl. `delivery_zone_id`, the fulfillment
-      check constraint, `version`), `order_items`, `order_item_fillings`,
-      `order_item_addons`, `payments`, `order_events`
-- [ ] `0006_indexes.sql` — doc 01 §6 verbatim
-- [ ] `0007_updated_at.sql` — the shared `updated_at` trigger, applied to every
-      mutable table
-- [ ] `0008_seed_superadmin.sql` — one `admin_users` row,
-      `SUPERADMIN_EMAIL_PLACEHOLDER@example.com`, with a comment marking it as
-      the single line to edit before any cloud deploy
-- [ ] `supabase db reset` runs clean from empty
+- [x] `backend/package.json` pins the Supabase CLI (2.115.0) with
+      `start` / `reset` / `types` scripts, so nobody has to install it globally
+- [x] `0001_extensions_enums.sql` — `private` schema, the seven enums,
+      `private.set_updated_at()`
+- [x] `0002_config.sql` — `shop_settings` (incl. `require_code_on_handover`),
+      `admin_users` + one-superadmin partial unique index, `shop_today()`,
+      `private.current_admin()` / `is_admin()` / `is_superadmin()`, and the
+      auth-linking triggers
+- [x] `0003_locations.sql` — `pickup_points`, `pickup_slots`, `delivery_zones`
+- [x] `0004_menu.sql` — `sets`, `fillings`, `addons`, `filling_stock_daily`
+- [x] `0005_orders.sql` — `orders` and children, `payments`, `order_events`,
+      `order_code_seq`
+- [x] `0006_indexes.sql` — doc 01 §6, plus an index on every foreign key
+- [x] `0007_updated_at.sql` — the trigger on all twelve mutable tables
+- [x] `0008_seed_superadmin.sql` — the placeholder row, loudly commented
+- [x] `supabase db reset` applies all nine cleanly from empty
 
 ### 0.3 RLS floor
 
-Written now, before any table has data, so nothing is ever briefly public.
-
-- [ ] `0009_rls.sql` — `enable row level security` on **every** table
-- [ ] Staff read/write policies keyed on `admin_users` (doc 05 §2)
-- [ ] The superadmin guard: reject any write where `role = 'superadmin'` appears
-      on either the old or the new row
-- [ ] Deny-by-default confirmed — a bare anon client can read nothing yet
+- [x] `0009_rls.sql` — RLS enabled on all fifteen tables
+- [x] Grants written table by table (`auto_expose_new_tables` is off, so a
+      missing grant means the table is simply unreachable) and revoked from
+      future objects by default
+- [x] The superadmin guard: `role <> 'superadmin'` on both `using` and
+      `with check`
+- [x] Column-scoped `update` grant on `orders`, no `update` at all on
+      `payments` — see the correction recorded in doc 05 §2
 
 ### 0.4 Frontend skeleton
 
-- [ ] Tailwind v4, React Router v7 data router, TanStack Query, RHF + Zod
-- [ ] Delete the scaffold `App.css`; replace `index.css` with the token layer
-- [ ] Design tokens as CSS variables (doc 04 §6): `--gold #F5D68A` **fill only**,
-      `--gold-ink #B45309` **text only**, `--ink #101720`, the cool status ramp,
-      and their dark-mode swap. No hardcoded hex anywhere but this file.
-- [ ] Theme: follow the device on first load, manual toggle, choice persisted
-- [ ] IBM Plex Sans Thai + IBM Plex Mono; `tabular-nums` on codes, prices, timers
-- [ ] `lib/supabase.ts`, `lib/queryClient.ts`, `lib/i18n.ts` with the Thai
-      dictionary — **every** string via `t()`, none inline in JSX
-- [ ] `components/ui/`: Button (gold fill + `--ink` text + **1.5px `--ink`
-      border**, the border is load-bearing, not decoration), Card (16px radius),
-      Input, Badge, Spinner
-- [ ] `app/router.tsx` with the route shells from doc 04 §1
-- [ ] Google OAuth sign-in, `admin_users` allow-list check, route guard on
-      `/admin/*`
-- [ ] `npm run supabase:types` script writing `src/types/database.ts`, committed
+- [x] Tailwind v4 (Vite plugin), React Router v7 data router, TanStack Query,
+      RHF + Zod, i18next
+- [x] Scaffold `App.tsx` / `App.css` deleted; `index.css` is the token layer
+- [x] Full light and dark token sets from doc 04 §6, exposed to Tailwind through
+      `@theme inline` so utilities resolve `var(--…)` at runtime. Tailwind names
+      them `gold-fill` and `gold-ink`, so `text-gold-fill` reads as wrong on
+      sight
+- [x] Theme: device by default (no stamp), manual toggle stamps `data-theme`,
+      stored raw in `localStorage` and applied by a pre-paint script so the
+      wrong theme never flashes
+- [x] IBM Plex Sans Thai + IBM Plex Mono; `.tnum` for codes, prices and timers
+- [x] `lib/`: `supabase`, `queryClient` (+ central query keys), `i18n` with the
+      Thai dictionary and an English stub, `theme`, `storage` (every
+      `localStorage` read wrapped and Zod-validated)
+- [x] `components/ui/`: Button (gold fill, ink text, **1.5px ink outline**),
+      Card, Input, Spinner, StatusBadge, ThemeToggle
+- [x] `app/router.tsx` — every route from doc 04 §1, real screens where they
+      exist and typed placeholders elsewhere. No string literal in JSX anywhere,
+      placeholders included
+- [x] Google sign-in page, `RequireAdmin` guard with a `superadminOnly` variant,
+      admin shell with role-filtered navigation
+- [x] `npm run types` regenerates `src/types/database.ts`; `npm run build` clean
+
+### 0.6 Responsive system (added after 0.5)
+
+Doc 04 §9. Mobile-first as an authoring rule — base styles are the phone, every
+larger screen is an additive `sm:` / `md:` / `lg:`, no `max-*` shrink-downs.
+
+- [x] Breakpoint contract and per-screen behaviour for **all three sizes**,
+      written for every screen in the route table, including the Phase 1 and 2
+      ones not built yet, so they are built to it rather than retrofitted
+- [x] Tablet, which doc 04 never covered: the board now gets 2 Kanban columns
+      with a pair switch instead of falling back to the phone list
+- [x] Admin shell: fixed bottom tab bar on phone and tablet (board, key in an
+      order, stock, more), inline header nav on desktop. The "more" sheet is
+      shown even to a plain admin, because it carries sign-out
+- [x] `viewport-fit=cover` plus `pt-safe` / `pb-safe` / `pb-tabbar` utilities —
+      without them the tab bar sits on the iPhone home indicator
+- [x] 16px minimum on every input, so iOS does not zoom the page on focus
+- [x] `scroll-strip` / `snap-item` utilities for chip rows; the page body never
+      scrolls sideways
+- [x] `useBreakpoint()` for the board only — the one case where the layouts are
+      different DOM rather than different styling
 
 ### 0.5 Exit test
 
-Sign in as the seeded superadmin (using the placeholder address locally) and
-land on an empty order board. Sign in with any other Google account and be
-refused — refused by RLS, verified by querying directly with that session's
-token, not merely hidden by the router.
+**Verified, at the layer that matters.** The guard is convenience; the database
+is the boundary, so the test was run against the API with forged JWTs for four
+identities rather than by clicking around:
+
+| Caller | `orders` | `admin_users` | Writes |
+|--------|----------|---------------|--------|
+| anon | `401` — not granted | `401` | insert refused |
+| signed in, not staff | `200 []` — RLS returns nothing | `200 []` | update matches 0 rows |
+| staff admin | rows visible | rows visible | cannot demote or delete the superadmin, cannot invite, cannot edit a finished order, cannot forge an `order_events` row |
+| superadmin | rows visible | rows visible | can correct a finished order and invite an admin; **cannot** create a second superadmin |
+
+Neither role can `PATCH` `status`, `total`, `version` or payment state at all —
+those are RPC-only by grant, not merely by policy.
+
+Two bugs were found and fixed by running this rather than assuming it:
+
+1. `authenticated` had no `usage` on the `private` schema, so `is_admin()` threw
+   for everyone. Every policy would have failed closed — safe, but useless.
+2. Emails compared case-**sensitively**. `search_path = ''` hides citext's `=`
+   operator, so the comparison silently degraded to `text = text` and any
+   allow-list address with a capital letter would never have matched. Emails are
+   now lower-cased `text`, normalised by trigger. Doc 01 §2 records why.
+
+**Not verified locally:** the Google sign-in round trip. The credentials are in
+`backend/supabase/.env` and `config.toml` now redirects to the Vite dev port,
+but completing it needs a human at a Google consent screen. Run
+`cd backend && npm run start`, `cd frontend && npm run dev`, open
+`/admin/login`, and sign in with an address that is in `admin_users`.
 
 ## Phase 1 — Menu and ordering
 
@@ -202,9 +252,13 @@ snapshots, stock decremented, and a code that survives being read aloud.
 English translation pass · customer-facing LINE notifications · slip
 auto-verification · pre-orders for a future date.
 
-## Suggested order of the next few sessions
+## Next
 
-1. Phase 0.1–0.3 — repo, migrations, RLS. Self-contained, no shop data needed.
-2. Phase 0.4–0.5 — tokens, UI primitives, auth guard. Ends on a real exit test.
-3. Phase 1.1 — the order code and its property test, while Q4–Q6 are collected.
-4. Phase 1.2 once the menu data arrives.
+1. **Phase 1.1 — the order code.** Needs no shop data except the Q9b blocklist,
+   and it is the riskiest thing in the build. Start here while Q4–Q7 and Q10 are
+   collected from the shop.
+2. **Phase 1.2** once the menu data arrives.
+
+One thing worth doing before either: replace the superadmin placeholder in
+`0008` with the real address (Q2) and run `npm run reset`, so local development
+stops running against an account nobody can sign in as.
