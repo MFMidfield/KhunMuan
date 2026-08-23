@@ -970,6 +970,34 @@ export type Database = {
       }
       place_order: { Args: { p_payload: Json }; Returns: Json }
       release_order: { Args: { p_order_id: string }; Returns: Json }
+      report_fillings: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          filling_name: string
+          orders: number
+          pieces: number
+        }[]
+      }
+      report_sales: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          cash: number
+          completed: number
+          lost: number
+          revenue: number
+          service_date: string
+          transfer: number
+        }[]
+      }
+      report_stage_timing: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          avg_minutes: number
+          median_minutes: number
+          samples: number
+          to_status: Database["public"]["Enums"]["order_status"]
+        }[]
+      }
       run_daily_rollover: { Args: never; Returns: Json }
       set_payment: {
         Args: {

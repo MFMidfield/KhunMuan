@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -31,6 +32,7 @@ interface StockRow {
  */
 export function StockPage() {
   const { t } = useTranslation(['admin', 'common'])
+  const navigate = useNavigate()
 
   const { data, isPending, error } = useQuery({
     queryKey: ['stock-admin'],
@@ -67,6 +69,15 @@ export function StockPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-semibold sm:text-2xl">{t('admin:stockTitle')}</h1>
+
+      {data.length === 0 && (
+        <Card className="flex flex-col items-start gap-3 p-5">
+          <p className="text-ink-muted">{t('admin:stockEmpty')}</p>
+          <Button onClick={() => void navigate('/admin/menu')}>
+            {t('admin:goToMenu')}
+          </Button>
+        </Card>
+      )}
 
       <ul className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
         {data.map((row) => (

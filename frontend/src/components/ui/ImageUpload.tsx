@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import { toSquareWebp } from '@/lib/squareImage'
 import { MenuImage } from './MenuImage'
 
 const MAX_BYTES = 5 * 1024 * 1024
@@ -42,12 +43,19 @@ export function ImageUpload({
     }
 
     setBusy(true)
-    const extension = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+
+    // Cropped square and re-encoded before it leaves the device. The size check
+    // above is against the original, deliberately: telling someone their photo
+    // is too big only after silently shrinking it would be nonsense.
+    const prepared = await toSquareWebp(file)
+    const extension = prepared.type === 'image/webp'
+      ? 'webp'
+      : (prepared.name.split('.').pop()?.toLowerCase() ?? 'jpg')
     const objectPath = `${folder}/${crypto.randomUUID()}-${Date.now()}.${extension}`
 
     const { error: uploadError } = await supabase.storage
       .from('menu')
-      .upload(objectPath, file, { contentType: file.type })
+      .upload(objectPath, prepared, { contentType: prepared.type })
 
     setBusy(false)
     if (uploadError) {

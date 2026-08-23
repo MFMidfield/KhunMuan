@@ -378,13 +378,44 @@ still outstanding, and it does not block the code.**
 
 ## Phase 4 — Reporting and polish
 
-**Blocked on Q19, Q20, and the logo assets from Q1.**
-
-- [ ] Daily sales, per-filling popularity, per-stage timing from `order_events`
-- [ ] Menu management UI with image upload and cropping
-- [ ] Staff management UI
-- [ ] Empty states, error states, offline banner, PWA install prompt
+- [x] Sales, filling popularity and per-stage timing, all over a **date range**.
+      Q19 asked which periods the shop wants — daily, weekly, monthly, export —
+      and a range answers every one of them without the question being settled.
+      CSV export ships with a UTF-8 BOM, because Excel opens a Thai CSV without
+      one as mojibake
+- [x] Superadmin-only, asserted from both sides: a cook calling `report_sales`
+      gets an empty array, anon cannot call it at all
+- [x] Only `handed_over` counts as revenue. An order cooked and then cancelled
+      cost food and earned nothing, and folding it in would overstate every day
+      it happened
+- [x] Stage timing reports a **median beside the mean** — one order forgotten
+      over a lunch break drags an average into uselessness
+- [x] Square crop and WebP re-encode **before upload**, on the device. The cost
+      being removed is the upload itself: a 4 MB phone photo spends thirty
+      seconds on campus wifi before a server-side resize would ever see it
+- [x] Empty states on every list, an app-wide error boundary, an offline banner
+- [x] Menu and staff management — landed early, in Phase 2
+- [ ] **PWA install prompt** — see below
 - [ ] **Exit:** the superadmin stops asking anyone for numbers
+
+### Q20 and the profit column
+
+Every figure says revenue and means revenue. Per-set cost is still unanswered,
+and a "profit" column computed from a cost nobody supplied would be worse than
+no column at all.
+
+### Why the PWA is not here
+
+Two reasons, both worth stating rather than quietly deferring.
+
+`public/favicon.svg` is still the purple Vite template mark. Shipping a manifest
+that points at it would put a stranger's logo on the shop's home screen and look
+like a bug to everyone who installed it. That is Q1.
+
+The service worker is a separate call: nothing in this environment can run one.
+A misbehaving service worker pins people to a stale build, and it is the hardest
+class of bug to talk a shop owner through over the phone. It should be added
+where it can be verified in a browser, not written blind and pushed.
 
 ## Phase 5 — Later, only if wanted
 
