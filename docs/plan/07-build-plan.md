@@ -19,32 +19,30 @@ was verified.
 | `frontend/` | Tailwind v4 + router + Query + i18n + tokens + auth guard; `npm run build` clean |
 | `docs/PROJECT_MAP.md` | written |
 
-## 1. Data still needed from the shop
+## 1. What is still outstanding
 
-These block the phase named beside them. Everything else can proceed without
-them. No placeholder values get invented in their place — an unanswered item
-means the seed file carries an obvious dummy that is clearly marked, never a
-plausible-looking guess.
+Q4–Q7 and Q10–Q13 used to live here as data the shop had to hand over. They are
+gone: they became back-office screens, and the owner enters them. Doc 06 records
+why and what it cost.
 
-| Ref | Needed | Blocks |
-|-----|--------|--------|
-| Q2 | The real superadmin Google address, replacing `SUPERADMIN_EMAIL_PLACEHOLDER@example.com` in the seed migration | Cloud deploy (local dev is fine without it) |
-| Q1 | Logo as SVG/AI/PSD or the designer's real hex; transparent-background version; 512px square for the PWA icon | Phase 0 polish, Phase 4 PWA |
-| Q4 | The sets — names, piece quotas, prices | Phase 1 |
-| Q5 | The fillings — full list, and any needing `max_per_set` | Phase 1 |
-| Q6 | Sauces and utensils — full list, which carry a charge, how much | Phase 1 |
-| Q7 | Name and fee for the single seeded delivery zone | Phase 1 |
-| Q9b | Blocklist seed — the specific mixed letter+digit patterns to exclude | Phase 1 |
-| Q10 | Minimum order and per-order quantity cap, if any | Phase 1 |
-| Q11 | Real pickup points | Phase 2 |
-| Q12 | Real pickup slots, capacities, and how long before a slot ordering closes | Phase 2 |
-| Q13 | Initial staff email allow-list | Phase 2 |
-| Q15 | Rejection reasons — fixed list or free text | Phase 2 |
-| Q16 | LINE OA — existing account? Messaging API channel? group push or per-person? | Phase 3 |
-| Q17 | PromptPay QR — static image or generated per order with the amount | Phase 3 |
+| Ref | Outstanding | Blocks |
+|-----|-------------|--------|
+| Q1 | Logo as SVG/AI/PSD or the designer's real hex; a transparent-background version; a 512px square for the PWA icon | Nothing today. Phase 4 PWA |
+| Q9b | Blocklist — the specific mixed letter+digit patterns to exclude beyond the seeded `*666` suffix | Nothing. Superadmin-editable, and the mixed-character rule already makes the ugly cases unreachable |
+| Q16 | LINE OA — is there an account? A Messaging API channel? Group push or per-person? | Phase 3 |
 | Q18 | Slip retention period (90 days proposed) | Phase 3 |
 | Q19 | Report periods beyond daily; CSV/Excel export | Phase 4 |
 | Q20 | Per-set cost, for profit rather than revenue | Phase 4 |
+
+Two things are outstanding that are not questions:
+
+- **Nobody has looked at any screen.** There is no browser driver in the
+  environment these were built in. Every route responds, every module
+  transforms, the types and the lint and the build are clean, and not one pixel
+  has been seen. The four widths in doc 04 §9 are the gate.
+- **The superadmin address in `0008`** is real now, but the migration is still
+  the only way to set it. That is by design (doc 03) and worth re-reading before
+  the first cloud deploy.
 
 ## 2. Decisions settled since doc 06 was written
 
