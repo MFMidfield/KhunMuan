@@ -34,6 +34,7 @@ export interface BoardOrder {
   zone_name: string | null
   payment_method: Database['public']['Enums']['payment_method'] | null
   payment_state: Database['public']['Enums']['payment_state'] | null
+  slip_path: string | null
   items: {
     id: string
     set_name: string
@@ -51,7 +52,7 @@ const SELECT = `
   point:pickup_points ( name ),
   slot:pickup_slots ( label ),
   zone:delivery_zones ( name ),
-  payments ( method, state ),
+  payments ( method, state, slip_path ),
   order_items (
     id, set_name, quantity, note, sort_order,
     order_item_fillings ( filling_name, qty ),
@@ -161,6 +162,7 @@ interface RawOrder {
   payments: {
     method: Database['public']['Enums']['payment_method']
     state: Database['public']['Enums']['payment_state']
+    slip_path: string | null
   } | null
   order_items: {
     id: string
@@ -195,6 +197,7 @@ function normalise(row: RawOrder): BoardOrder {
     zone_name: row.zone?.name ?? null,
     payment_method: row.payments?.method ?? null,
     payment_state: row.payments?.state ?? null,
+    slip_path: row.payments?.slip_path ?? null,
     items: [...row.order_items]
       .sort((a, b) => a.sort_order - b.sort_order)
       .map((i) => ({

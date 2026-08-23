@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { money } from '@/lib/i18n'
 import { useNow } from '@/lib/useNow'
+import { supabase } from '@/lib/supabase'
 import { AgeTimer } from './AgeTimer'
 import { ReasonDialog } from './ReasonDialog'
 import { actionError, useAdvance, useClaim, useRelease, useSetPayment } from './useOrderActions'
@@ -41,6 +42,24 @@ export function OrderCard({
   const [code, setCode] = useState('')
   const [overrideNote, setOverrideNote] = useState('')
   const [showOverride, setShowOverride] = useState(false)
+  const [openingSlip, setOpeningSlip] = useState(false)
+
+  /**
+   * A signed URL made at the moment of viewing, valid for a minute.
+   *
+   * The bucket is private and stays private: a link that keeps working after
+   * the tab is closed is a link that ends up pasted into a group chat, and a
+   * slip carries a name, part of an account number and an amount.
+   */
+  async function openSlip() {
+    if (!order.slip_path) return
+    setOpeningSlip(true)
+    const { data } = await supabase.storage
+      .from('slips')
+      .createSignedUrl(order.slip_path, 60)
+    setOpeningSlip(false)
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank', 'noopener')
+  }
 
   const now = useNow()
   const mine = order.claimed_by !== null && order.claimed_by === currentAdminId
@@ -154,7 +173,19 @@ export function OrderCard({
             {order.payment_state && t(`tracking:paymentState.${order.payment_state}`)}
           </span>
         </span>
-        <span className="tnum font-semibold">{money.format(Number(order.total))}</span>
+        <div className="flex items-center gap-3">
+          {order.slip_path && (
+            <button
+              type="button"
+              disabled={openingSlip}
+              onClick={() => void openSlip()}
+              className="min-h-9 text-[0.85rem] text-gold-ink hover:underline"
+            >
+              {openingSlip ? t('admin:slipOpening') : t('admin:viewSlip')}
+            </button>
+          )}
+          <span className="tnum font-semibold">{money.format(Number(order.total))}</span>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">

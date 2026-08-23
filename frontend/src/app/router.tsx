@@ -18,6 +18,7 @@ import { CartPage } from '@/features/cart/CartPage'
 import { CheckoutPage } from '@/features/checkout/CheckoutPage'
 import { TrackingPage } from '@/features/tracking/TrackingPage'
 import { MyOrdersPage } from '@/features/tracking/MyOrdersPage'
+import { SlipUploadPage } from '@/features/tracking/SlipUploadPage'
 
 // Route table from doc 04 §1. Screens land phase by phase; the shells are here
 // from the start so the guards and navigation are exercised for real.
@@ -30,9 +31,7 @@ export const router = createBrowserRouter([
       { path: '/build/:setId', element: <BuilderPage /> },
       { path: '/cart', element: <CartPage /> },
       { path: '/checkout', element: <CheckoutPage /> },
-      // Slip upload needs the `slips` bucket and a signed-upload Edge Function,
-      // both of which land in Phase 3.
-      { path: '/checkout/slip/:code', element: <Placeholder titleKey="slip" phase={3} /> },
+      { path: '/checkout/slip/:code', element: <SlipUploadPage /> },
       { path: '/o/:code', element: <TrackingPage /> },
       { path: '/my-orders', element: <MyOrdersPage /> },
     ],

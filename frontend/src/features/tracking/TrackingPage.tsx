@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -52,6 +52,7 @@ const FLOW: OrderStatus[] = ['pending_confirmation', 'accepted', 'cooking', 'rea
 
 export function TrackingPage() {
   const { code = '' } = useParams<{ code: string }>()
+  const navigate = useNavigate()
   const { t } = useTranslation(['tracking', 'common'])
   const [copied, setCopied] = useState(false)
 
@@ -278,6 +279,25 @@ export function TrackingPage() {
         />
         <Fact label={t('tracking:placedAt')} value={timeOfDay.format(new Date(order.created_at))} />
       </Card>
+
+      {/* A transfer nobody has confirmed yet outranks everything below it: the
+          order does not move until the shop can see the money. */}
+      {order.full_view &&
+        order.payment?.method === 'transfer' &&
+        order.payment.state !== 'paid' && (
+          <Card className="flex flex-col gap-3 p-5">
+            <p className="text-[0.95rem]">
+              {order.payment.state === 'slip_uploaded'
+                ? t('tracking:slipDone')
+                : t('tracking:slipNeeded')}
+            </p>
+            <Button size="lg" onClick={() => void navigate(`/checkout/slip/${order.code}`)}>
+              {order.payment.state === 'slip_uploaded'
+                ? t('tracking:slipAgain')
+                : t('tracking:slipTitle')}
+            </Button>
+          </Card>
+        )}
 
       {!order.full_view && (
         <p className="px-1 text-[0.85rem] text-ink-muted">{t('tracking:limitedView')}</p>

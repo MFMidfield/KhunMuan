@@ -114,6 +114,30 @@ export type Database = {
           },
         ]
       }
+      code_lookup_attempts: {
+        Row: {
+          code: string
+          created_at: string
+          hit: boolean
+          id: number
+          ip_hash: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          hit: boolean
+          id?: never
+          ip_hash: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          hit?: boolean
+          id?: never
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       delivery_zones: {
         Row: {
           created_at: string
@@ -771,6 +795,7 @@ export type Database = {
           order_code_length: number
           promptpay_qr_path: string | null
           require_code_on_handover: boolean
+          slip_retention_days: number
           updated_at: string
           updated_by: string | null
         }
@@ -788,6 +813,7 @@ export type Database = {
           order_code_length?: number
           promptpay_qr_path?: string | null
           require_code_on_handover?: boolean
+          slip_retention_days?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -805,6 +831,7 @@ export type Database = {
           order_code_length?: number
           promptpay_qr_path?: string | null
           require_code_on_handover?: boolean
+          slip_retention_days?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -835,15 +862,42 @@ export type Database = {
         }
         Returns: Json
       }
+      attach_slip: {
+        Args: { p_client_token: string; p_code: string; p_path: string }
+        Returns: Json
+      }
+      blocked_lookup_ips: {
+        Args: never
+        Returns: {
+          attempts: number
+          codes_tried: string[]
+          first_seen: string
+          ip_hash: string
+          last_seen: string
+          misses: number
+        }[]
+      }
       cancel_order: {
         Args: { p_client_token: string; p_code: string }
         Returns: Json
       }
       claim_order: { Args: { p_order_id: string }; Returns: Json }
+      expired_slips: {
+        Args: never
+        Returns: {
+          order_id: string
+          slip_path: string
+        }[]
+      }
+      forget_slip: { Args: { p_order_id: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
       is_superadmin: { Args: never; Returns: boolean }
       lookup_order: {
         Args: { p_client_token?: string; p_code: string }
+        Returns: Json
+      }
+      lookup_order_tracked: {
+        Args: { p_client_token: string; p_code: string; p_ip_hash: string }
         Returns: Json
       }
       place_order: { Args: { p_payload: Json }; Returns: Json }
@@ -865,6 +919,7 @@ export type Database = {
         Args: { p_is_open: boolean; p_message?: string }
         Returns: Json
       }
+      unblock_ip: { Args: { p_ip_hash: string }; Returns: Json }
     }
     Enums: {
       addon_group: "sauce" | "utensil" | "packaging"

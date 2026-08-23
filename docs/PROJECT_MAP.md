@@ -69,6 +69,22 @@ npm run build      # tsc -b && vite build
 Run `npm run types` after **every** migration that changes a table. The
 generated file is committed so the frontend never guesses a column name.
 
+## Edge Functions
+
+`track`, `slip-upload-url`, `slip-prune`, all under `backend/supabase/functions/`.
+
+A **newly created** function directory is invisible to the local edge runtime
+until the stack is stopped and started — `npm run reset` is not enough, and the
+symptom is a plain `404 Function not found` that looks exactly like a routing
+mistake:
+
+```bash
+cd backend && npm run stop && npm run start
+```
+
+Editing a file inside a function the runtime already knows about hot-reloads
+normally.
+
 ## Things that will bite you
 
 - **`SUPERADMIN_EMAIL_PLACEHOLDER@example.com`** in `0008` must become the real
@@ -86,3 +102,10 @@ generated file is committed so the frontend never guesses a column name.
   lower-cased `text` rather than `citext`; see doc 01 §2.
 - **No string literals in JSX.** Everything goes through `t()`, placeholders
   included.
+- **`service_role` is granted nothing by default either.** `auto_expose_new_tables`
+  strips DML from all three roles, not just anon — and a missing grant returns
+  zero rows, which reads as "not found" rather than "not allowed". See migration
+  0020 for the bug that cost.
+- **`revoke ... from anon` does not undo a grant to `PUBLIC`.** `create function`
+  grants EXECUTE to PUBLIC and anon inherits it. Revoke from `public`, then
+  grant back to the roles that should keep it.

@@ -25,7 +25,12 @@ export function useShopSettings() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('shop_settings')
-        .select('is_open, closed_message, delivery_enabled')
+        // Named columns, not *: anon holds a column-level grant and selecting
+        // anything outside it fails the whole request. One literal string, not
+        // a concatenation — supabase-js infers the row type from the literal
+        // and gives up the moment it is built at runtime.
+        // prettier-ignore
+        .select('is_open, closed_message, delivery_enabled, promptpay_qr_path, min_order_total, max_boxes_per_order')
         .eq('id', 1)
         .single()
       if (error) throw error
