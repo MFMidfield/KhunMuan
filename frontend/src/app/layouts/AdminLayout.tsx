@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/features/auth/useSession'
@@ -31,13 +31,9 @@ export function AdminLayout() {
   const { data: admin } = useCurrentAdmin(session?.user.email)
   const isSuper = admin?.role === 'superadmin'
   const [moreOpen, setMoreOpen] = useState(false)
-  const location = useLocation()
 
   const primary = visibleLinks(PRIMARY_LINKS, isSuper)
   const secondary = visibleLinks(SECONDARY_LINKS, isSuper)
-
-  // A navigation must never leave the sheet hanging over the new screen.
-  useEffect(() => setMoreOpen(false), [location.pathname])
 
   return (
     <div className="min-h-svh bg-ground">
@@ -198,6 +194,10 @@ function MoreSheet({ links, onClose }: { links: AdminLink[]; onClose: () => void
               <NavLink
                 to={l.to}
                 end={l.end}
+                // Closing here rather than watching the URL: the tap is the
+                // event, and a navigation that does not change the path would
+                // otherwise leave the sheet hanging over the screen.
+                onClick={onClose}
                 className={({ isActive }) =>
                   [
                     'flex min-h-14 items-center gap-3 rounded-btn px-3',

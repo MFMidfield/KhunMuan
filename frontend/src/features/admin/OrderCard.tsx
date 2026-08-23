@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { money } from '@/lib/i18n'
+import { useNow } from '@/lib/useNow'
 import { AgeTimer } from './AgeTimer'
 import { ReasonDialog } from './ReasonDialog'
 import { actionError, useAdvance, useClaim, useRelease, useSetPayment } from './useOrderActions'
@@ -41,12 +42,13 @@ export function OrderCard({
   const [overrideNote, setOverrideNote] = useState('')
   const [showOverride, setShowOverride] = useState(false)
 
+  const now = useNow()
   const mine = order.claimed_by !== null && order.claimed_by === currentAdminId
   const theirs = order.claimed_by !== null && !mine
   const staleClaim =
     order.claimed_at !== null &&
     order.status === 'accepted' &&
-    Date.now() - new Date(order.claimed_at).getTime() > STALE_CLAIM_MINUTES * 60_000
+    now - new Date(order.claimed_at).getTime() > STALE_CLAIM_MINUTES * 60_000
 
   const busy = claim.isPending || release.isPending || advance.isPending || payment.isPending
   const error =

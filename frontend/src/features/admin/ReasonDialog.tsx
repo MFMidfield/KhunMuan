@@ -23,7 +23,7 @@ export function ReasonDialog({
   onClose: () => void
 }) {
   const { t } = useTranslation(['admin', 'common'])
-  const [reasonId, setReasonId] = useState('')
+  const [picked, setPicked] = useState('')
   const [note, setNote] = useState('')
 
   const { data: reasons } = useQuery({
@@ -39,9 +39,9 @@ export function ReasonDialog({
     },
   })
 
-  useEffect(() => {
-    if (reasons?.length && !reasonId) setReasonId(reasons[0]!.id)
-  }, [reasons, reasonId])
+  // Derived, not synced in an effect: the first reason is the default until
+  // someone picks another, and an effect would briefly render with none chosen.
+  const reasonId = picked || reasons?.[0]?.id || ''
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -82,7 +82,7 @@ export function ReasonDialog({
                 type="radio"
                 name="reason"
                 checked={reasonId === r.id}
-                onChange={() => setReasonId(r.id)}
+                onChange={() => setPicked(r.id)}
                 className="size-4"
               />
               <span>{r.label}</span>

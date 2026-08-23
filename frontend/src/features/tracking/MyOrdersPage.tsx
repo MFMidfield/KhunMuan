@@ -12,7 +12,7 @@ const EXCLUDED = /[ILO01]/
 export function MyOrdersPage() {
   const { t } = useTranslation(['tracking', 'common'])
   const navigate = useNavigate()
-  const orders = useMemo(readMyOrders, [])
+  const orders = useMemo(() => readMyOrders(), [])
   const [code, setCode] = useState('')
   const [hint, setHint] = useState<string | null>(null)
 

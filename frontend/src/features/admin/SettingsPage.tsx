@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useRef } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -20,17 +20,17 @@ import { actionError } from './useOrderActions'
 export function SettingsPage() {
   const { t } = useTranslation(['admin', 'common'])
   const { data: settings, isPending } = useShopSettingsAdmin()
-  const [message, setMessage] = useState('')
-
-  useEffect(() => {
-    if (settings) setMessage(settings.closed_message ?? '')
-  }, [settings])
+  // Uncontrolled, seeded from the server value. Mirroring it into state would
+  // mean an effect that overwrites whatever the person is halfway through
+  // typing every time the query refetches.
+  const messageRef = useRef<HTMLTextAreaElement>(null)
 
   const toggle = useMutation({
     mutationFn: async (open: boolean) => {
+      const note = messageRef.current?.value.trim() ?? ''
       const { error } = await supabase.rpc('toggle_shop', {
         p_is_open: open,
-        ...(message.trim() ? { p_message: message.trim() } : {}),
+        ...(note ? { p_message: note } : {}),
       })
       if (error) throw error
     },
@@ -65,8 +65,8 @@ export function SettingsPage() {
         <label className="flex flex-col gap-1.5">
           <span className="text-[0.9rem] font-medium">{t('admin:closedMessage')}</span>
           <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            ref={messageRef}
+            defaultValue={settings.closed_message ?? ''}
             rows={2}
             maxLength={200}
             className="rounded-btn border border-border-strong bg-surface p-3 text-ink"

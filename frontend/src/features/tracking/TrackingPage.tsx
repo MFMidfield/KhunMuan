@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +12,8 @@ import { tokenForCode } from './myOrders'
 import type { Database } from '@/types/database'
 
 type OrderStatus = Database['public']['Enums']['order_status']
+type PaymentMethod = Database['public']['Enums']['payment_method']
+type PaymentState = Database['public']['Enums']['payment_state']
 
 interface LookupItem {
   set_name: string
@@ -41,16 +43,9 @@ interface LookupResult {
   delivery_location: string | null
   customer_name: string | null
   customer_phone: string | null
-  payment: { method: 'cash' | 'transfer'; state: keyof typeof PAYMENT_KEYS } | null
+  payment: { method: PaymentMethod; state: PaymentState } | null
   items: LookupItem[]
 }
-
-const PAYMENT_KEYS = {
-  unpaid: 1,
-  slip_uploaded: 1,
-  paid: 1,
-  refunded: 1,
-} as const
 
 /** The five nodes a live order moves through. Terminal states render separately. */
 const FLOW: OrderStatus[] = ['pending_confirmation', 'accepted', 'cooking', 'ready', 'handed_over']
@@ -64,11 +59,13 @@ export function TrackingPage() {
 
   const query = useQuery({
     queryKey: ['order-lookup', code.toUpperCase()],
-    // Realtime for the customer channel lands with the `track` Edge Function in
-    // Phase 3. Until then the page polls: a customer staring at "กำลังทำ" needs
-    // it to change on its own, and 10 seconds is well inside the rate limit
-    // that function will impose.
-    refetchInterval: 10_000,
+    // Realtime carries the fast path; this is the safety net. A slow poll costs
+    // two requests a minute and covers the one gap measured in testing: for
+    // somewhat under two seconds after the channel reports SUBSCRIBED, a
+    // broadcast can still be dropped. A customer who opens this page at the
+    // exact moment staff tap "รับออเดอร์" would otherwise sit on a stale status
+    // until they reloaded.
+    refetchInterval: 30_000,
     retry: false,
     queryFn: async (): Promise<LookupResult> => {
       const { data, error } = await supabase.rpc('lookup_order', {
@@ -81,6 +78,29 @@ export function TrackingPage() {
       return data as unknown as LookupResult
     },
   })
+
+  // The channel is named after the order's id, not its code. The id is a random
+  // uuid that is never displayed, so a channel name cannot be guessed the way a
+  // four-character code can — and a code used as a subscription filter would be
+  // brute-forceable over a websocket with no HTTP request to rate-limit.
+  const orderId = query.data?.id
+  useEffect(() => {
+    if (!orderId) return
+
+    const channel = supabase
+      .channel(`order:${orderId}`)
+      .on('broadcast', { event: 'status' }, () => void query.refetch())
+      .subscribe((status) => {
+        // Refetch on join, not just on message: anything broadcast while the
+        // channel was still coming up never arrives.
+        if (status === 'SUBSCRIBED') void query.refetch()
+      })
+
+    return () => void supabase.removeChannel(channel)
+    // query.refetch is stable for a given key; re-subscribing on every render
+    // would tear the channel down mid-shift.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId])
 
   const cancel = useMutation({
     mutationFn: async () => {

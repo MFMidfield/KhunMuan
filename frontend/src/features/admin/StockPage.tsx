@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -71,7 +71,11 @@ export function StockPage() {
       <ul className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
         {data.map((row) => (
           <li key={row.id}>
-            <StockCard row={row} />
+            {/* Keyed on the stored total, so another admin calling set_stock
+                resets this field — their value is the newer one — while an
+                ordinary sale, which only moves qty_remaining, does not disturb
+                what someone is typing. */}
+            <StockCard key={`${row.id}:${row.qty_total}`} row={row} />
           </li>
         ))}
       </ul>
@@ -83,12 +87,6 @@ function StockCard({ row }: { row: StockRow }) {
   const { t } = useTranslation(['admin', 'common'])
   const [value, setValue] = useState(String(row.qty_total ?? ''))
   const [saved, setSaved] = useState(false)
-
-  // A realtime stock change from someone else's sale must not fight what this
-  // person is currently typing, so the field only re-syncs when it is untouched.
-  useEffect(() => {
-    setValue(String(row.qty_total ?? ''))
-  }, [row.qty_total])
 
   const save = useMutation({
     mutationFn: async (qty: number) => {

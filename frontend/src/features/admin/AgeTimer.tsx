@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNow } from '@/lib/useNow'
 
 /**
  * Counts up from created_at, amber past 10 minutes, red past 20.
@@ -11,13 +11,8 @@ import { useTranslation } from 'react-i18next'
  */
 export function AgeTimer({ createdAt }: { createdAt: string }) {
   const { t } = useTranslation('admin')
-  const [minutes, setMinutes] = useState(() => minutesSince(createdAt))
-
-  useEffect(() => {
-    setMinutes(minutesSince(createdAt))
-    const id = setInterval(() => setMinutes(minutesSince(createdAt)), 30_000)
-    return () => clearInterval(id)
-  }, [createdAt])
+  const now = useNow()
+  const minutes = Math.max(0, Math.floor((now - new Date(createdAt).getTime()) / 60_000))
 
   const tone =
     minutes >= 20
@@ -31,8 +26,4 @@ export function AgeTimer({ createdAt }: { createdAt: string }) {
       {t('minutes', { count: minutes })}
     </span>
   )
-}
-
-function minutesSince(iso: string): number {
-  return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60_000))
 }

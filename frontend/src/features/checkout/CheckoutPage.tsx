@@ -45,9 +45,12 @@ export function CheckoutPage() {
   const { data: zones } = useDeliveryZones()
 
   const [fulfillment, setFulfillment] = useState<Fulfillment>('pickup')
-  const [pointId, setPointId] = useState('')
-  const [slotId, setSlotId] = useState('')
-  const [zoneId, setZoneId] = useState('')
+  // Picked values, empty until someone chooses. The first option is the
+  // default, derived below rather than written back in an effect — an effect
+  // would render one frame with nothing selected and a disabled submit.
+  const [pickedPoint, setPickedPoint] = useState('')
+  const [pickedSlot, setPickedSlot] = useState('')
+  const [pickedZone, setPickedZone] = useState('')
   const [location, setLocation] = useState('')
   const [name, setName] = useState('')
   const [room, setRoom] = useState('')
@@ -59,12 +62,6 @@ export function CheckoutPage() {
   // of an idempotency key. A double-tap or a retry after a dropped connection
   // must return the first order rather than create a second one.
   const [requestId] = useState(() => crypto.randomUUID())
-
-  useEffect(() => {
-    if (points?.length && !pointId) setPointId(points[0]!.id)
-    if (slots?.length && !slotId) setSlotId(slots[0]!.id)
-    if (zones?.length && !zoneId) setZoneId(zones[0]!.id)
-  }, [points, slots, zones, pointId, slotId, zoneId])
 
   useEffect(() => {
     if (cart.lines.length === 0) void navigate('/cart', { replace: true })
@@ -82,6 +79,10 @@ export function CheckoutPage() {
       return sum + (Number(setById.get(line.set_id)?.price ?? 0) + extras) * line.quantity
     }, 0)
   }, [cart.lines, sets, addons])
+
+  const pointId = pickedPoint || points?.[0]?.id || ''
+  const slotId = pickedSlot || slots?.[0]?.id || ''
+  const zoneId = pickedZone || zones?.[0]?.id || ''
 
   const zone = zones?.find((z) => z.id === zoneId)
   const deliveryFee = fulfillment === 'delivery' ? Number(zone?.fee ?? 0) : 0
@@ -179,7 +180,7 @@ export function CheckoutPage() {
             <Select
               label={t('checkout:pickupPoint')}
               value={pointId}
-              onChange={setPointId}
+              onChange={setPickedPoint}
               options={points.map((p) => ({
                 value: p.id,
                 label: p.detail ? `${p.name} · ${p.detail}` : p.name,
@@ -188,7 +189,7 @@ export function CheckoutPage() {
             <Select
               label={t('checkout:pickupSlot')}
               value={slotId}
-              onChange={setSlotId}
+              onChange={setPickedSlot}
               options={slots.map((s) => ({ value: s.id, label: s.label }))}
             />
           </>
@@ -198,7 +199,7 @@ export function CheckoutPage() {
               <Select
                 label={t('checkout:zone')}
                 value={zoneId}
-                onChange={setZoneId}
+                onChange={setPickedZone}
                 options={zones.map((z) => ({
                   value: z.id,
                   label: `${z.name} · ${money.format(Number(z.fee))}`,

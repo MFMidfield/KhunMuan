@@ -1,3 +1,8 @@
+/* eslint-disable react-refresh/only-export-components --
+   The provider and its hook belong together: the theme context object is a
+   private implementation detail and exporting it would invite reading the
+   context directly, skipping the null check the hook exists to make. The cost
+   is a full reload instead of hot-reload when editing this one file. */
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { STORAGE_KEYS, removeLocal } from './storage'
