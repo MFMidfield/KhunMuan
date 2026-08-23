@@ -6,6 +6,7 @@ import { en } from './locales/en'
 export const NAMESPACES = [
   'common',
   'menu',
+  'build',
   'cart',
   'checkout',
   'tracking',

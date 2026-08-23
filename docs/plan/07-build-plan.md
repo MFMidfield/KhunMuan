@@ -247,11 +247,52 @@ run with `npm run test:orders`.
       once by the RPC and never selectable
 - [x] `sets.daily_limit` and `pickup_slots.capacity` actually enforced — both
       columns existed and neither did anything
+- [x] `lookup_order(code, client_token)` — two views from one function. With the
+      token: everything. With the code alone: status, contents, pickup point,
+      slot and total, and **never** the name, room, phone or delivery address.
+      24-hour expiry after the order stops being in flight
 - [ ] `seed.sql` holds a **[DEV] fixture, not shop data**. Q4–Q7 and Q11–Q12 are
       still open, and the prefix is what will make the replacement obvious
-- [ ] Menu screen, set builder (doc 04 §2), cart, checkout
-- [ ] Checkout hides the zone selector while exactly one zone is active
-- [ ] Tracking page on Realtime, code stored in `localStorage` for "my orders"
+- [x] Menu screen — 1 card per row on a phone, 2 on a tablet, 3 on a desktop,
+      shop-closed banner, cart badge in the header
+- [x] Set builder (doc 04 §2): sticky quota header with a progress bar, chosen
+      fillings as a tappable chip row, 2/3/4 filling cards per row, sauces and
+      utensils, note, sticky action bar. Out-of-stock fillings are **dimmed and
+      labelled `หมดวันนี้`, never hidden**, and every disabled `+` says which of
+      the three caps it hit — quota, `max_per_set`, or today's stock
+- [x] Cart — quantity steppers, per-line edit that reopens the builder with the
+      line loaded, remove, running subtotal
+- [x] Checkout — pickup/delivery, contact block only for delivery, payment
+      method, server-error codes mapped to Thai sentences that name the chip to
+      change, idempotency key generated once per checkout rather than per click
+- [x] Checkout hides the zone selector while exactly one zone is active
+- [x] Tracking page — the code at 3rem with a copy button, a five-node vertical
+      stepper, contents, payment state, and a cancel button that only exists
+      while the window is open
+- [x] "My orders" from `localStorage`, plus a code lookup box that **rejects**
+      `I L O 0 1` with a hint rather than silently correcting them
+- [ ] Realtime on the tracking page. It polls every 10s for now; the customer
+      channel arrives with the `track` Edge Function in Phase 3, which is also
+      where the rate limit that makes a public lookup safe lives
+- [ ] Slip upload — needs the `slips` bucket and a signed-upload Edge Function,
+      both Phase 3
+
+**Checks that run:**
+
+```
+backend  npm run test:orders       35 assertions, all passing
+backend  npm run test:order-code   full domain walk, all properties hold
+frontend npm run build             clean
+```
+
+Plus three project rules verified by grep after every change: no string literal
+in JSX, no hard-coded hex outside `index.css`, no `max-*` breakpoint variants.
+All 122 literal `t()` keys in the app resolve against `th.ts`.
+
+**Not verified:** rendered output. There is no browser driver attached to this
+environment, so the build, the type check, every module's Vite transform and
+every route's response were checked, but nobody has looked at the screens. They
+need a pass at the four widths in doc 04 §9 before Phase 1 can be called done.
 
 **35 assertions, all passing, exercised over REST as the anonymous client** —
 not through psql as a superuser, which would skip the grants and RLS that are

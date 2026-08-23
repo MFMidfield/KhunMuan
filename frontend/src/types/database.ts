@@ -780,6 +780,10 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_superadmin: { Args: never; Returns: boolean }
+      lookup_order: {
+        Args: { p_client_token?: string; p_code: string }
+        Returns: Json
+      }
       place_order: { Args: { p_payload: Json }; Returns: Json }
       shop_today: { Args: never; Returns: string }
     }

@@ -6,6 +6,12 @@ import { Placeholder } from './Placeholder'
 import { RouteError } from './RouteError'
 import { LoginPage } from '@/features/admin/LoginPage'
 import { BoardPage } from '@/features/admin/BoardPage'
+import { MenuPage } from '@/features/menu/MenuPage'
+import { BuilderPage } from '@/features/builder/BuilderPage'
+import { CartPage } from '@/features/cart/CartPage'
+import { CheckoutPage } from '@/features/checkout/CheckoutPage'
+import { TrackingPage } from '@/features/tracking/TrackingPage'
+import { MyOrdersPage } from '@/features/tracking/MyOrdersPage'
 
 // Route table from doc 04 §1. Screens land phase by phase; the shells are here
 // from the start so the guards and navigation are exercised for real.
@@ -14,13 +20,15 @@ export const router = createBrowserRouter([
     element: <CustomerLayout />,
     errorElement: <RouteError />,
     children: [
-      { path: '/', element: <Placeholder titleKey="menu" phase={1} /> },
-      { path: '/build/:setId', element: <Placeholder titleKey="build" phase={1} /> },
-      { path: '/cart', element: <Placeholder titleKey="cart" phase={1} /> },
-      { path: '/checkout', element: <Placeholder titleKey="checkout" phase={1} /> },
-      { path: '/checkout/slip/:code', element: <Placeholder titleKey="slip" phase={1} /> },
-      { path: '/o/:code', element: <Placeholder titleKey="tracking" phase={1} /> },
-      { path: '/my-orders', element: <Placeholder titleKey="myOrders" phase={1} /> },
+      { path: '/', element: <MenuPage /> },
+      { path: '/build/:setId', element: <BuilderPage /> },
+      { path: '/cart', element: <CartPage /> },
+      { path: '/checkout', element: <CheckoutPage /> },
+      // Slip upload needs the `slips` bucket and a signed-upload Edge Function,
+      // both of which land in Phase 3.
+      { path: '/checkout/slip/:code', element: <Placeholder titleKey="slip" phase={3} /> },
+      { path: '/o/:code', element: <TrackingPage /> },
+      { path: '/my-orders', element: <MyOrdersPage /> },
     ],
   },
 
