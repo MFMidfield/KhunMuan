@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -19,6 +20,7 @@ export function OrderCard({
   isNew,
   onSeen,
   showStatus = false,
+  linkToDetail = true,
 }: {
   order: BoardOrder
   currentAdminId: string | null
@@ -26,6 +28,7 @@ export function OrderCard({
   isNew: boolean
   onSeen: () => void
   showStatus?: boolean
+  linkToDetail?: boolean
 }) {
   const { t } = useTranslation(['admin', 'tracking', 'common'])
   const claim = useClaim()
@@ -68,7 +71,18 @@ export function OrderCard({
       ].join(' ')}
     >
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="tnum text-xl font-semibold tracking-wide">{order.code}</span>
+        {/* The code doubles as the way into the order's history. On the detail
+            page it is already there, so it stops being a link to itself. */}
+        {linkToDetail ? (
+          <Link
+            to={`/admin/orders/${order.id}`}
+            className="tnum text-xl font-semibold tracking-wide hover:underline"
+          >
+            {order.code}
+          </Link>
+        ) : (
+          <span className="tnum text-xl font-semibold tracking-wide">{order.code}</span>
+        )}
         {showStatus && <StatusBadge status={order.status} />}
         {isNew && (
           <span className="rounded-full border-[1.5px] border-gold-edge bg-gold-fill px-2 py-0.5 text-[0.7rem] font-semibold text-ink">

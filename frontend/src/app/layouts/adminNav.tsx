@@ -85,7 +85,10 @@ export const SECONDARY_LINKS: AdminLink[] = [
     to: '/admin/settings',
     key: 'settings',
     end: false,
-    superadmin: true,
+    // Visible to every admin, because open/close lives here and doc 04 §1 puts
+    // that in ordinary staff hands. The superadmin-only editors on this screen
+    // gate themselves inside the page.
+    superadmin: false,
     icon: icon(
       <>
         <circle cx="12" cy="12" r="3" />

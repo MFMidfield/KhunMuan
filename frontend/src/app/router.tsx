@@ -6,6 +6,9 @@ import { Placeholder } from './Placeholder'
 import { RouteError } from './RouteError'
 import { LoginPage } from '@/features/admin/LoginPage'
 import { BoardPage } from '@/features/admin/BoardPage'
+import { StockPage } from '@/features/admin/StockPage'
+import { OrderDetailPage } from '@/features/admin/OrderDetailPage'
+import { SettingsPage } from '@/features/admin/SettingsPage'
 import { MenuPage } from '@/features/menu/MenuPage'
 import { BuilderPage } from '@/features/builder/BuilderPage'
 import { CartPage } from '@/features/cart/CartPage'
@@ -42,12 +45,14 @@ export const router = createBrowserRouter([
         element: <AdminLayout />,
         children: [
           { path: '/admin', element: <BoardPage /> },
-          {
-            path: '/admin/orders/:id',
-            element: <Placeholder titleKey="orderDetail" phase={2} />,
-          },
+          { path: '/admin/orders/:id', element: <OrderDetailPage /> },
           { path: '/admin/new', element: <Placeholder titleKey="newOrder" phase={2} /> },
-          { path: '/admin/stock', element: <Placeholder titleKey="stock" phase={2} /> },
+          { path: '/admin/stock', element: <StockPage /> },
+          // Open/close is an ordinary admin power (doc 04 §1): whoever is on
+          // shift when the last tray runs out has to be able to stop the queue
+          // without phoning the owner. The superadmin-only editors on this
+          // screen arrive in Phase 4.
+          { path: '/admin/settings', element: <SettingsPage /> },
         ],
       },
     ],
@@ -61,7 +66,6 @@ export const router = createBrowserRouter([
         element: <AdminLayout />,
         children: [
           { path: '/admin/menu', element: <Placeholder titleKey="adminMenu" phase={4} /> },
-          { path: '/admin/settings', element: <Placeholder titleKey="settings" phase={2} /> },
           { path: '/admin/reports', element: <Placeholder titleKey="reports" phase={4} /> },
           { path: '/admin/staff', element: <Placeholder titleKey="staff" phase={4} /> },
         ],

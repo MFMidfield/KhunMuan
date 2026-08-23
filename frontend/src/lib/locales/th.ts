@@ -235,6 +235,18 @@ export const th = {
     reasonDetail: 'อธิบายเพิ่ม',
     reasonDetailOptional: 'ไม่บังคับ',
 
+    history: 'ประวัติ',
+    orderNotFound: 'ไม่พบออเดอร์นี้',
+    eventType: {
+      created: 'สร้างออเดอร์',
+      claimed: 'รับงาน',
+      released: 'ปล่อยงาน',
+      status_changed: 'เปลี่ยนสถานะ',
+      payment_confirmed: 'อัปเดตการชำระเงิน',
+      edited: 'แก้ไข',
+      cancelled: 'ยกเลิก',
+    },
+
     stockTitle: 'สต็อกวันนี้',
     stockTotal: 'ตั้งไว้',
     stockLeft: 'เหลือ',
