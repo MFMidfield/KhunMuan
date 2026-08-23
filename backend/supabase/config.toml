@@ -392,8 +392,11 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
-# [edge_runtime.secrets]
-# secret_key = "env(SECRET_VALUE)"
+[edge_runtime.secrets]
+# Per environment, and never committed. Hashing an IPv4 address without a salt
+# is not anonymisation: there are only four billion of them, so a plain SHA-256
+# is reversible with a lookup table anyone can build in an afternoon.
+LOOKUP_IP_SALT = "env(LOOKUP_IP_SALT)"
 
 [analytics]
 enabled = true

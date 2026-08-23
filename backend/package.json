@@ -2,7 +2,7 @@
   "name": "khunmuan-backend",
   "private": true,
   "version": "0.0.0",
-  "description": "Supabase project for KhunMuan — migrations, edge functions, seed",
+  "description": "Supabase project for KhunMuan \u2014 migrations, edge functions, seed",
   "scripts": {
     "start": "supabase start",
     "stop": "supabase stop",
@@ -16,7 +16,8 @@
     "test:back-office": "supabase db reset >/dev/null && node tests/back_office.test.mjs",
     "test:tracking": "supabase db reset >/dev/null && node tests/tracking_broadcast.test.mjs",
     "test:config": "supabase db reset >/dev/null && node tests/config_crud.test.mjs",
-    "test": "npm run test:order-code && npm run test:orders && npm run test:back-office && npm run test:config && npm run test:tracking"
+    "test": "npm run test:order-code && npm run test:orders && npm run test:back-office && npm run test:config && npm run test:tracking && npm run test:rate-limit",
+    "test:rate-limit": "supabase db reset >/dev/null && node tests/rate_limit.test.mjs"
   },
   "devDependencies": {
     "supabase": "^2.60.4"

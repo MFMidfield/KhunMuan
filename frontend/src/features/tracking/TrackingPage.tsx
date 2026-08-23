@@ -68,14 +68,22 @@ export function TrackingPage() {
     refetchInterval: 30_000,
     retry: false,
     queryFn: async (): Promise<LookupResult> => {
-      const { data, error } = await supabase.rpc('lookup_order', {
-        p_code: code,
-        // Omitted rather than sent as null when this device did not place the
-        // order — that is what selects the reduced view server-side.
-        ...(token ? { p_client_token: token } : {}),
+      // Through the Edge Function, not the RPC. `lookup_order` is no longer
+      // callable by anon at all: a plain RPC is never told the caller's IP, and
+      // the rate limit that makes a public code lookup survivable is per-IP.
+      const { data, error } = await supabase.functions.invoke<LookupResult>('track', {
+        body: { code, client_token: token },
       })
-      if (error) throw error
-      return data as unknown as LookupResult
+
+      if (error) {
+        // The function answers 4xx with a machine code in the body; the SDK
+        // hands back a FunctionsHttpError whose response still has to be read.
+        const response = (error as { context?: Response }).context
+        const detail = response ? await response.json().catch(() => null) : null
+        throw new Error(detail?.message ?? 'ORDER_NOT_FOUND')
+      }
+
+      return data as LookupResult
     },
   })
 
@@ -120,7 +128,11 @@ export function TrackingPage() {
     return (
       <Card className="p-5">
         <p className="text-ink-muted">
-          {message === 'ORDER_EXPIRED' ? t('tracking:expired') : t('tracking:notFound')}
+          {message === 'ORDER_EXPIRED'
+            ? t('tracking:expired')
+            : message === 'RATE_LIMITED' || message === 'IP_BLOCKED'
+              ? t('tracking:rateLimited')
+              : t('tracking:notFound')}
         </p>
       </Card>
     )

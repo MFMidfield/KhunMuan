@@ -25,8 +25,14 @@ const placed=await rpc('place_order',{p_payload:{client_request_id:crypto.random
   pickup_point_id:'c0000000-0000-4000-8000-000000000001',pickup_slot_id:'50000000-0000-4000-8000-000000000001',
   payment_method:'cash',items:[{set_id:'5e000000-0000-4000-8000-000000000001',quantity:1,
   fillings:[{filling_id:'f1000000-0000-4000-8000-000000000004',qty:5}]}]}})
-const look=await rpc('lookup_order',{p_code:placed.b.code,p_client_token:placed.b.client_token})
-const id=look.b.id
+// Through the Edge Function, because anon lost direct access to lookup_order
+// in migration 0018 — which is exactly how the real tracking page resolves a
+// code into the order id it then subscribes to.
+const look=await fetch(`${URL}/functions/v1/track`,{method:'POST',
+  headers:{apikey:ANON,Authorization:`Bearer ${ANON}`,'Content-Type':'application/json',
+           'x-forwarded-for':'203.0.113.77'},
+  body:JSON.stringify({code:placed.b.code,client_token:placed.b.client_token})}).then(r=>r.json())
+const id=look.id
 console.log('order', placed.b.code, 'id', id)
 
 const got=[]
