@@ -10,6 +10,8 @@
 // stock, slot capacity and a daily set limit on purpose. Those are exactly the
 // finite resources whose exhaustion is being tested, so the suite is not
 // idempotent against a database it has already run on.
+import crypto from 'node:crypto'
+
 const URL = 'http://127.0.0.1:54321/rest/v1'
 const ANON =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
@@ -67,6 +69,42 @@ const pickup = (items, extra = {}) => ({
 })
 
 const fill = (id, qty) => ({ filling_id: id, qty })
+
+/** A signed-in superadmin, for the parts of the suite that need one. */
+function mintStaff(email = 'midfieldkanis1@gmail.com') {
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url')
+  const now = Math.floor(Date.now() / 1000)
+  const h = b64({ alg: 'HS256', typ: 'JWT' })
+  const p = b64({
+    iss: 'supabase-demo',
+    role: 'authenticated',
+    aud: 'authenticated',
+    sub: crypto.randomUUID(),
+    email,
+    iat: now,
+    exp: now + 3600,
+  })
+  const s = crypto
+    .createHmac('sha256', 'super-secret-jwt-token-with-at-least-32-characters-long')
+    .update(`${h}.${p}`)
+    .digest('base64url')
+  return `${h}.${p}.${s}`
+}
+
+/** The minimum and the cap live in shop_settings, editable in the back office. */
+async function setRules(patch, token) {
+  const res = await fetch(`${URL}/shop_settings?id=eq.1`, {
+    method: 'PATCH',
+    headers: {
+      apikey: ANON,
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(patch),
+  })
+  if (!res.ok) throw new Error(`setRules failed: ${res.status} ${await res.text()}`)
+}
 
 async function main() {
   console.log('\n— happy path —')
@@ -248,6 +286,60 @@ async function main() {
     limitRace.filter((r) => r.status === 200).length === 2,
     String(limitRace.filter((r) => r.status === 200).length),
   )
+
+  console.log('\n— shop-configurable rules (Q10, Q12) —')
+  // These are null in the seed, so they are switched on here, exercised, and
+  // switched back off. Leaving them on would change what every other assertion
+  // in this file means.
+  const SLOT_CLOSED_ALWAYS = '50000000-0000-4000-8000-000000000004'
+  const staffToken = mintStaff()
+
+  const closed = await rpc('place_order', {
+    p_payload: {
+      client_request_id: crypto.randomUUID(),
+      fulfillment: 'pickup',
+      pickup_point_id: POINT,
+      pickup_slot_id: SLOT_CLOSED_ALWAYS,
+      payment_method: 'cash',
+      items: [{ set_id: SET_SMALL, quantity: 1, fillings: [fill(F_D, 5)] }],
+    },
+  })
+  ok('a slot past its cutoff → SLOT_CLOSED', closed.body?.message === 'SLOT_CLOSED')
+
+  const staffLate = await rpc(
+    'place_order',
+    {
+      p_payload: {
+        client_request_id: crypto.randomUUID(),
+        fulfillment: 'pickup',
+        pickup_point_id: POINT,
+        pickup_slot_id: SLOT_CLOSED_ALWAYS,
+        payment_method: 'cash',
+        items: [{ set_id: SET_SMALL, quantity: 1, fillings: [fill(F_D, 5)] }],
+      },
+    },
+    staffToken,
+  )
+  ok('staff are exempt from the cutoff', staffLate.status === 200, JSON.stringify(staffLate.body))
+
+  await setRules({ min_order_total: 150, max_boxes_per_order: 3 }, staffToken)
+
+  const tooSmall = await rpc('place_order', { p_payload: pickup([
+    { set_id: SET_SMALL, quantity: 1, fillings: [fill(F_D, 5)] },
+  ]) })
+  ok('below the minimum → BELOW_MINIMUM', tooSmall.body?.message === 'BELOW_MINIMUM')
+
+  const bigEnough = await rpc('place_order', { p_payload: pickup([
+    { set_id: SET_SMALL, quantity: 2, fillings: [fill(F_D, 5)] },
+  ]) })
+  ok('two boxes clear it', bigEnough.status === 200, JSON.stringify(bigEnough.body))
+
+  const tooMany = await rpc('place_order', { p_payload: pickup([
+    { set_id: SET_SMALL, quantity: 4, fillings: [fill(F_D, 5)] },
+  ]) })
+  ok('over the box cap → TOO_MANY_BOXES', tooMany.body?.message === 'TOO_MANY_BOXES')
+
+  await setRules({ min_order_total: null, max_boxes_per_order: null }, staffToken)
 
   console.log('\n— anon still cannot read anything —')
   const peek = await fetch(`${URL}/orders?select=code,customer_phone`, {

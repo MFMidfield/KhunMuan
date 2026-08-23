@@ -43,6 +43,12 @@ insert into public.pickup_slots (id, label, starts_at_local, capacity) values
   -- already eaten into.
   ('50000000-0000-4000-8000-000000000003', '[DEV] 12:30–12:45', '12:30', 2);
 
+-- A slot whose cutoff has always already passed, so the SLOT_CLOSED rule can be
+-- asserted at any hour the tests happen to run. The others leave cutoff_minutes
+-- null, which means no automatic cutoff at all.
+insert into public.pickup_slots (id, label, starts_at_local, cutoff_minutes) values
+  ('50000000-0000-4000-8000-000000000004', '[DEV] 00:00 ปิดรับไปแล้ว', '00:00', 0);
+
 -- --- Menu -------------------------------------------------------------------
 
 insert into public.sets

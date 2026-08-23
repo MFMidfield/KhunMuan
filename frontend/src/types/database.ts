@@ -685,6 +685,7 @@ export type Database = {
         Row: {
           capacity: number | null
           created_at: string
+          cutoff_minutes: number | null
           id: string
           is_active: boolean
           label: string
@@ -694,6 +695,7 @@ export type Database = {
         Insert: {
           capacity?: number | null
           created_at?: string
+          cutoff_minutes?: number | null
           id?: string
           is_active?: boolean
           label: string
@@ -703,6 +705,7 @@ export type Database = {
         Update: {
           capacity?: number | null
           created_at?: string
+          cutoff_minutes?: number | null
           id?: string
           is_active?: boolean
           label?: string
@@ -762,8 +765,11 @@ export type Database = {
           id: number
           is_open: boolean
           line_notify_enabled: boolean
+          max_boxes_per_order: number | null
+          min_order_total: number | null
           order_code_alphabet: string
           order_code_length: number
+          promptpay_qr_path: string | null
           require_code_on_handover: boolean
           updated_at: string
           updated_by: string | null
@@ -776,8 +782,11 @@ export type Database = {
           id: number
           is_open?: boolean
           line_notify_enabled?: boolean
+          max_boxes_per_order?: number | null
+          min_order_total?: number | null
           order_code_alphabet?: string
           order_code_length?: number
+          promptpay_qr_path?: string | null
           require_code_on_handover?: boolean
           updated_at?: string
           updated_by?: string | null
@@ -790,8 +799,11 @@ export type Database = {
           id?: number
           is_open?: boolean
           line_notify_enabled?: boolean
+          max_boxes_per_order?: number | null
+          min_order_total?: number | null
           order_code_alphabet?: string
           order_code_length?: number
+          promptpay_qr_path?: string | null
           require_code_on_handover?: boolean
           updated_at?: string
           updated_by?: string | null
