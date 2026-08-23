@@ -235,6 +235,19 @@ export const th = {
     reasonDetail: 'อธิบายเพิ่ม',
     reasonDetailOptional: 'ไม่บังคับ',
 
+    newTitle: 'คีย์ออเดอร์ทางโทรศัพท์',
+    pickSet: 'เลือกเซต',
+    addBox: 'เพิ่มกล่องนี้',
+    boxes: 'กล่องในออเดอร์',
+    noBoxes: 'ยังไม่ได้ใส่กล่อง',
+    removeBox: 'เอาออก',
+    acceptNow: 'รับออเดอร์ให้เลย',
+    acceptNowHelp: 'ข้ามขั้นรอยืนยัน เพราะคุยกับลูกค้าอยู่แล้ว',
+    submitOrder: 'สร้างออเดอร์',
+    submitting: 'กำลังสร้าง…',
+    createdCode: 'สร้างแล้ว รหัส {{code}}',
+    acceptFailed: 'สร้างออเดอร์แล้ว แต่กดรับให้ไม่สำเร็จ ไปกดที่บอร์ดอีกที',
+
     history: 'ประวัติ',
     orderNotFound: 'ไม่พบออเดอร์นี้',
     eventType: {

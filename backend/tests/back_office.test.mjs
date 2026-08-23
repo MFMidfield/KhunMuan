@@ -355,6 +355,20 @@ async function main() {
   )
   ok('it is recorded as an admin-entered order', keyedIn.source === 'admin')
   ok('and it remembers who keyed it in', keyedIn.created_by_admin !== null)
+
+  // What /admin/new does when "รับออเดอร์ให้เลย" is ticked: place, then accept
+  // in a second call. place_order always starts at pending_confirmation, and a
+  // freshly placed order is therefore always at version 0.
+  const acceptedAtOnce = await rpc(
+    'advance_order',
+    { p_order_id: staffStillCan.id, p_to_status: 'accepted', p_expected_version: 0 },
+    A,
+  )
+  ok(
+    'a just-placed order accepts at version 0',
+    acceptedAtOnce.body?.status === 'accepted',
+    JSON.stringify(acceptedAtOnce.body),
+  )
   await rpc('toggle_shop', { p_is_open: true }, A)
 
   console.log(`\n${pass} passed, ${fail} failed\n`)

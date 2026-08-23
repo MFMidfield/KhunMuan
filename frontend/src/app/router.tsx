@@ -7,6 +7,7 @@ import { RouteError } from './RouteError'
 import { LoginPage } from '@/features/admin/LoginPage'
 import { BoardPage } from '@/features/admin/BoardPage'
 import { StockPage } from '@/features/admin/StockPage'
+import { NewOrderPage } from '@/features/admin/NewOrderPage'
 import { OrderDetailPage } from '@/features/admin/OrderDetailPage'
 import { SettingsPage } from '@/features/admin/SettingsPage'
 import { MenuPage } from '@/features/menu/MenuPage'
@@ -46,7 +47,7 @@ export const router = createBrowserRouter([
         children: [
           { path: '/admin', element: <BoardPage /> },
           { path: '/admin/orders/:id', element: <OrderDetailPage /> },
-          { path: '/admin/new', element: <Placeholder titleKey="newOrder" phase={2} /> },
+          { path: '/admin/new', element: <NewOrderPage /> },
           { path: '/admin/stock', element: <StockPage /> },
           // Open/close is an ordinary admin power (doc 04 §1): whoever is on
           // shift when the last tray runs out has to be able to stop the queue
