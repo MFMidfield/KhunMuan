@@ -1,25 +1,20 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '@/lib/supabase'
-import { qk } from '@/lib/queryClient'
-import { useBreakpoint } from '@/lib/useBreakpoint'
 import { Card } from '@/components/ui/Card'
 import { PageSpinner } from '@/components/ui/Spinner'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { useBreakpoint } from '@/lib/useBreakpoint'
+import { STORAGE_KEYS, readLocal, writeLocal } from '@/lib/storage'
+import { z } from 'zod'
+import { useSession } from '@/features/auth/useSession'
+import { useCurrentAdmin } from '@/features/auth/useCurrentAdmin'
+import { useShopSettingsAdmin } from './useShopSettingsAdmin'
+import { ACTIVE_STATUSES, useOrderBoard } from './useOrderBoard'
+import { OrderCard } from './OrderCard'
+import type { BoardOrder } from './useOrderBoard'
 import type { Database } from '@/types/database'
 
 type OrderStatus = Database['public']['Enums']['order_status']
-type BoardOrder = {
-  id: string
-  code: string
-  status: OrderStatus
-  total: number
-  created_at: string
-  claimed_by: string | null
-}
-
-const COLUMNS: OrderStatus[] = ['pending_confirmation', 'accepted', 'cooking', 'ready']
 
 /** Tablet shows two columns at a time; these are the pairs it swaps between. */
 const PAIRS: [OrderStatus, OrderStatus][] = [
@@ -27,70 +22,96 @@ const PAIRS: [OrderStatus, OrderStatus][] = [
   ['cooking', 'ready'],
 ]
 
-/**
- * One query, three presentations — the split doc 04 §3 asks for, extended to
- * the tablet the original text never covered.
- *
- *   phone   one list, sticky status filter chips. Six staff on phones need one
- *           column and big tap targets, not four squeezed ones.
- *   tablet  two Kanban columns, chips swap which pair is on screen.
- *   desktop all four columns.
- */
 export function BoardPage() {
   const { t } = useTranslation('admin')
   const breakpoint = useBreakpoint()
+  const { session } = useSession()
+  const { data: admin } = useCurrentAdmin(session?.user.email)
+  const { data: settings } = useShopSettingsAdmin()
+  const board = useOrderBoard()
+  const chime = useChime(board.orders.length, board.unseen.size)
 
-  const { data, isPending, error } = useQuery({
-    queryKey: qk.orders('active'),
-    queryFn: async (): Promise<BoardOrder[]> => {
-      const { data: rows, error: queryError } = await supabase
-        .from('orders')
-        .select('id, code, status, total, created_at, claimed_by')
-        .in('status', COLUMNS)
-        .order('created_at', { ascending: true })
-
-      if (queryError) throw queryError
-      return rows
-    },
-  })
-
-  if (isPending) return <PageSpinner />
-  if (error) {
+  if (board.isPending) return <PageSpinner />
+  if (board.error) {
     return (
-      <Card className="p-4 text-st-cancel-fg">
-        <p className="break-words">{error.message}</p>
+      <Card className="p-4">
+        <p className="break-words text-st-cancel-fg">{board.error.message}</p>
       </Card>
     )
   }
 
-  if (breakpoint === 'phone') return <PhoneList orders={data} emptyLabel={t('boardEmpty')} />
-  if (breakpoint === 'tablet') return <TabletBoard orders={data} emptyLabel={t('boardEmpty')} />
-  return <DesktopBoard orders={data} emptyLabel={t('boardEmpty')} />
-}
-
-/* ---------------------------------------------------------------- phone -- */
-
-function PhoneList({ orders, emptyLabel }: { orders: BoardOrder[]; emptyLabel: string }) {
-  const { t } = useTranslation('admin')
-  const [filter, setFilter] = useState<OrderStatus | 'all'>('all')
-  const shown = filter === 'all' ? orders : orders.filter((o) => o.status === filter)
+  const cardProps = {
+    currentAdminId: admin?.id ?? null,
+    // The switch is enforced inside advance_order; this only decides whether
+    // the card shows the field, so a stale read here cannot let anything past.
+    requireCodeOnHandover: settings?.require_code_on_handover ?? true,
+    unseen: board.unseen,
+    markSeen: board.markSeen,
+  }
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Sticky under the header, so the filter is reachable however far the
-          list has been scrolled. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <ConnectionDot connected={board.connected} />
+        {!chime.enabled && (
+          <button
+            type="button"
+            onClick={chime.enable}
+            className="min-h-9 rounded-full border border-border bg-surface px-3 text-[0.85rem] text-ink-muted"
+          >
+            {t('soundEnable')}
+          </button>
+        )}
+      </div>
+
+      {breakpoint === 'phone' && <PhoneList board={board} {...cardProps} />}
+      {breakpoint === 'tablet' && <TabletBoard board={board} {...cardProps} />}
+      {breakpoint === 'desktop' && <DesktopBoard board={board} {...cardProps} />}
+    </div>
+  )
+}
+
+type BoardData = ReturnType<typeof useOrderBoard>
+interface CardProps {
+  currentAdminId: string | null
+  requireCodeOnHandover: boolean
+  unseen: Set<string>
+  markSeen: (id: string) => void
+}
+
+function renderCard(order: BoardOrder, p: CardProps, showStatus = false) {
+  return (
+    <OrderCard
+      key={order.id}
+      order={order}
+      currentAdminId={p.currentAdminId}
+      requireCodeOnHandover={p.requireCodeOnHandover}
+      isNew={p.unseen.has(order.id)}
+      onSeen={() => p.markSeen(order.id)}
+      showStatus={showStatus}
+    />
+  )
+}
+
+function PhoneList({ board, ...p }: { board: BoardData } & CardProps) {
+  const { t } = useTranslation('admin')
+  const [filter, setFilter] = useState<OrderStatus | 'all'>('all')
+  const shown = filter === 'all' ? board.orders : board.orders.filter((o) => o.status === filter)
+
+  return (
+    <div className="flex flex-col gap-3">
       <div className="scroll-strip sticky top-14 z-20 -mx-3 flex gap-2 bg-ground px-3 py-2">
-        <FilterChip
+        <Chip
           label={t('filterAll')}
-          count={orders.length}
+          count={board.orders.length}
           active={filter === 'all'}
           onClick={() => setFilter('all')}
         />
-        {COLUMNS.map((status) => (
-          <FilterChip
+        {ACTIVE_STATUSES.map((status) => (
+          <Chip
             key={status}
             status={status}
-            count={orders.filter((o) => o.status === status).length}
+            count={board.orders.filter((o) => o.status === status).length}
             active={filter === status}
             onClick={() => setFilter(status)}
           />
@@ -98,17 +119,15 @@ function PhoneList({ orders, emptyLabel }: { orders: BoardOrder[]; emptyLabel: s
       </div>
 
       {shown.length === 0 ? (
-        <EmptyCard label={emptyLabel} />
+        <EmptyCard />
       ) : (
-        shown.map((order) => <OrderCard key={order.id} order={order} showStatus />)
+        shown.map((o) => renderCard(o, p, true))
       )}
     </div>
   )
 }
 
-/* --------------------------------------------------------------- tablet -- */
-
-function TabletBoard({ orders, emptyLabel }: { orders: BoardOrder[]; emptyLabel: string }) {
+function TabletBoard({ board, ...p }: { board: BoardData } & CardProps) {
   const { t } = useTranslation('admin')
   const { t: tStatus } = useTranslation('tracking')
   const [pair, setPair] = useState(0)
@@ -121,7 +140,7 @@ function TabletBoard({ orders, emptyLabel }: { orders: BoardOrder[]; emptyLabel:
         aria-label={t('columnPair')}
         className="sticky top-14 z-20 -mx-4 flex gap-2 bg-ground px-4 py-2"
       >
-        {PAIRS.map((p, i) => (
+        {PAIRS.map((columnPair, i) => (
           <button
             key={i}
             role="tab"
@@ -134,85 +153,53 @@ function TabletBoard({ orders, emptyLabel }: { orders: BoardOrder[]; emptyLabel:
                 : 'border-border bg-surface text-ink-muted',
             ].join(' ')}
           >
-            {p.map((s) => tStatus(`status.${s}`)).join(' · ')}
+            {columnPair.map((s) => tStatus(`status.${s}`)).join(' · ')}
           </button>
         ))}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {columns.map((status) => (
-          <Column
-            key={status}
-            status={status}
-            orders={orders.filter((o) => o.status === status)}
-            emptyLabel={emptyLabel}
-          />
+          <Column key={status} status={status} board={board} {...p} />
         ))}
       </div>
     </div>
   )
 }
 
-/* -------------------------------------------------------------- desktop -- */
-
-function DesktopBoard({ orders, emptyLabel }: { orders: BoardOrder[]; emptyLabel: string }) {
+function DesktopBoard({ board, ...p }: { board: BoardData } & CardProps) {
   return (
     <div className="grid grid-cols-4 gap-4">
-      {COLUMNS.map((status) => (
-        <Column
-          key={status}
-          status={status}
-          orders={orders.filter((o) => o.status === status)}
-          emptyLabel={emptyLabel}
-        />
+      {ACTIVE_STATUSES.map((status) => (
+        <Column key={status} status={status} board={board} {...p} />
       ))}
     </div>
   )
 }
 
-/* ---------------------------------------------------------------- parts -- */
-
 function Column({
   status,
-  orders,
-  emptyLabel,
-}: {
-  status: OrderStatus
-  orders: BoardOrder[]
-  emptyLabel: string
-}) {
+  board,
+  ...p
+}: { status: OrderStatus; board: BoardData } & CardProps) {
+  const orders = board.orders.filter((o) => o.status === status)
   return (
     <section className="flex min-w-0 flex-col gap-3">
       <div className="flex items-center gap-2">
         <StatusBadge status={status} />
         <span className="tnum text-[0.85rem] text-ink-muted">{orders.length}</span>
       </div>
-
-      {orders.length === 0 ? (
-        <EmptyCard label={emptyLabel} />
-      ) : (
-        orders.map((order) => <OrderCard key={order.id} order={order} />)
-      )}
+      {orders.length === 0 ? <EmptyCard /> : orders.map((o) => renderCard(o, p))}
     </section>
   )
 }
 
-function OrderCard({ order, showStatus = false }: { order: BoardOrder; showStatus?: boolean }) {
-  return (
-    <Card className="p-4">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="tnum text-xl font-semibold tracking-wide">{order.code}</span>
-        {showStatus && <StatusBadge status={order.status} />}
-      </div>
-    </Card>
-  )
+function EmptyCard() {
+  const { t } = useTranslation('admin')
+  return <Card className="p-4 text-[0.9rem] text-ink-muted">{t('boardEmpty')}</Card>
 }
 
-function EmptyCard({ label }: { label: string }) {
-  return <Card className="p-4 text-[0.9rem] text-ink-muted">{label}</Card>
-}
-
-function FilterChip({
+function Chip({
   status,
   label,
   count,
@@ -243,4 +230,77 @@ function FilterChip({
       <span className="tnum text-[0.8rem]">{count}</span>
     </button>
   )
+}
+
+function ConnectionDot({ connected }: { connected: boolean }) {
+  const { t } = useTranslation('admin')
+  return (
+    <span
+      className={[
+        'inline-flex items-center gap-2 text-[0.85rem]',
+        connected ? 'text-ink-muted' : 'text-st-cancel-fg',
+      ].join(' ')}
+    >
+      <span
+        aria-hidden="true"
+        className={[
+          'size-2 rounded-full',
+          connected ? 'bg-st-ready-fg' : 'bg-st-cancel-fg',
+        ].join(' ')}
+      />
+      {connected ? t('liveOn') : t('liveOff')}
+    </span>
+  )
+}
+
+/**
+ * A short chime on a new order, plus an unread count in the tab title.
+ *
+ * Browsers block autoplay until the user has interacted with the page, so
+ * consent is asked for once and remembered. The tab title is free and works
+ * when the board is in a background tab, which during prep it usually is.
+ */
+function useChime(orderCount: number, unseenCount: number) {
+  const { t } = useTranslation('common')
+  const [enabled, setEnabled] = useState(() =>
+    readLocal(STORAGE_KEYS.soundConsent, z.boolean(), false),
+  )
+  const previous = useRef(orderCount)
+
+  useEffect(() => {
+    const name = t('appName')
+    document.title = unseenCount > 0 ? `(${unseenCount}) ${name}` : name
+  }, [unseenCount, t])
+
+  useEffect(() => {
+    const grew = orderCount > previous.current
+    previous.current = orderCount
+    if (!grew || !enabled) return
+
+    try {
+      const ctx = new AudioContext()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.value = 880
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.01)
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35)
+      osc.connect(gain).connect(ctx.destination)
+      osc.start()
+      osc.stop(ctx.currentTime + 0.36)
+      osc.onended = () => void ctx.close()
+    } catch {
+      // No audio device, or a policy still blocking it. The ring and the tab
+      // count carry the alert on their own.
+    }
+  }, [orderCount, enabled])
+
+  return {
+    enabled,
+    enable: () => {
+      setEnabled(true)
+      writeLocal(STORAGE_KEYS.soundConsent, true)
+    },
+  }
 }
