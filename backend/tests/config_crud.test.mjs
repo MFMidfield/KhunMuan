@@ -101,6 +101,50 @@ async function main() {
     body: JSON.stringify({ email: 'evil@example.com', display_name: 'E', role: 'superadmin' }) }, SUPER)
   ok('and cannot create a second one', secondOwner.status === 403)
 
+  console.log('\n— deleting a staff member who has claimed something —')
+  // orders.claimed_by is ON DELETE SET NULL, which used to leave claimed_at
+  // behind and trip the pair constraint with a 400. A before-delete trigger
+  // clears both halves and records why (migration 0017).
+  const [worker] = await (await rest('admin_users', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'delete-me@example.com', display_name: 'มีประวัติ', role: 'admin' }),
+  }, SUPER)).json()
+
+  const order = await (await fetch(`${URL}/rest/v1/rpc/place_order`, {
+    method: 'POST',
+    headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_payload: {
+      client_request_id: crypto.randomUUID(), fulfillment: 'pickup',
+      pickup_point_id: 'c0000000-0000-4000-8000-000000000001',
+      pickup_slot_id: '50000000-0000-4000-8000-000000000001',
+      payment_method: 'cash',
+      items: [{ set_id: '5e000000-0000-4000-8000-000000000001', quantity: 1,
+                fillings: [{ filling_id: 'f1000000-0000-4000-8000-000000000001', qty: 5 }] }],
+    } }),
+  })).json()
+  const [row] = await (await rest(`orders?select=id&code=eq.${order.code}`, {}, SUPER)).json()
+
+  const WORKER = mint('delete-me@example.com')
+  await fetch(`${URL}/rest/v1/rpc/claim_order`, {
+    method: 'POST',
+    headers: { apikey: ANON, Authorization: `Bearer ${WORKER}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_order_id: row.id }),
+  })
+
+  const dropped = await rest(`admin_users?id=eq.${worker.id}`, { method: 'DELETE' }, SUPER)
+  ok('a staff member with history can be deleted', dropped.status === 200, String(dropped.status))
+
+  const [freed] = await (await rest(
+    `orders?select=claimed_by,claimed_at&id=eq.${row.id}`, {}, SUPER)).json()
+  ok('their claim is released, both halves', freed.claimed_by === null && freed.claimed_at === null,
+     JSON.stringify(freed))
+
+  const [ev] = await (await rest(
+    `order_events?select=actor_label,payload&order_id=eq.${row.id}&type=eq.released`, {}, SUPER)).json()
+  ok('and the board can see why it came free',
+     ev?.payload?.reason === 'staff_removed' && ev?.actor_label === 'มีประวัติ',
+     JSON.stringify(ev))
+
   console.log('\n— storage —')
   const png = Buffer.from(
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',

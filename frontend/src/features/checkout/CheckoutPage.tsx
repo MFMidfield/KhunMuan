@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -63,8 +63,18 @@ export function CheckoutPage() {
   // must return the first order rather than create a second one.
   const [requestId] = useState(() => crypto.randomUUID())
 
+  // Set the moment an order comes back, and read by the guard below.
+  //
+  // Without it the two fight: a successful placement clears the cart, the empty
+  // cart trips the guard, and the redirect to /cart wins the race against the
+  // redirect to the tracking page — so the customer's code, the one thing they
+  // are about to be asked for at the counter, never appears.
+  const placed = useRef(false)
+
   useEffect(() => {
-    if (cart.lines.length === 0) void navigate('/cart', { replace: true })
+    if (cart.lines.length === 0 && !placed.current) {
+      void navigate('/cart', { replace: true })
+    }
   }, [cart.lines.length, navigate])
 
   const subtotal = useMemo(() => {
@@ -124,6 +134,7 @@ export function CheckoutPage() {
       return data as unknown as PlaceOrderResult
     },
     onSuccess: (result) => {
+      placed.current = true
       rememberOrder({
         code: result.code,
         client_token: result.client_token,

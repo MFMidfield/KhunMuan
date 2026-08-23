@@ -309,6 +309,7 @@ export const th = {
       staffRole: 'สิทธิ์',
       roleAdmin: 'พนักงาน',
       roleSuperadmin: 'เจ้าของร้าน',
+      roleOnlyStaff: 'เจ้าของร้านมีได้คนเดียว เปลี่ยนได้ที่ฐานข้อมูลเท่านั้น',
       ownerLocked: 'แถวเจ้าของร้านแก้ผ่านหน้านี้ไม่ได้ ต้องแก้ที่ฐานข้อมูลโดยตรง',
       signedInOnce: 'เคยเข้าระบบแล้ว',
       neverSignedIn: 'ยังไม่เคยเข้าระบบ',

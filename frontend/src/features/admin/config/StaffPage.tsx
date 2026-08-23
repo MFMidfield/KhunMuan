@@ -87,6 +87,16 @@ export function StaffPage() {
               onChange={(e) => setDraft({ ...draft, display_name: e.target.value })}
             />
           </Field>
+
+          {/* Shown so the field is visible rather than implied, with the reason
+              it offers one option: the owner tier is unique and RLS refuses to
+              create a second one, so a second entry here would be a control
+              that always fails. */}
+          <Field label={t('admin:cfg.staffRole')} hint={t('admin:cfg.roleOnlyStaff')}>
+            <select className={fieldClass} value="admin" disabled>
+              <option value="admin">{t('admin:cfg.roleAdmin')}</option>
+            </select>
+          </Field>
         </AddRow>
       </EditorList>
     </div>
@@ -126,6 +136,7 @@ function StaffRow({
       </Field>
 
       <p className="text-[0.8rem] text-ink-muted">
+        {t('admin:cfg.roleAdmin')} ·{' '}
         {row.auth_user_id ? t('admin:cfg.signedInOnce') : t('admin:cfg.neverSignedIn')}
       </p>
 
