@@ -19,30 +19,53 @@ was verified.
 | `frontend/` | Tailwind v4 + router + Query + i18n + tokens + auth guard; `npm run build` clean |
 | `docs/PROJECT_MAP.md` | written |
 
-## 1. What is still outstanding
+## 1. Where this stands, and what is left
 
-Q4–Q7 and Q10–Q13 used to live here as data the shop had to hand over. They are
-gone: they became back-office screens, and the owner enters them. Doc 06 records
-why and what it cost.
+**All five phases are built.** Phase 5 in doc 06 is the optional list — an
+English pass, customer-facing LINE, slip auto-verification, pre-orders — and is
+not part of delivery.
 
-| Ref | Outstanding | Blocks |
-|-----|-------------|--------|
-| Q1 | Logo as SVG/AI/PSD or the designer's real hex; a transparent-background version; a 512px square for the PWA icon | Nothing today. Phase 4 PWA |
-| Q9b | Blocklist — the specific mixed letter+digit patterns to exclude beyond the seeded `*666` suffix | Nothing. Superadmin-editable, and the mixed-character rule already makes the ugly cases unreachable |
-| Q16 | LINE OA — is there an account? A Messaging API channel? Group push or per-person? | Phase 3 |
-| Q18 | Slip retention period (90 days proposed) | Phase 3 |
-| Q19 | Report periods beyond daily; CSV/Excel export | Phase 4 |
-| Q20 | Per-set cost, for profit rather than revenue | Phase 4 |
+| | |
+|---|---|
+| Branch | `phase-0-foundations`, pushed, **not merged into `main`** |
+| Migrations | `0001`–`0024`, `db reset` clean from empty |
+| Routes | all 15 are real screens; the `Placeholder` component is deleted |
+| Backend suites | `npm test` runs nine: order-code, orders, back-office, config, tracking, rate-limit, slips, ops, reports |
+| Frontend | `npm run check` = tsc + eslint + build, clean |
+| Deployed | **nowhere.** Everything above has only ever run against the local stack |
 
-Two things are outstanding that are not questions:
+### The two that matter most, and neither is a question
 
-- **Nobody has looked at any screen.** There is no browser driver in the
-  environment these were built in. Every route responds, every module
-  transforms, the types and the lint and the build are clean, and not one pixel
-  has been seen. The four widths in doc 04 §9 are the gate.
-- **The superadmin address in `0008`** is real now, but the migration is still
-  the only way to set it. That is by design (doc 03) and worth re-reading before
-  the first cloud deploy.
+- **Nobody has looked at any screen.** There is no browser in the environment
+  this was built in. Every route responds, every module transforms, the types
+  and the lint and the build are clean, and not one pixel has been seen. The
+  first time a human clicked through, three bugs surfaced in a minute and two of
+  them were invisible to every check above. The four widths in doc 04 §9 are the
+  gate, and a full round — order, accept, cook, hand over — is the real one.
+- **Nothing is deployed.** Before the first push to Supabase Cloud: confirm the
+  superadmin address in `0008` (the migration is still the only way to set it,
+  by design), generate a fresh `LOOKUP_IP_SALT` for that environment, and set
+  `app.functions_url` / `app.service_role_key` so the slip prune and the LINE
+  drain can be woken at all — both warn and skip without them rather than
+  pretending.
+
+### Still open
+
+| Ref | Outstanding | What it blocks |
+|-----|-------------|----------------|
+| Q1 | The real logo — SVG/AI/PSD or the designer's hex, a transparent version, and a 512px square | The PWA. `public/favicon.svg` is still the purple Vite template mark |
+| Q16 | LINE — account, Messaging API channel, group or per-person | Nothing in the code. Two environment variables and the outbox drains |
+| Q20 | Per-set cost | The profit column. Reports say revenue and mean revenue |
+| Q9b | Blocklist patterns beyond the seeded `*666` | Nothing. Superadmin-editable |
+
+Q18 became `shop_settings.slip_retention_days`, and Q19 became a date range.
+Neither is a question any more.
+
+### Deliberately not built
+
+The **service worker**. Nothing here can run one, and a misbehaving service
+worker pins users to a stale build — the hardest class of bug to talk a shop
+owner through over the phone. It belongs in a session with a browser attached.
 
 ## 2. Decisions settled since doc 06 was written
 
