@@ -179,16 +179,56 @@ but completing it needs a human at a Google consent screen. Run
 **Blocked on Q4, Q5, Q6, Q7, Q9b, Q10.** The order-code work below is the one
 part that can start immediately, and it is also the riskiest, so start there.
 
-### 1.1 Order code — do this first
+### 1.1 Order code ✅
 
-- [ ] `order_code_config` / blocklist storage, superadmin-editable
-- [ ] Keyed Feistel over `[0, M)` with cycle-walking, then unranking into the
-      mixed letters-and-digits set — **in that order**; swapping the two produces
-      collisions, doc 03 §4
-- [ ] `next_order_code()` consuming `code_seq`
-- [ ] Property test: walk the full domain, assert **639,584** codes, all
-      distinct, every one containing at least one letter and at least one digit
-- [ ] Blocklist filter applied after unranking, seeded from Q9b
+Migration `0010_order_code.sql`, test `supabase/tests/order_code_property.sql`,
+run with `npm run test:order-code`.
+
+- [x] `order_code_blocklist` — pattern plus `exact` / `prefix` / `suffix` /
+      `contains`, superadmin-only in both directions. Seeded with the `*666`
+      suffix rule and **nothing else**: the rest of Q9b is still an open
+      question and is not invented here
+- [x] Keyed Feistel over `[0, M)` with cycle-walking, then unranking into the
+      mixed set — **in that order**. The key is 32 random bytes generated per
+      database, so codes are not comparable across environments
+- [x] `private.next_order_code()` returning `(seq, code, epoch)`
+- [x] `code_epoch` on both `shop_settings` and `orders`, so an alphabet or
+      length change leaves history interpretable
+- [x] Sizing derived from the configured alphabet, never hard-coded — asserted
+      for lengths 4, 5 and 6
+- [x] Length bound tightened from 3–12 to 4–6: 3 leaves only 17,112 usable
+      codes and 12 overflows the Feistel's integer domain
+
+**Property test results — full domain walk, ~40s:**
+
+```
+domain: alphabet=ABCDEFGHJKMNPQRSTUVWXYZ23456789 letters=23 digits=8 length=4
+        M=639584 half_bits=10
+ok · 639584 inputs produced 639584 distinct codes, zero collisions
+ok · every code contains at least one letter and one digit
+ok · every code is 4 characters
+ok · no code uses I, L, O, 0, 1 or anything else off-alphabet
+ok · FUCK, 6666 and AAAA are unreachable
+ok · average cycle-walk iterations: 1.639
+ok · length 4 → M=639584 half_bits=10
+ok · length 5 → M=22160040 half_bits=13
+ok · length 6 → M=739205648 half_bits=15
+ok · 20000 length-5 codes sampled, all distinct and correctly shaped
+ok · blocked code skipped; the sequence advances rather than redrawing
+ok · the seeded *666 suffix rule matches suffixes and nothing else
+```
+
+`M`, `half_bits` and the 1.639 walk average match doc 03 §4 exactly.
+
+Two defects in the doc 03 §5 sketch were found in the process, both fixed in the
+migration and worth knowing about before reading the sketch again:
+
+1. `hmac(text, bytea, text)` does not exist. pgcrypto offers
+   `hmac(text,text,text)` and `hmac(bytea,bytea,text)`; mixing them selects
+   neither overload. The data argument goes through `convert_to(…, 'UTF8')`.
+2. `for pat in 1 .. n loop` declares its **own** loop variable, shadowing the
+   one in `declare`. The pattern index was therefore NULL by the time the
+   mixed-radix decomposition needed it. The loop is hand-rolled instead.
 
 ### 1.2 Ordering
 

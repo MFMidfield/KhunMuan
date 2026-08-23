@@ -218,6 +218,30 @@ export type Database = {
         }
         Relationships: []
       }
+      order_code_blocklist: {
+        Row: {
+          created_at: string
+          id: string
+          match_type: string
+          note: string | null
+          pattern: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_type: string
+          note?: string | null
+          pattern: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_type?: string
+          note?: string | null
+          pattern?: string
+        }
+        Relationships: []
+      }
       order_events: {
         Row: {
           actor_admin_id: string | null
@@ -410,6 +434,7 @@ export type Database = {
           claimed_at: string | null
           claimed_by: string | null
           code: string
+          code_epoch: number
           code_seq: number
           created_at: string
           created_by_admin: string | null
@@ -437,6 +462,7 @@ export type Database = {
           claimed_at?: string | null
           claimed_by?: string | null
           code: string
+          code_epoch?: number
           code_seq: number
           created_at?: string
           created_by_admin?: string | null
@@ -464,6 +490,7 @@ export type Database = {
           claimed_at?: string | null
           claimed_by?: string | null
           code?: string
+          code_epoch?: number
           code_seq?: number
           created_at?: string
           created_by_admin?: string | null
@@ -686,6 +713,7 @@ export type Database = {
       shop_settings: {
         Row: {
           closed_message: string | null
+          code_epoch: number
           created_at: string
           delivery_enabled: boolean
           id: number
@@ -699,6 +727,7 @@ export type Database = {
         }
         Insert: {
           closed_message?: string | null
+          code_epoch?: number
           created_at?: string
           delivery_enabled?: boolean
           id: number
@@ -712,6 +741,7 @@ export type Database = {
         }
         Update: {
           closed_message?: string | null
+          code_epoch?: number
           created_at?: string
           delivery_enabled?: boolean
           id?: number
