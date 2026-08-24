@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/Card'
 import { PageSpinner } from '@/components/ui/Spinner'
-import { StatusBadge } from '@/components/ui/StatusBadge'
-import { useBreakpoint } from '@/lib/useBreakpoint'
 import { STORAGE_KEYS, readLocal, writeLocal } from '@/lib/storage'
 import { z } from 'zod'
 import { useSession } from '@/features/auth/useSession'
@@ -16,15 +14,18 @@ import type { Database } from '@/types/database'
 
 type OrderStatus = Database['public']['Enums']['order_status']
 
-/** Tablet shows two columns at a time; these are the pairs it swaps between. */
-const PAIRS: [OrderStatus, OrderStatus][] = [
-  ['pending_confirmation', 'accepted'],
-  ['cooking', 'ready'],
-]
-
+/**
+ * One filtered list, at every width.
+ *
+ * This replaced the Kanban columns. Four columns fit on a desktop and nowhere
+ * else, so the board used to be three different DOM trees behind a JS
+ * breakpoint — and on the two smaller ones the "column" a card sat in was
+ * already not the thing you looked at; the chip row was. Filtering is what
+ * staff were doing anyway, so it is now the only mechanism, and the layout
+ * differs by width only in how many cards fit on a row.
+ */
 export function BoardPage() {
   const { t } = useTranslation('admin')
-  const breakpoint = useBreakpoint()
   const { session } = useSession()
   const { data: admin } = useCurrentAdmin(session?.user.email)
   const { data: settings } = useShopSettingsAdmin()
@@ -64,9 +65,7 @@ export function BoardPage() {
         )}
       </div>
 
-      {breakpoint === 'phone' && <PhoneList board={board} {...cardProps} />}
-      {breakpoint === 'tablet' && <TabletBoard board={board} {...cardProps} />}
-      {breakpoint === 'desktop' && <DesktopBoard board={board} {...cardProps} />}
+      <FilteredBoard board={board} {...cardProps} />
     </div>
   )
 }
@@ -93,14 +92,23 @@ function renderCard(order: BoardOrder, p: CardProps, showStatus = false) {
   )
 }
 
-function PhoneList({ board, ...p }: { board: BoardData } & CardProps) {
+function FilteredBoard({ board, ...p }: { board: BoardData } & CardProps) {
   const { t } = useTranslation('admin')
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all')
   const shown = filter === 'all' ? board.orders : board.orders.filter((o) => o.status === filter)
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="scroll-strip sticky top-14 z-20 -mx-3 flex gap-2 bg-ground px-3 py-2">
+      {/* Sticky, and bleeding to the edges of the layout's own padding so the
+          scroll strip runs full-width. The filter has to stay reachable however
+          far the list has been scrolled — it is now the only way to narrow the
+          board. */}
+      <div
+        className={[
+          'scroll-strip sticky top-14 z-20 flex gap-2 bg-ground py-2',
+          '-mx-3 px-3 sm:-mx-4 sm:px-4',
+        ].join(' ')}
+      >
         <Chip
           label={t('filterAll')}
           count={board.orders.length}
@@ -121,76 +129,14 @@ function PhoneList({ board, ...p }: { board: BoardData } & CardProps) {
       {shown.length === 0 ? (
         <EmptyCard />
       ) : (
-        shown.map((o) => renderCard(o, p, true))
+        // The status badge stays on every card even when one status is
+        // selected: the filter is at the top of a page that scrolls, and a card
+        // has to say what it is without scrolling back up to check.
+        <div className="grid items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {shown.map((o) => renderCard(o, p, true))}
+        </div>
       )}
     </div>
-  )
-}
-
-function TabletBoard({ board, ...p }: { board: BoardData } & CardProps) {
-  const { t } = useTranslation('admin')
-  const { t: tStatus } = useTranslation('tracking')
-  const [pair, setPair] = useState(0)
-  const columns = PAIRS[pair] ?? PAIRS[0]!
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div
-        role="tablist"
-        aria-label={t('columnPair')}
-        className="sticky top-14 z-20 -mx-4 flex gap-2 bg-ground px-4 py-2"
-      >
-        {PAIRS.map((columnPair, i) => (
-          <button
-            key={i}
-            role="tab"
-            aria-selected={pair === i}
-            onClick={() => setPair(i)}
-            className={[
-              'min-h-11 flex-1 rounded-btn border px-3 text-[0.9rem]',
-              pair === i
-                ? 'border-ink bg-surface-2 font-medium text-ink'
-                : 'border-border bg-surface text-ink-muted',
-            ].join(' ')}
-          >
-            {columnPair.map((s) => tStatus(`status.${s}`)).join(' · ')}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {columns.map((status) => (
-          <Column key={status} status={status} board={board} {...p} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function DesktopBoard({ board, ...p }: { board: BoardData } & CardProps) {
-  return (
-    <div className="grid grid-cols-4 gap-4">
-      {ACTIVE_STATUSES.map((status) => (
-        <Column key={status} status={status} board={board} {...p} />
-      ))}
-    </div>
-  )
-}
-
-function Column({
-  status,
-  board,
-  ...p
-}: { status: OrderStatus; board: BoardData } & CardProps) {
-  const orders = board.orders.filter((o) => o.status === status)
-  return (
-    <section className="flex min-w-0 flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <StatusBadge status={status} />
-        <span className="tnum text-[0.85rem] text-ink-muted">{orders.length}</span>
-      </div>
-      {orders.length === 0 ? <EmptyCard /> : orders.map((o) => renderCard(o, p))}
-    </section>
   )
 }
 
