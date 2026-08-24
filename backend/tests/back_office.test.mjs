@@ -158,6 +158,9 @@ async function main() {
   ok('pending → accepted', accepted.body?.status === 'accepted')
   ok('the version moved', accepted.body?.version === o3.version + 1)
 
+  const [afterAccept] = await read(`orders?select=claimed_by,version&id=eq.${o3.id}`, A)
+  ok('accepting claimed it for A (0027)', afterAccept.claimed_by !== null)
+
   const replay = await rpc(
     'advance_order',
     { p_order_id: o3.id, p_to_status: 'accepted', p_expected_version: o3.version },
@@ -171,7 +174,25 @@ async function main() {
     { p_order_id: o3.id, p_to_status: 'cooking', p_expected_version: accepted.body.version },
     B,
   )
-  ok('B may start it — nobody had claimed it', cookByB.body?.status === 'cooking')
+  ok(
+    'B may not start what A accepted',
+    cookByB.body?.message === 'CLAIMED_BY_SOMEONE_ELSE',
+    JSON.stringify(cookByB.body),
+  )
+
+  // Released, the order is anyone's again — and picking it up is still one tap,
+  // because starting work claims implicitly.
+  await rpc('release_order', { p_order_id: o3.id }, A)
+  // Releasing bumps the version too, so the next call has to quote the new one.
+  const [afterRelease] = await read(`orders?select=claimed_by,version&id=eq.${o3.id}`, A)
+  ok('releasing left it unclaimed', afterRelease.claimed_by === null)
+
+  const cookByBAgain = await rpc(
+    'advance_order',
+    { p_order_id: o3.id, p_to_status: 'cooking', p_expected_version: afterRelease.version },
+    B,
+  )
+  ok('B may start it once A released it', cookByBAgain.body?.status === 'cooking')
 
   const [afterCook] = await read(`orders?select=claimed_by,version&id=eq.${o3.id}`, A)
   ok('starting work claimed it implicitly', afterCook.claimed_by !== null)
