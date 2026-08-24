@@ -89,7 +89,7 @@ export function StockPage() {
         </Card>
       )}
 
-      <ul className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
+      <ul className="anim-rise flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
         {data.map((row) => (
           <li key={row.id}>
             {/* Keyed on the stored total, so another admin calling set_stock

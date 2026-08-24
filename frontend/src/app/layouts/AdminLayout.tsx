@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/features/auth/useSession'
@@ -30,6 +30,7 @@ export function AdminLayout() {
   const { session } = useSession()
   const { data: admin } = useCurrentAdmin(session?.user.email)
   const isSuper = admin?.role === 'superadmin'
+  const location = useLocation()
   const [moreOpen, setMoreOpen] = useState(false)
 
   const primary = visibleLinks(PRIMARY_LINKS, isSuper)
@@ -82,7 +83,9 @@ export function AdminLayout() {
 
       {/* pb-tabbar keeps the last card clear of the fixed bar; lg drops it. */}
       <main className="mx-auto max-w-7xl px-3 py-4 pb-tabbar sm:px-4 lg:py-6 lg:pb-6">
-        <Outlet />
+        <div key={location.pathname} className="anim-rise">
+          <Outlet />
+        </div>
       </main>
 
       <TabBar
@@ -171,7 +174,7 @@ function MoreSheet({ links, onClose }: { links: AdminLink[]; onClose: () => void
         type="button"
         aria-label={t('common:close')}
         onClick={onClose}
-        className="absolute inset-0 bg-ink/40"
+        className="backdrop-dim anim-fade absolute inset-0"
       />
 
       <div
@@ -179,7 +182,7 @@ function MoreSheet({ links, onClose }: { links: AdminLink[]; onClose: () => void
         aria-modal="true"
         aria-label={t('admin:moreTitle')}
         className={[
-          'absolute inset-x-0 bottom-0 rounded-t-card border-t border-border',
+          'anim-slide-up absolute inset-x-0 bottom-0 rounded-t-card border-t border-border',
           'bg-surface px-3 pt-3 pb-tabbar',
         ].join(' ')}
       >

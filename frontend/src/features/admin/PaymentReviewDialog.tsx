@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { money } from '@/lib/i18n'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { Modal } from '@/components/ui/Modal'
 
 /**
  * The one screen where the shop decides whether money arrived.
@@ -46,14 +47,6 @@ export function PaymentReviewDialog({
     return () => clearTimeout(id)
   }, [left])
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   /**
    * Signed for two minutes, not for the session. The bucket is private and
    * stays private — a URL that still works after this dialog closes is a URL
@@ -77,80 +70,59 @@ export function PaymentReviewDialog({
   const isPdf = slipPath?.toLowerCase().endsWith('.pdf') ?? false
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-      <button
-        type="button"
-        aria-label={t('common:close')}
-        onClick={onClose}
-        className="absolute inset-0 bg-ink/40"
-      />
+    <Modal label={t('admin:payReviewTitle')} onClose={onClose}>
+      <h2 className="font-semibold">{t('admin:payReviewTitle')}</h2>
+      <p className="mt-1 text-[0.9rem] text-ink-muted">
+        <span className="tnum">{code}</span> · {t('admin:payReviewAmount')}{' '}
+        <span className="tnum font-semibold text-ink">{money.format(total)}</span>
+      </p>
 
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('admin:payReviewTitle')}
-        className={[
-          'relative flex max-h-[92vh] w-full max-w-md flex-col overflow-y-auto',
-          'rounded-t-card border border-border bg-surface p-5 pb-safe sm:rounded-card',
-        ].join(' ')}
-      >
-        <h2 className="font-semibold">{t('admin:payReviewTitle')}</h2>
-        <p className="mt-1 text-[0.9rem] text-ink-muted">
-          <span className="tnum">{code}</span> · {t('admin:payReviewAmount')}{' '}
-          <span className="tnum font-semibold text-ink">{money.format(total)}</span>
-        </p>
-
-        <div className="mt-4 flex min-h-40 items-center justify-center rounded-card border border-border bg-surface-2 p-2">
-          {!slipPath ? (
-            <p className="p-4 text-center text-[0.9rem] text-gold-ink">
-              {t('admin:payReviewNoSlip')}
-            </p>
-          ) : slip.isPending ? (
-            <Spinner />
-          ) : slip.error || !slip.data ? (
-            <p className="p-4 text-center text-[0.9rem] text-st-cancel-fg">
-              {t('admin:payReviewSlipFailed')}
-            </p>
-          ) : isPdf ? (
-            // A PDF has no useful inline preview at this size, so it opens in a
-            // tab instead of being crammed into an iframe nobody can read.
-            <a
-              href={slip.data}
-              target="_blank"
-              rel="noopener"
-              className="min-h-11 px-3 py-3 text-gold-ink underline"
-            >
-              {t('admin:payReviewOpenPdf')}
-            </a>
-          ) : (
-            <a href={slip.data} target="_blank" rel="noopener">
-              <img
-                src={slip.data}
-                alt={t('admin:payReviewTitle')}
-                className="max-h-[46vh] w-auto rounded-btn"
-              />
-            </a>
-          )}
-        </div>
-
-        <div className="mt-5 flex flex-col gap-2">
-          <Button
-            size="lg"
-            disabled={waiting || busy}
-            onClick={onAccept}
+      <div className="anim-fade mt-4 flex min-h-40 items-center justify-center rounded-card border border-border bg-surface-2 p-2">
+        {!slipPath ? (
+          <p className="p-4 text-center text-[0.9rem] text-gold-ink">
+            {t('admin:payReviewNoSlip')}
+          </p>
+        ) : slip.isPending ? (
+          <Spinner />
+        ) : slip.error || !slip.data ? (
+          <p className="p-4 text-center text-[0.9rem] text-st-cancel-fg">
+            {t('admin:payReviewSlipFailed')}
+          </p>
+        ) : isPdf ? (
+          // A PDF has no useful inline preview at this size, so it opens in a
+          // tab instead of being crammed into an iframe nobody can read.
+          <a
+            href={slip.data}
+            target="_blank"
+            rel="noopener"
+            className="min-h-11 px-3 py-3 text-gold-ink underline"
           >
-            {waiting ? t('common:waitSeconds', { count: left }) : t('admin:payReviewAccept')}
+            {t('admin:payReviewOpenPdf')}
+          </a>
+        ) : (
+          <a href={slip.data} target="_blank" rel="noopener">
+            <img
+              src={slip.data}
+              alt={t('admin:payReviewTitle')}
+              className="anim-fade max-h-[46vh] w-auto rounded-btn"
+            />
+          </a>
+        )}
+      </div>
+
+      <div className="mt-6 flex flex-col gap-3">
+        <Button size="lg" disabled={waiting || busy} onClick={onAccept}>
+          {waiting ? t('common:waitSeconds', { count: left }) : t('admin:payReviewAccept')}
+        </Button>
+        <div className="flex gap-3">
+          <Button variant="ghost" size="lg" className="flex-1" onClick={onClose}>
+            {t('common:close')}
           </Button>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="lg" className="flex-1" onClick={onClose}>
-              {t('common:close')}
-            </Button>
-            <Button variant="danger" size="lg" className="flex-1" disabled={busy} onClick={onReject}>
-              {t('admin:payReviewReject')}
-            </Button>
-          </div>
+          <Button variant="danger" size="lg" className="flex-1" disabled={busy} onClick={onReject}>
+            {t('admin:payReviewReject')}
+          </Button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }

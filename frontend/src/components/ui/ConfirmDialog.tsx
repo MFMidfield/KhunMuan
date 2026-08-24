@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from './Button'
+import { Modal } from './Modal'
 
 /**
  * A yes/no dialog whose confirm button is dead for the first few seconds.
@@ -45,57 +46,32 @@ export function ConfirmDialog({
     return () => clearTimeout(id)
   }, [left])
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
-
   const waiting = left > 0
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-      <button
-        type="button"
-        aria-label={t('common:close')}
-        onClick={onClose}
-        className="absolute inset-0 bg-ink/40"
-      />
+    <Modal label={title} onClose={onClose}>
+      <h2 className="font-semibold">{title}</h2>
+      {body && <p className="mt-2 text-[0.95rem] text-ink-muted">{body}</p>}
 
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className={[
-          'relative w-full max-w-md rounded-t-card border border-border bg-surface',
-          'p-5 pb-safe sm:rounded-card',
-        ].join(' ')}
-      >
-        <h2 className="font-semibold">{title}</h2>
-        {body && <p className="mt-2 text-[0.95rem] text-ink-muted">{body}</p>}
+      {children}
 
-        {children}
-
-        <div className="mt-5 flex gap-2">
-          <Button variant="ghost" size="lg" className="flex-1" onClick={onClose}>
-            {cancelLabel ?? t('common:close')}
-          </Button>
-          <Button
-            type="button"
-            variant={danger ? 'danger' : 'primary'}
-            size="lg"
-            className="flex-1"
-            // aria-describedby is not enough on its own: a disabled button is
-            // skipped by some screen readers, so the seconds go in the label.
-            disabled={waiting || busy}
-            onClick={onConfirm}
-          >
-            {waiting ? t('common:waitSeconds', { count: left }) : confirmLabel}
-          </Button>
-        </div>
+      <div className="mt-6 flex gap-3">
+        <Button variant="ghost" size="lg" className="flex-1" onClick={onClose}>
+          {cancelLabel ?? t('common:close')}
+        </Button>
+        <Button
+          type="button"
+          variant={danger ? 'danger' : 'primary'}
+          size="lg"
+          className="flex-1"
+          // aria-describedby is not enough on its own: a disabled button is
+          // skipped by some screen readers, so the seconds go in the label.
+          disabled={waiting || busy}
+          onClick={onConfirm}
+        >
+          {waiting ? t('common:waitSeconds', { count: left }) : confirmLabel}
+        </Button>
       </div>
-    </div>
+    </Modal>
   )
 }

@@ -408,6 +408,34 @@ deliberate call: brand recognition over icon legibility.
 - **Motion is functional only** — a new card sliding in, a status node advancing.
   Nothing decorative animates.
 
+### Motion
+
+One vocabulary, four verbs: things **fade**, things **rise** a little, panels
+**pop** from the middle, sheets **slide** from an edge. Durations are 120–220ms.
+Every one of these sits in front of somebody trying to finish a task during a
+rush, so motion that has to be waited for is a cost rather than a polish.
+
+It is opt-in through a class — `.anim-fade`, `.anim-rise`, `.anim-pop`,
+`.anim-slide-up`, `.anim-slide-end`. Nothing animates because it happens to be a
+div. Where it is used:
+
+| Thing | Motion |
+|-------|--------|
+| Modal backdrop, drawer backdrop | fade, plus a 3px blur |
+| Modal panel | pop |
+| Admin `เพิ่มเติม` sheet | slide up |
+| Customer side nav | slide from the end edge |
+| Route change | the outlet rises, keyed on the pathname |
+| Board cards, menu grid, stock list | rise, keyed on the filter or search |
+| Buttons, chips, status badges | colour transition only |
+
+**Transitions never touch layout.** A row of buttons that reflows under a thumb
+already travelling towards one of them is worse than no motion at all.
+
+Lists are keyed on *what is being shown* — the filter, the search string — not
+on the rows themselves. Changing the filter replays the entrance for the new
+set; a realtime update to one card does not restart the animation on the rest.
+
 ## 6b. The order-code input
 
 Four separate boxes, not one text field. Each holds one character, uppercases on
@@ -444,6 +472,11 @@ worse than building it.
   palette work has to account for that from the start.
 - Full keyboard operation of the back office. Six staff, some on laptops, and
   keyboard-driven claiming is measurably faster than a trackpad.
+- **`prefers-reduced-motion: reduce` collapses every animation and transition to
+  a single frame.** Vestibular disorders are not rare and "reduce" is a request,
+  not a preference to weigh against a design. Animations are collapsed rather
+  than removed, so anything that waits for one to finish still completes. The
+  backdrop blur goes with them.
 
 ## 9. Responsive system
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/lib/theme'
 import { useCart } from '@/features/cart/cartContext'
@@ -27,6 +27,7 @@ export function CustomerLayout() {
   const { t } = useTranslation(['common', 'cart'])
   const { boxCount } = useCart()
   const [navOpen, setNavOpen] = useState(false)
+  const location = useLocation()
 
   return (
     <div className="min-h-svh bg-ground">
@@ -67,7 +68,11 @@ export function CustomerLayout() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-4 pb-safe sm:py-6">
-        <Outlet />
+        {/* Keyed on the path so a navigation replays the entrance. Without the
+            key React reuses the node and the animation never re-runs. */}
+        <div key={location.pathname} className="anim-rise">
+          <Outlet />
+        </div>
       </main>
 
       {navOpen && <SideNav onClose={() => setNavOpen(false)} boxCount={boxCount} />}
@@ -124,7 +129,7 @@ function SideNav({ onClose, boxCount }: { onClose: () => void; boxCount: number 
         type="button"
         aria-label={t('common:close')}
         onClick={onClose}
-        className="absolute inset-0 bg-ink/40"
+        className="backdrop-dim anim-fade absolute inset-0"
       />
 
       <div
@@ -132,7 +137,7 @@ function SideNav({ onClose, boxCount }: { onClose: () => void; boxCount: number 
         aria-modal="true"
         aria-label={t('common:nav.title')}
         className={[
-          'absolute inset-y-0 end-0 flex w-72 max-w-[85vw] flex-col',
+          'anim-slide-end absolute inset-y-0 end-0 flex w-72 max-w-[85vw] flex-col',
           'border-s border-border bg-surface pt-safe pb-safe',
         ].join(' ')}
       >

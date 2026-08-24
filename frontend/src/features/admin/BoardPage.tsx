@@ -231,7 +231,14 @@ function FilteredBoard({ board, ...p }: { board: BoardData } & CardProps) {
         // The status badge stays on every card even when one status is
         // selected: the filter is at the top of a page that scrolls, and a card
         // has to say what it is without scrolling back up to check.
-        <div className="grid items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        // Keyed on what is being shown, so changing the filter or typing in the
+        // search replays the entrance for the new set. Individual cards are
+        // keyed by id inside, so a realtime update to one of them does not
+        // restart the animation on the rest.
+        <div
+          key={searching ? `q:${query}` : `f:${filter}`}
+          className="anim-rise grid items-start gap-3 sm:grid-cols-2 xl:grid-cols-3"
+        >
           {shown.map((o) => renderCard(o, p, true))}
         </div>
       )}
@@ -264,7 +271,7 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        'snap-item inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4',
+        'snap-item tap-target inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4',
         'text-[0.9rem] whitespace-nowrap',
         active
           ? 'border-ink bg-surface-2 font-medium text-ink'
