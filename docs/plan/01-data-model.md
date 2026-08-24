@@ -53,6 +53,7 @@ shop will ever consume; see doc 03 for why the size still matters.
 | `email` | `text` unique not null, check `= lower(email)` | Matched against the Google OAuth JWT email |
 | `display_name` | `text` not null | Shown on claimed order cards |
 | `role` | `admin_role` not null default `'admin'` | enum: `superadmin`, `admin` |
+| `is_owner` | `boolean` not null default false | The one row no API write may touch |
 | `is_active` | `boolean` not null default true | Soft disable instead of delete |
 | `auth_user_id` | `uuid` → `auth.users.id`, nullable | Linked on first successful sign-in |
 | `invited_by` | `uuid` → `admin_users.id` | |
@@ -71,18 +72,33 @@ A `before insert or update` trigger lower-cases and trims the address instead, s
 already stores `auth.users.email` lower-cased, so both sides match with plain
 text equality and no extension in the picture.
 
-**Superadmin rule.** Exactly one row may have `role = 'superadmin'`, enforced by
-a partial unique index:
+**Owner rule.** `role` and "the untouchable row" started out as the same flag
+and were split by migration 0026, because one flag was doing two jobs and the
+back office could therefore never offer the higher tier at all. `role` is now
+only the permission tier and may be granted to as many people as the owner
+likes. `is_owner` is the protected row, and exactly one may exist:
 
 ```sql
-create unique index admin_users_one_superadmin
-  on admin_users ((true)) where role = 'superadmin';
+create unique index admin_users_one_owner
+  on admin_users ((true)) where is_owner;
+
+alter table admin_users add constraint admin_users_owner_is_superadmin
+  check (not is_owner or role = 'superadmin');
 ```
 
 That row is seeded by migration and cannot be created, modified or deleted
-through the API — RLS blocks any write where `role = 'superadmin'` is involved
-on either the old or the new row. Changing the superadmin is a deliberate
-database operation, exactly as requested.
+through the API — RLS blocks any write where `is_owner` is involved on either
+the old or the new row. Changing the owner is a deliberate database operation,
+exactly as requested.
+
+The check constraint pairs with it: RLS never sees a direct database statement,
+so it is the only thing stopping a hand-written `update` from leaving an owner
+sitting at `admin` and locking the shop out of its own back office.
+
+Keeping the owner unreachable is also what makes the second superadmin safe to
+offer. A compromised superadmin session can remove other superadmins, but not
+the owner, so a way back in always exists. A flat model — every superadmin able
+to delete every other one — would not have that property.
 
 ### `pickup_points`
 
