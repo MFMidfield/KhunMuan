@@ -95,10 +95,69 @@ function renderCard(order: BoardOrder, p: CardProps, showStatus = false) {
   )
 }
 
+/**
+ * Everything on a card that someone might type into the box.
+ *
+ * The code first, because it is what a customer reads out on the phone — but
+ * not only the code: staff searching the board are as often working from
+ * "the one with the shrimp for the girl in building 3" as from four characters.
+ */
+function haystack(o: BoardOrder): string {
+  return [
+    o.code,
+    o.customer_name,
+    o.customer_phone,
+    o.delivery_location,
+    o.point_name,
+    o.slot_label,
+    o.zone_name,
+    o.claimed_by_name,
+    o.note,
+    ...o.items.flatMap((i) => [
+      i.set_name,
+      i.note,
+      ...i.fillings.map((f) => f.filling_name),
+      ...i.addons.map((a) => a.addon_name),
+    ]),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+}
+
+/** Digits only, so 080-000-0000 and 0800000000 are the same search. */
+const digits = (s: string) => s.replace(/\D/g, '')
+
+function matches(o: BoardOrder, query: string): boolean {
+  if (haystack(o).includes(query)) return true
+  const wanted = digits(query)
+  return wanted.length >= 3 && digits(o.customer_phone ?? '').includes(wanted)
+}
+
 function FilteredBoard({ board, ...p }: { board: BoardData } & CardProps) {
   const { t } = useTranslation('admin')
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all')
-  const shown = filter === 'all' ? board.orders : board.orders.filter((o) => o.status === filter)
+  const [search, setSearch] = useState('')
+
+  const query = search.trim().toLowerCase()
+  const searching = query.length > 0
+
+  // Search spans the whole board and ignores the chip. Someone typing a code
+  // does not know which status the order is sitting in — that is usually the
+  // question they are asking.
+  const shown = searching
+    ? board.orders.filter((o) => matches(o, query))
+    : filter === 'all'
+      ? board.orders
+      : board.orders.filter((o) => o.status === filter)
+
+  // One narrowing mechanism at a time. Tapping a chip while a search is open is
+  // the gesture for "put the board back", so it clears the box rather than
+  // quietly doing nothing.
+  const pick = (next: OrderStatus | 'all') => {
+    setSearch('')
+    setFilter(next)
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -108,29 +167,66 @@ function FilteredBoard({ board, ...p }: { board: BoardData } & CardProps) {
           board. */}
       <div
         className={[
-          'scroll-strip sticky top-14 z-20 flex gap-2 bg-ground py-2',
+          'sticky top-14 z-20 flex flex-col gap-2 bg-ground py-2',
           '-mx-3 px-3 sm:-mx-4 sm:px-4',
         ].join(' ')}
       >
-        <Chip
-          label={t('filterAll')}
-          count={board.orders.length}
-          active={filter === 'all'}
-          onClick={() => setFilter('all')}
-        />
-        {ACTIVE_STATUSES.map((status) => (
-          <Chip
-            key={status}
-            status={status}
-            count={board.orders.filter((o) => o.status === status).length}
-            active={filter === status}
-            onClick={() => setFilter(status)}
+        <div className="relative">
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('searchPlaceholder')}
+            aria-label={t('searchPlaceholder')}
+            // 16px minimum: iOS zooms the whole page for anything smaller and
+            // never zooms back.
+            className="min-h-11 w-full rounded-btn border border-border-strong bg-surface px-3 pe-10 text-base text-ink"
           />
-        ))}
+          {searching && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              aria-label={t('searchClear')}
+              className="absolute inset-y-0 end-0 flex min-h-11 w-10 items-center justify-center text-ink-muted hover:text-ink"
+            >
+              ×
+            </button>
+          )}
+        </div>
+
+        {/* The chips bleed back out past the header's padding so the strip
+            still scrolls edge to edge; the search box above stays inside it. */}
+        <div className="scroll-strip -mx-3 flex gap-2 px-3 sm:-mx-4 sm:px-4">
+          <Chip
+            label={t('filterAll')}
+            count={board.orders.length}
+            active={!searching && filter === 'all'}
+            onClick={() => pick('all')}
+          />
+          {ACTIVE_STATUSES.map((status) => (
+            <Chip
+              key={status}
+              status={status}
+              count={board.orders.filter((o) => o.status === status).length}
+              active={!searching && filter === status}
+              onClick={() => pick(status)}
+            />
+          ))}
+        </div>
       </div>
 
+      {searching && (
+        <p className="text-[0.85rem] text-ink-muted">
+          {t('searchScope', { count: shown.length })}
+        </p>
+      )}
+
       {shown.length === 0 ? (
-        <EmptyCard />
+        searching ? (
+          <Card className="p-4 text-[0.9rem] text-ink-muted">{t('searchEmpty')}</Card>
+        ) : (
+          <EmptyCard />
+        )
       ) : (
         // The status badge stays on every card even when one status is
         // selected: the filter is at the top of a page that scrolls, and a card

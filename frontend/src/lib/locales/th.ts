@@ -258,6 +258,10 @@ export const th = {
     more: 'เพิ่มเติม',
     moreTitle: 'เมนูเพิ่มเติม',
     filterAll: 'ทั้งหมด',
+    searchPlaceholder: 'ค้นรหัส ชื่อ เบอร์ ไส้ ที่ส่ง',
+    searchClear: 'ล้างคำค้น',
+    searchScope: 'เจอ {{count}} รายการ · ค้นทั้งบอร์ด ไม่สนใจชิปสถานะ',
+    searchEmpty: 'ไม่เจอออเดอร์ที่ตรงกับคำค้น ค้นได้เฉพาะออเดอร์ที่ยังทำอยู่',
 
     accept: 'รับออเดอร์',
     reject: 'ปฏิเสธ',

@@ -127,11 +127,24 @@ too easy to lose track of.
 
 ## 3. The order board — the screen that runs the shop
 
-**One filtered list, at every width.** A sticky chip row — `ทั้งหมด` plus one
-chip per status, each carrying its count — and below it the cards for whatever
-is selected. `ทั้งหมด` is the default. The chip row sticks under the header, so
-the filter stays reachable however far the list has been scrolled; it is now the
-only way to narrow the board.
+**One filtered list, at every width.** A sticky search box and chip row —
+`ทั้งหมด` plus one chip per status, each carrying its count — and below them the
+cards for whatever is selected. `ทั้งหมด` is the default. Both stick under the
+header, so narrowing the board stays reachable however far it has been scrolled.
+
+**Search spans the whole board and ignores the chip.** Someone typing a code
+does not know which status the order is sitting in — that is usually the
+question they are asking. It matches the code, the customer's name and phone,
+the delivery location, pickup point and slot, the claimer, the order note, and
+every set, filling and add-on name on the card; a phone is compared digits-only
+so `080-000-0000` and `0800000000` are the same search. It is a filter over the
+rows already in the browser, so it is instant and has no loading state — and it
+therefore only reaches orders still on the board. An order already handed over
+or cancelled is not findable here, which the empty state says out loud.
+
+One narrowing mechanism is active at a time: tapping a chip while a search is
+open clears the box, because that tap is the gesture for "put the board back"
+and a chip that quietly did nothing would read as broken.
 
 Width changes how many cards fit on a row and nothing else: one on a phone, two
 from `sm`, three from `xl`. Cards keep their status badge even when a single
