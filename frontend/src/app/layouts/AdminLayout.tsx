@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/features/auth/useSession'
 import { useCurrentAdmin } from '@/features/auth/useCurrentAdmin'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { Button } from '@/components/ui/Button'
 import {
@@ -31,6 +32,7 @@ export function AdminLayout() {
   const { data: admin } = useCurrentAdmin(session?.user.email)
   const isSuper = admin?.role === 'superadmin'
   const location = useLocation()
+  const [signingOut, setSigningOut] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
 
   const primary = visibleLinks(PRIMARY_LINKS, isSuper)
@@ -73,7 +75,7 @@ export function AdminLayout() {
             <Button
               variant="ghost"
               className="hidden lg:inline-flex"
-              onClick={() => void supabase.auth.signOut()}
+              onClick={() => setSigningOut(true)}
             >
               {t('admin:signOut')}
             </Button>
@@ -94,7 +96,36 @@ export function AdminLayout() {
         onToggleMore={() => setMoreOpen((v) => !v)}
       />
 
-      {moreOpen && <MoreSheet links={secondary} onClose={() => setMoreOpen(false)} />}
+      {moreOpen && (
+        <MoreSheet
+          links={secondary}
+          onClose={() => setMoreOpen(false)}
+          onSignOut={() => {
+            setMoreOpen(false)
+            setSigningOut(true)
+          }}
+        />
+      )}
+
+      {/* Signing out is not destructive — the way back is to sign in again —
+          but on a shared counter tablet it is the tap that hands the next
+          person somebody else's session, and it sits next to the navigation.
+          The three seconds are the same three the rest of the app uses. */}
+      {signingOut && (
+        <ConfirmDialog
+          title={t('admin:signOutTitle')}
+          body={admin?.display_name
+            ? t('admin:signOutBody', { name: admin.display_name })
+            : undefined}
+          confirmLabel={t('admin:signOut')}
+          cancelLabel={t('admin:signOutStay')}
+          onClose={() => setSigningOut(false)}
+          onConfirm={() => {
+            setSigningOut(false)
+            void supabase.auth.signOut()
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -157,7 +188,15 @@ function TabBar({
   )
 }
 
-function MoreSheet({ links, onClose }: { links: AdminLink[]; onClose: () => void }) {
+function MoreSheet({
+  links,
+  onClose,
+  onSignOut,
+}: {
+  links: AdminLink[]
+  onClose: () => void
+  onSignOut: () => void
+}) {
   const { t } = useTranslation(['admin', 'common'])
 
   useEffect(() => {
@@ -215,12 +254,9 @@ function MoreSheet({ links, onClose }: { links: AdminLink[]; onClose: () => void
           ))}
         </ul>
 
-        <Button
-          variant="ghost"
-          size="lg"
-          className="mt-2 w-full"
-          onClick={() => void supabase.auth.signOut()}
-        >
+        {/* Closes the sheet on the way to the dialog. Two stacked overlays is
+            two backdrops and two Escape handlers arguing over one key. */}
+        <Button variant="ghost" size="lg" className="mt-2 w-full" onClick={onSignOut}>
           {t('admin:signOut')}
         </Button>
       </div>
