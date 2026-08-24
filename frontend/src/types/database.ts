@@ -178,6 +178,7 @@ export type Database = {
           qty_remaining: number
           qty_total: number
           service_date: string
+          unlimited: boolean
           updated_at: string
         }
         Insert: {
@@ -186,6 +187,7 @@ export type Database = {
           qty_remaining: number
           qty_total: number
           service_date?: string
+          unlimited?: boolean
           updated_at?: string
         }
         Update: {
@@ -194,6 +196,7 @@ export type Database = {
           qty_remaining?: number
           qty_total?: number
           service_date?: string
+          unlimited?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -1075,6 +1078,7 @@ export type Database = {
         Args: { p_filling_id: string; p_qty_total: number }
         Returns: Json
       }
+      set_stock_unlimited: { Args: { p_filling_id: string }; Returns: Json }
       shop_today: { Args: never; Returns: string }
       toggle_shop: {
         Args: { p_is_open: boolean; p_message?: string }

@@ -98,6 +98,10 @@ export function useStockToday() {
       const { data, error } = await supabase
         .from('filling_stock_daily')
         .select('filling_id, qty_remaining')
+        // A row flagged unlimited (0031) is deliberately left out of the map,
+        // so it reads exactly like a filling with no row at all: no number, no
+        // "หมดวันนี้", nothing counted.
+        .eq('unlimited', false)
       if (error) throw error
       return new Map(data.map((r) => [r.filling_id, r.qty_remaining]))
     },

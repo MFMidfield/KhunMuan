@@ -24,7 +24,7 @@
 | `/admin/orders/:id` | Order detail / kitchen ticket | admin |
 | `/admin/new` | Key in a phone order | admin |
 | `/admin/menu` | Sets, fillings, add-ons, photos | superadmin |
-| `/admin/stock` | Today's remaining quantities | admin |
+| `/admin/stock` | Today's remaining quantities, and "never runs out" | admin |
 | `/admin/settings` | Open/close, contact channels, pickup points, slots, delivery fee, order limits, handover code, claim mode | superadmin (open/close and claim mode: admin) |
 | `/admin/reports` | Daily sales, top/bottom fillings, stage times | superadmin |
 | `/admin/staff` | Admin allow-list | superadmin |

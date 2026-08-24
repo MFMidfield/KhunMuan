@@ -18,6 +18,8 @@ interface StockRow {
   default_daily_qty: number | null
   qty_total: number | null
   qty_remaining: number | null
+  /** Today this filling is not counted at all (0031). */
+  unlimited: boolean
 }
 
 /**
@@ -39,7 +41,9 @@ export function StockPage() {
     queryFn: async (): Promise<StockRow[]> => {
       const [fillings, stock] = await Promise.all([
         supabase.from('fillings').select('*').order('sort_order'),
-        supabase.from('filling_stock_daily').select('filling_id, qty_total, qty_remaining'),
+        supabase
+          .from('filling_stock_daily')
+          .select('filling_id, qty_total, qty_remaining, unlimited'),
       ])
       if (fillings.error) throw fillings.error
       if (stock.error) throw stock.error
@@ -53,6 +57,12 @@ export function StockPage() {
         default_daily_qty: f.default_daily_qty,
         qty_total: byId.get(f.id)?.qty_total ?? null,
         qty_remaining: byId.get(f.id)?.qty_remaining ?? null,
+        // No row and no daily default is the original way of saying unlimited,
+        // and it still means it. The column is the way to say it while a row
+        // exists.
+        unlimited:
+          byId.get(f.id)?.unlimited ??
+          (f.default_daily_qty === null),
       }))
     },
   })
@@ -86,7 +96,7 @@ export function StockPage() {
                 resets this field — their value is the newer one — while an
                 ordinary sale, which only moves qty_remaining, does not disturb
                 what someone is typing. */}
-            <StockCard key={`${row.id}:${row.qty_total}`} row={row} />
+            <StockCard key={`${row.id}:${row.qty_total}:${row.unlimited}`} row={row} />
           </li>
         ))}
       </ul>
@@ -99,6 +109,11 @@ function StockCard({ row }: { row: StockRow }) {
   const [value, setValue] = useState(String(row.qty_total ?? ''))
   const [saved, setSaved] = useState(false)
 
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: ['stock-admin'] })
+    void queryClient.invalidateQueries({ queryKey: qk.stockToday })
+  }
+
   const save = useMutation({
     mutationFn: async (qty: number) => {
       const { error } = await supabase.rpc('set_stock', {
@@ -110,9 +125,16 @@ function StockCard({ row }: { row: StockRow }) {
     onSuccess: () => {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
-      void queryClient.invalidateQueries({ queryKey: ['stock-admin'] })
-      void queryClient.invalidateQueries({ queryKey: qk.stockToday })
+      refresh()
     },
+  })
+
+  const unlimit = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('set_stock_unlimited', { p_filling_id: row.id })
+      if (error) throw error
+    },
+    onSuccess: refresh,
   })
 
   const sold =
@@ -120,7 +142,13 @@ function StockCard({ row }: { row: StockRow }) {
       ? row.qty_total - row.qty_remaining
       : null
   const parsed = Number.parseInt(value, 10)
-  const dirty = Number.isFinite(parsed) && parsed >= 0 && parsed !== row.qty_total
+  // While unlimited, any valid number is a change even if it matches the stored
+  // total — the stored total is not in force, and pressing this is what turns
+  // counting back on.
+  const dirty =
+    Number.isFinite(parsed) &&
+    parsed >= 0 &&
+    (row.unlimited || parsed !== row.qty_total)
 
   return (
     <Card className={['flex gap-3 p-3', row.is_active ? '' : 'opacity-55'].join(' ')}>
@@ -135,10 +163,15 @@ function StockCard({ row }: { row: StockRow }) {
           <span>
             {t('admin:stockLeft')}{' '}
             <span className="tnum font-medium text-ink">
-              {row.qty_remaining ?? t('admin:stockUnlimited')}
+              {row.unlimited
+                ? t('admin:stockUnlimited')
+                : (row.qty_remaining ?? t('admin:stockUnlimited'))}
             </span>
           </span>
-          {sold !== null && (
+          {/* Shown even while unlimited: what the morning sold is still what
+              the morning sold, and it is what a number typed this afternoon
+              gets subtracted from. */}
+          {sold !== null && sold > 0 && (
             <span>
               {t('admin:stockSold')} <span className="tnum">{sold}</span>
             </span>
@@ -164,9 +197,26 @@ function StockCard({ row }: { row: StockRow }) {
           </Button>
         </div>
 
-        {save.error && (
+        {/* Two changes in one tap, so the label says so underneath: today stops
+            being counted, and the daily default is cleared so tomorrow's
+            rollover does not put a ceiling back. Putting one back is a menu
+            decision and lives on the menu screen. */}
+        {row.unlimited ? (
+          <p className="text-[0.8rem] text-ink-muted">{t('admin:stockIsUnlimited')}</p>
+        ) : (
+          <button
+            type="button"
+            disabled={unlimit.isPending}
+            onClick={() => unlimit.mutate()}
+            className="min-h-9 self-start px-1 text-[0.85rem] text-gold-ink hover:underline"
+          >
+            {t('admin:stockMakeUnlimited')}
+          </button>
+        )}
+
+        {(save.error || unlimit.error) && (
           <p role="alert" className="text-[0.8rem] text-st-cancel-fg">
-            {actionError(save.error, t)}
+            {actionError(save.error ?? unlimit.error, t)}
           </p>
         )}
       </div>

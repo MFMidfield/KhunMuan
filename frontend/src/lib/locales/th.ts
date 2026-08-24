@@ -451,6 +451,8 @@ export const th = {
     stockSet: 'ตั้งจำนวน',
     stockSaved: 'บันทึกแล้ว',
     stockUnlimited: 'ไม่จำกัด',
+    stockMakeUnlimited: 'ตั้งเป็นมีไม่จำกัด',
+    stockIsUnlimited: 'ไม่จำกัดอยู่ · ใส่ตัวเลขแล้วกดตั้งจำนวนเพื่อกลับมานับ',
     stockEmpty: 'ยังไม่มีไส้ในระบบ ไปเพิ่มที่จัดการเมนูก่อน',
     goToMenu: 'ไปจัดการเมนู',
 

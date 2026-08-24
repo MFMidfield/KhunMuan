@@ -182,9 +182,22 @@ the schema is not painted into a corner.
 | `service_date` | `date`, PK part | Local shop date, not UTC |
 | `qty_total` | `int` not null | Set by staff each morning, or copied from `default_daily_qty` |
 | `qty_remaining` | `int` not null check `>= 0` | Decremented atomically on order placement |
+| `unlimited` | `boolean` not null default false | Today this filling is not counted at all (0031) |
 
 The `check (qty_remaining >= 0)` constraint is the last line of defence against
 overselling; the row lock in `place_order` is the first. Both are load-bearing.
+
+**Two ways of saying unlimited, and why there are two.** A filling with no row
+for today and no `default_daily_qty` has always been uncounted — that is the
+state a filling starts in. `unlimited` is how a filling says it *while a row
+exists*, which is what the stock screen's button needs: deleting the row would
+not work, because `place_order` re-creates it from `default_daily_qty` the
+moment the next order touches that filling.
+
+The qty columns are kept rather than zeroed when the flag goes on. They are the
+record of what today has already sold, and `set_stock` subtracts it — a filling
+switched to unlimited at noon and back to 40 at two has still sold whatever it
+sold that morning.
 
 ### `addons`
 
