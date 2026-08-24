@@ -7,12 +7,12 @@
      customer  ───► │   pending_   │ ──── admin rejects ───► rejected  (terminal)
      places order   │ confirmation │ ──── customer cancels ► cancelled (terminal)
                     └──────┬───────┘
-                           │ admin accepts
+                           │ admin accepts (and thereby claims)
                            ▼
                     ┌──────────────┐
                     │   accepted   │ ──── admin cancels ───► cancelled
                     └──────┬───────┘
-                           │ admin claims + starts
+                           │ the claimer starts
                            ▼
                     ┌──────────────┐
                     │   cooking    │ ──── admin cancels ───► cancelled
@@ -33,7 +33,7 @@
 
 | From | To | Who | Guard |
 |------|----|-----|-------|
-| `pending_confirmation` | `accepted` | admin | shop context only |
+| `pending_confirmation` | `accepted` | admin | shop context only; claims the order for the accepter. For a transfer order the board goes through `confirm_payment_and_accept`, which marks the payment paid and calls `advance_order` in the same transaction (0029) |
 | `pending_confirmation` | `rejected` | admin | reason required; restores stock |
 | `pending_confirmation` | `cancelled` | customer | **only** state where the customer may cancel; restores stock |
 | `accepted` | `cooking` | admin | must be the claimer, or claim happens implicitly |
@@ -75,10 +75,19 @@ failure.
 
 Rules:
 
+- **Accepting an order claims it** (migration 0027). Whoever reads an order and
+  decides the shop can make it is the person who then makes it, so there is no
+  separate "รับงาน" button and no accepted-but-unclaimed state to explain. The
+  claim happens inside `advance_order`, not as a second call the client could
+  fail to make.
 - Claiming is **required** before moving an order into `cooking`. The "เริ่มทำ"
-  button performs claim-and-advance in one RPC when the order is unclaimed.
+  button performs claim-and-advance in one RPC when the order is unclaimed,
+  which is the path an order takes after being released.
 - Any admin can **release** their own claim. The superadmin can force-release
-  anyone's — for the case where a phone died mid-shift.
+  anyone's — for the case where a phone died mid-shift. A released order goes
+  back to unclaimed and the next person to tap "เริ่มทำ" takes it.
+- `claim_order` still exists and is still granted; nothing in the board calls it
+  now. It is the only path that claims without also moving the order.
 - A claim older than 45 minutes on an order still in `accepted` gets a visual
   stale marker on the board. It is not auto-released; a silent auto-release
   would recreate the double-cooking problem it is meant to prevent.
@@ -100,6 +109,13 @@ payload. Steps, all inside one transaction:
 3. **Validate fulfillment.** For pickup: point and slot active, and the slot's
    remaining capacity for `shop_today()` is > 0. For delivery: name, phone and
    location present, `delivery_enabled` true.
+3a. **The slip, for a transfer** (migration 0028). A public caller paying by
+   transfer must send a `slip_path`, or the call raises `SLIP_REQUIRED`; the
+   order is created with `payments.state = 'slip_uploaded'` rather than
+   `unpaid`. Staff keying in a phone order are exempt — they do not have the
+   customer's slip in front of them, and refusing would push those orders back
+   onto paper. The path must be one `slip-staging-url` issued and nobody has
+   claimed, and a file must have arrived at it: see doc 05 §5.
 4. **Lock and decrement stock.** For each distinct filling across all items,
    ordered by `filling_id` to give every concurrent transaction the same lock
    order and eliminate deadlocks:

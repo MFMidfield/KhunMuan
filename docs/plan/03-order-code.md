@@ -332,6 +332,12 @@ slot, the status and the total. Names, phone numbers and room numbers are
    the code alone sees status, order contents, pickup point, slot and total — and
    **never** `customer_name`, `customer_room` or `customer_phone`. A scanner that
    gets lucky learns what someone ordered, not who they are.
+
+   The rejection reason splits along the same line (0029): the **label** the
+   shop picked goes to any caller who knows the code, because it comes from a
+   fixed list the shop wrote and "ของหมด" describes the kitchen rather than the
+   customer. The **free-text note** is full-view only — staff type real
+   sentences into it, and a sentence about one order can be about its customer.
 4. **24-hour expiry** after handover, as above.
 5. **Misses are logged** and surfaced to the superadmin (doc 05 §4).
 

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { PageSpinner } from '@/components/ui/Spinner'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { tokenForCode } from './myOrders'
 import type { Database } from '@/types/database'
 
@@ -44,6 +45,10 @@ interface LookupResult {
   customer_name: string | null
   customer_phone: string | null
   payment: { method: PaymentMethod; state: PaymentState } | null
+  /** The label the shop picked from its own list. Null unless the order ended. */
+  reject_reason: string | null
+  /** Free text staff typed. Full view only — it can be about the customer. */
+  reject_note: string | null
   items: LookupItem[]
 }
 
@@ -55,6 +60,7 @@ export function TrackingPage() {
   const navigate = useNavigate()
   const { t } = useTranslation(['tracking', 'common'])
   const [copied, setCopied] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
 
   const token = tokenForCode(code)
 
@@ -171,8 +177,24 @@ export function TrackingPage() {
 
       <Card className="p-5">
         {terminal ? (
-          <div className="flex items-center gap-3">
-            <StatusBadge status={order.status} />
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <StatusBadge status={order.status} />
+            </div>
+
+            {/* Why, not just that. A rejected order rendering as one word is
+                the version of this screen that generates a phone call. */}
+            {(order.reject_reason || order.reject_note) && (
+              <div className="flex flex-col gap-1 border-t border-border pt-3">
+                <p className="text-[0.85rem] text-ink-muted">{t('tracking:whyEnded')}</p>
+                {order.reject_reason && (
+                  <p className="text-[0.95rem] break-words">{order.reject_reason}</p>
+                )}
+                {order.reject_note && (
+                  <p className="text-[0.9rem] break-words text-ink-muted">{order.reject_note}</p>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <ol className="flex flex-col">
@@ -310,7 +332,7 @@ export function TrackingPage() {
             variant="danger"
             size="lg"
             disabled={cancel.isPending}
-            onClick={() => cancel.mutate()}
+            onClick={() => setCancelling(true)}
           >
             {cancel.isPending ? t('tracking:cancelling') : t('tracking:cancelOrder')}
           </Button>
@@ -320,6 +342,25 @@ export function TrackingPage() {
             </p>
           )}
         </Card>
+      )}
+
+      {/* Cancelling is the one thing on this page the customer cannot undo: the
+          window closes the moment the shop accepts, and stock has already moved
+          back by then. */}
+      {cancelling && (
+        <ConfirmDialog
+          title={t('tracking:cancelOrder')}
+          body={t('tracking:cancelModalBody', { code: order.code })}
+          confirmLabel={t('tracking:cancelConfirmYes')}
+          cancelLabel={t('tracking:cancelConfirmNo')}
+          danger
+          busy={cancel.isPending}
+          onClose={() => setCancelling(false)}
+          onConfirm={() => {
+            setCancelling(false)
+            cancel.mutate()
+          }}
+        />
       )}
     </div>
   )

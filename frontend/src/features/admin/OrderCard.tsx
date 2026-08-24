@@ -9,7 +9,14 @@ import { useNow } from '@/lib/useNow'
 import { supabase } from '@/lib/supabase'
 import { AgeTimer } from './AgeTimer'
 import { ReasonDialog } from './ReasonDialog'
-import { actionError, useAdvance, useClaim, useRelease, useSetPayment } from './useOrderActions'
+import { PaymentReviewDialog } from './PaymentReviewDialog'
+import {
+  actionError,
+  useAdvance,
+  useConfirmPaymentAndAccept,
+  useRelease,
+  useSetPayment,
+} from './useOrderActions'
 import type { BoardOrder } from './useOrderBoard'
 
 /** A claim left sitting this long on an accepted order gets a stale marker. */
@@ -33,12 +40,13 @@ export function OrderCard({
   linkToDetail?: boolean
 }) {
   const { t } = useTranslation(['admin', 'tracking', 'common'])
-  const claim = useClaim()
   const release = useRelease()
   const advance = useAdvance()
   const payment = useSetPayment()
+  const confirmPay = useConfirmPaymentAndAccept()
 
   const [reasonFor, setReasonFor] = useState<'rejected' | 'cancelled' | null>(null)
+  const [reviewingPayment, setReviewingPayment] = useState(false)
   const [code, setCode] = useState('')
   const [overrideNote, setOverrideNote] = useState('')
   const [showOverride, setShowOverride] = useState(false)
@@ -69,9 +77,10 @@ export function OrderCard({
     order.status === 'accepted' &&
     now - new Date(order.claimed_at).getTime() > STALE_CLAIM_MINUTES * 60_000
 
-  const busy = claim.isPending || release.isPending || advance.isPending || payment.isPending
+  const busy =
+    release.isPending || advance.isPending || payment.isPending || confirmPay.isPending
   const error =
-    claim.error ?? release.error ?? advance.error ?? payment.error ?? null
+    release.error ?? advance.error ?? payment.error ?? confirmPay.error ?? null
 
   const run = (to: BoardOrder['status'], extra: Record<string, unknown> = {}) =>
     advance.mutate({
@@ -244,9 +253,24 @@ export function OrderCard({
       <div className="flex flex-wrap gap-2">
         {order.status === 'pending_confirmation' && (
           <>
-            <Button className="flex-1" disabled={busy} onClick={() => run('accepted')}>
-              {t('admin:accept')}
-            </Button>
+            {/* For a transfer order the first question is whether the money
+                arrived, not whether the shop can cook it — and since 0028 the
+                slip is already attached when the order lands. So the primary
+                button opens the slip and answers both at once. A cash order has
+                nothing to look at and keeps the plain accept. */}
+            {order.payment_method === 'transfer' ? (
+              <Button
+                className="flex-1"
+                disabled={busy}
+                onClick={() => setReviewingPayment(true)}
+              >
+                {t('admin:confirmPayment')}
+              </Button>
+            ) : (
+              <Button className="flex-1" disabled={busy} onClick={() => run('accepted')}>
+                {t('admin:accept')}
+              </Button>
+            )}
             <Button
               variant="ghost"
               disabled={busy}
@@ -259,15 +283,8 @@ export function OrderCard({
 
         {order.status === 'accepted' && (
           <>
-            {!order.claimed_by && (
-              <Button
-                variant="ghost"
-                disabled={busy}
-                onClick={() => claim.mutate(order.id)}
-              >
-                {t('admin:claim')}
-              </Button>
-            )}
+            {/* No claim button: accepting already took the order, and picking
+                up a released one is what tapping เริ่มทำ does. */}
             <Button
               className="flex-1"
               disabled={busy || theirs}
@@ -328,16 +345,30 @@ export function OrderCard({
         )}
       </div>
 
-      {claim.data?.claimed === false && (
-        <p className="text-[0.85rem] text-ink-muted">
-          {t('admin:takenBy', { name: claim.data.claimed_by_name ?? '' })}
-        </p>
-      )}
-
       {error && (
         <p role="alert" className="text-[0.85rem] break-words text-st-cancel-fg">
           {actionError(error, t)}
         </p>
+      )}
+
+      {reviewingPayment && (
+        <PaymentReviewDialog
+          slipPath={order.slip_path}
+          total={Number(order.total)}
+          code={order.code}
+          busy={busy}
+          onClose={() => setReviewingPayment(false)}
+          onAccept={() => {
+            setReviewingPayment(false)
+            confirmPay.mutate({ orderId: order.id, expectedVersion: order.version })
+          }}
+          onReject={() => {
+            // Straight into the reason dialog: rejecting is never a bare no,
+            // and the reason is what the customer's tracking page shows.
+            setReviewingPayment(false)
+            setReasonFor('rejected')
+          }}
+        />
       )}
 
       {reasonFor && (
