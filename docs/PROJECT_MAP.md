@@ -26,12 +26,12 @@ KhunMuan/
 │   └── supabase/
 │       ├── config.toml         local stack; Google OAuth reads supabase/.env
 │       ├── .env                Google client id + secret (gitignored)
-│       └── migrations/         0001–0009, applied in filename order
+│       └── migrations/         0001–0025, applied in filename order
 └── frontend/
     ├── .env.local              VITE_SUPABASE_URL + ANON_KEY (gitignored)
     └── src/
         ├── app/                router, providers, layouts, guards, error page
-        ├── features/           admin, auth (menu/cart/checkout/tracking: Phase 1)
+        ├── features/           home, menu, builder, cart, checkout, tracking, admin, auth
         ├── components/ui/      Button, Card, Input, Spinner, StatusBadge, ThemeToggle
         ├── lib/                supabase, queryClient, i18n, locales, theme, storage
         └── types/database.ts   generated — never edited by hand
@@ -50,6 +50,11 @@ KhunMuan/
 | `0007_updated_at.sql` | The trigger, attached to every mutable table |
 | `0008_seed_superadmin.sql` | **Contains the one line to edit before any cloud deploy** |
 | `0009_rls.sql` | Grants and row-level security |
+
+`0010`–`0025` are the feature migrations and each names its plan doc in its own
+header comment. Two are worth knowing about before you touch `shop_settings`:
+`0016` turned the shop's lists into back-office configuration, and `0025` added
+the three contact channels the landing page reads.
 
 ## Commands
 
@@ -71,7 +76,8 @@ generated file is committed so the frontend never guesses a column name.
 
 ## Edge Functions
 
-`track`, `slip-upload-url`, `slip-prune`, all under `backend/supabase/functions/`.
+`track`, `slip-upload-url`, `slip-staging-url`, `slip-prune`, `line-notify`,
+`daily-rollover`, all under `backend/supabase/functions/`.
 
 A **newly created** function directory is invisible to the local edge runtime
 until the stack is stopped and started — `npm run reset` is not enough, and the
@@ -102,6 +108,16 @@ normally.
   lower-cased `text` rather than `citext`; see doc 01 §2.
 - **No string literals in JSX.** Everything goes through `t()`, placeholders
   included.
+- **`/` is the landing page, not the menu.** The menu lives at `/menu` since the
+  landing page landed; anything sending a customer "back to the menu" wants
+  `/menu`, and `/` is where you send someone who should see the shop first.
+- **Light is the default theme, and `index.css` has no
+  `@media (prefers-color-scheme: dark)` block on purpose.** Three things hold it
+  up together: the pre-paint script in `index.html` always stamps `data-theme`,
+  the provider has two states rather than three, and that media query is absent.
+  Re-adding the query — it looks like an obvious omission — hands a dark first
+  paint to anyone whose phone is on a dark schedule, and with JavaScript off
+  nothing corrects it. Doc 04 §6.
 - **`service_role` is granted nothing by default either.** `auto_expose_new_tables`
   strips DML from all three roles, not just anon — and a missing grant returns
   zero rows, which reads as "not found" rather than "not allowed". See migration

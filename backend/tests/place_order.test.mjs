@@ -146,7 +146,9 @@ async function main() {
       delivery_location: 'ตึกตัวอย่าง',
       customer_name: 'ทดสอบ',
       customer_phone: '0800000000',
-      payment_method: 'transfer',
+      // Cash, because this case is about the arithmetic. A public transfer
+      // order needs a staged slip since 0028, and that path is slips.test.mjs.
+      payment_method: 'cash',
       items: [
         {
           set_id: SET_SMALL,

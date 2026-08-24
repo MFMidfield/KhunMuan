@@ -8,11 +8,9 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { PageSpinner } from '@/components/ui/Spinner'
 import { MenuImage } from '@/components/ui/MenuImage'
+import { checkSlipFile, SLIP_TYPES } from '@/lib/slip'
 import { useShopSettings } from '@/features/menu/queries'
 import { tokenForCode } from './myOrders'
-
-const MAX_BYTES = 5 * 1024 * 1024
-const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
 
 /**
  * Where a customer attaches proof of a transfer.
@@ -45,11 +43,7 @@ export function SlipUploadPage() {
 
   const upload = useMutation({
     mutationFn: async (file: File) => {
-      // Checked here so a 12 MB photo says so in Thai before it spends thirty
-      // seconds uploading. Storage enforces the same two limits, and that is
-      // the copy that actually holds.
-      if (!ALLOWED.includes(file.type)) throw new Error('slipWrongType')
-      if (file.size > MAX_BYTES) throw new Error('slipTooBig')
+      checkSlipFile(file)
 
       const { data: grant, error: grantError } = await supabase.functions.invoke<{
         path: string
@@ -126,7 +120,7 @@ export function SlipUploadPage() {
           <span className="sr-only">{t('tracking:slipPick')}</span>
           <input
             type="file"
-            accept={ALLOWED.join(',')}
+            accept={SLIP_TYPES.join(',')}
             disabled={upload.isPending}
             onChange={(e) => {
               const file = e.target.files?.[0]
