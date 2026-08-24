@@ -11,6 +11,7 @@ export const ACTIVE_STATUSES: OrderStatus[] = [
   'accepted',
   'cooking',
   'ready',
+  'out_for_delivery',
 ]
 
 export interface BoardOrder {
@@ -81,7 +82,10 @@ export function useOrderBoard() {
         .from('orders')
         .select(SELECT)
         .in('status', ACTIVE_STATUSES)
-        .order('created_at', { ascending: true })
+        // Newest first. The age timer is what says an order has been waiting
+        // too long — the position in the list is not doing that job, and a new
+        // order appearing at the bottom of a long board is an order nobody sees.
+        .order('created_at', { ascending: false })
 
       if (error) throw error
       return (data as unknown as RawOrder[]).map(normalise)

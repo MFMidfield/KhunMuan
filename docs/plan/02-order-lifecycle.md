@@ -22,7 +22,14 @@
                     ┌──────────────┐
                     │    ready     │
                     └──────┬───────┘
-                           │ handed to customer (payment must be `paid`)
+                           │ pickup: handed over at the counter
+                           │ delivery: leaves the shop first
+                           ▼
+                    ┌──────────────────┐
+                    │ out_for_delivery │ ─── admin cancels ──► cancelled
+                    │  (delivery only) │
+                    └──────┬───────────┘
+                           │ handed to customer — payment MUST be `paid`
                            ▼
                     ┌──────────────┐
                     │ handed_over  │  (terminal)
@@ -39,8 +46,27 @@
 | `accepted` | `cooking` | admin | must be the claimer, or claim happens implicitly |
 | `accepted` \| `cooking` | `cancelled` | admin | reason required; restores stock |
 | `cooking` | `ready` | admin | must be the claimer |
-| `ready` | `handed_over` | admin | `payments.state = 'paid'`, or admin explicitly overrides with a note |
+| `ready` | `handed_over` | admin | **pickup only**; `payments.state = 'paid'` |
+| `ready` | `out_for_delivery` | admin | **delivery only**; no payment requirement — cash is collected at the door |
+| `out_for_delivery` | `handed_over` | admin | `payments.state = 'paid'` |
+| `out_for_delivery` | `cancelled` | admin | reason required; restores stock |
 | `ready` | `cooking` | admin | correction path — "we need to remake this" |
+
+**`ready` forks on fulfillment** (0033). It used to mean two things: for a
+pickup, the box is on the shelf; for a delivery, it meant that *and* went on
+meaning it while somebody was out on a bike — the board could not tell "cooked,
+still here" from "cooked, gone, nearly there", which is the difference the shop
+gets phoned about. A delivery may not skip the middle step, and there is no
+re-cooking something already on a bike.
+
+**There is no payment override** (0033). `advance_order` used to take
+`p_override_payment` plus a note, letting staff hand over an unpaid order and
+explain afterwards. It existed for the case where money moved and the system did
+not know it — but the honest fix for that is to mark the payment paid, which is
+one tap away on the same card and records who confirmed it and when. The
+override wrote nothing into that record, and it was the only path by which food
+left the shop with no evidence of being paid for. The money is still required at
+handover and nowhere earlier, which is what lets a cash delivery go out at all.
 
 Everything else is rejected by the RPC. The client never writes `orders.status`
 directly; RLS denies `update` on the column.

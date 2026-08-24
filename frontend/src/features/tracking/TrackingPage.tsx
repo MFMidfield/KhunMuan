@@ -52,8 +52,19 @@ interface LookupResult {
   items: LookupItem[]
 }
 
-/** The five nodes a live order moves through. Terminal states render separately. */
-const FLOW: OrderStatus[] = ['pending_confirmation', 'accepted', 'cooking', 'ready', 'handed_over']
+/**
+ * The nodes a live order moves through. Terminal states render separately.
+ *
+ * A delivery has one more: it leaves the shop before it reaches anyone, and the
+ * customer watching this page is precisely the person who wants to know which
+ * side of that line their food is on (0033).
+ */
+const PICKUP_FLOW: OrderStatus[] = [
+  'pending_confirmation', 'accepted', 'cooking', 'ready', 'handed_over',
+]
+const DELIVERY_FLOW: OrderStatus[] = [
+  'pending_confirmation', 'accepted', 'cooking', 'ready', 'out_for_delivery', 'handed_over',
+]
 
 export function TrackingPage() {
   const { code = '' } = useParams<{ code: string }>()
@@ -147,6 +158,7 @@ export function TrackingPage() {
 
   const order = query.data
   const terminal = order.status === 'cancelled' || order.status === 'rejected'
+  const FLOW = order.fulfillment === 'delivery' ? DELIVERY_FLOW : PICKUP_FLOW
   const currentIndex = FLOW.indexOf(order.status)
 
   async function copyCode() {

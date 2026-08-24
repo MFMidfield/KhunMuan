@@ -12,7 +12,6 @@ export interface AdvanceArgs {
   reasonId?: string
   note?: string
   code?: string
-  overridePayment?: boolean
 }
 
 /**
@@ -54,7 +53,6 @@ export function useAdvance() {
         ...(args.reasonId ? { p_reason_id: args.reasonId } : {}),
         ...(args.note ? { p_note: args.note } : {}),
         ...(args.code ? { p_code: args.code } : {}),
-        ...(args.overridePayment ? { p_override_payment: true } : {}),
       })
       if (error) throw error
       return data

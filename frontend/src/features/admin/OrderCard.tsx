@@ -56,8 +56,6 @@ export function OrderCard({
   const [reasonFor, setReasonFor] = useState<'rejected' | 'cancelled' | null>(null)
   const [reviewingPayment, setReviewingPayment] = useState(false)
   const [code, setCode] = useState('')
-  const [overrideNote, setOverrideNote] = useState('')
-  const [showOverride, setShowOverride] = useState(false)
   const [openingSlip, setOpeningSlip] = useState(false)
 
   /**
@@ -92,6 +90,15 @@ export function OrderCard({
   const error =
     release.error ?? advance.error ?? payment.error ?? confirmPay.error ?? null
 
+  // A delivery is handed over at the door, one status later than a pickup: it
+  // has to leave the shop first. Everything that belongs to the moment of
+  // handing over — the code field, the paid check, the button — keys off this
+  // rather than off `ready`.
+  const handingOver =
+    order.fulfillment === 'delivery'
+      ? order.status === 'out_for_delivery'
+      : order.status === 'ready'
+
   const run = (to: BoardOrder['status'], extra: Record<string, unknown> = {}) =>
     advance.mutate({
       orderId: order.id,
@@ -105,6 +112,11 @@ export function OrderCard({
       onPointerDown={isNew ? onSeen : undefined}
       className={[
         'flex flex-col gap-3 p-4',
+        // A delivery has somewhere to be, and the person reading the board has
+        // to see that before reading anything on the card. Blue, because gold
+        // means brand here and never state, and the status palette is cool
+        // throughout.
+        order.fulfillment === 'delivery' ? 'border-[1.5px] border-st-cook-fg' : '',
         // Cards someone else owns get a muted edge so your eye skips them.
         theirs ? 'border-border opacity-80' : '',
         isNew ? 'ring-2 ring-gold-fill' : '',
@@ -233,7 +245,9 @@ export function OrderCard({
       </div>
       )}
 
-      {order.status === 'ready' && requireCodeOnHandover && (
+      {/* The code is asked for at the moment of handing over, which for a
+          delivery is at the door — one status later than for a pickup. */}
+      {handingOver && requireCodeOnHandover && (
         <label className="flex flex-col gap-1">
           <span className="text-[0.85rem] font-medium">{t('admin:handoverCode')}</span>
           <input
@@ -248,17 +262,6 @@ export function OrderCard({
           <span className="text-[0.75rem] text-ink-muted">
             {t('admin:handoverCodeHelp')}
           </span>
-        </label>
-      )}
-
-      {showOverride && (
-        <label className="flex flex-col gap-1">
-          <span className="text-[0.85rem] font-medium">{t('admin:overrideNote')}</span>
-          <input
-            value={overrideNote}
-            onChange={(e) => setOverrideNote(e.target.value)}
-            className="min-h-11 rounded-btn border border-border-strong bg-surface px-3"
-          />
         </label>
       )}
 
@@ -321,8 +324,24 @@ export function OrderCard({
           </>
         )}
 
-        {order.status === 'ready' && (
+        {/* Cooked and still in the shop. A delivery leaves; a pickup waits for
+            its customer and is handed over from here. */}
+        {order.status === 'ready' && order.fulfillment === 'delivery' && (
           <>
+            <Button className="flex-1" disabled={busy} onClick={() => run('out_for_delivery')}>
+              {t('admin:startDelivery')}
+            </Button>
+            <Button variant="ghost" disabled={busy} onClick={() => setReasonFor('cancelled')}>
+              {t('common:cancel')}
+            </Button>
+          </>
+        )}
+
+        {handingOver && (
+          <>
+            {/* Money is required at this step and there is no way past it any
+                more (0033). For a cash delivery this is the tap the rider makes
+                at the door, before the one next to it. */}
             {order.payment_state !== 'paid' && (
               <Button
                 variant="ghost"
@@ -334,26 +353,29 @@ export function OrderCard({
             )}
             <Button
               className="flex-1"
-              disabled={busy || (requireCodeOnHandover && code.length < 4)}
+              disabled={
+                busy ||
+                order.payment_state !== 'paid' ||
+                (requireCodeOnHandover && code.length < 4)
+              }
               onClick={() =>
-                run('handed_over', {
-                  ...(requireCodeOnHandover ? { code } : {}),
-                  ...(showOverride ? { overridePayment: true, note: overrideNote } : {}),
-                })
+                run('handed_over', requireCodeOnHandover ? { code } : {})
               }
             >
               {t('admin:handOver')}
             </Button>
-            {order.payment_state !== 'paid' && !showOverride && (
-              <button
-                type="button"
-                onClick={() => setShowOverride(true)}
-                className="min-h-9 px-1 text-[0.85rem] text-ink-muted hover:text-ink"
-              >
-                {t('admin:override')}
-              </button>
+            {order.payment_state !== 'paid' && (
+              <p className="w-full text-[0.8rem] text-ink-muted">
+                {t('admin:handOverNeedsPaid')}
+              </p>
             )}
           </>
+        )}
+
+        {order.status === 'out_for_delivery' && (
+          <Button variant="ghost" disabled={busy} onClick={() => setReasonFor('cancelled')}>
+            {t('common:cancel')}
+          </Button>
         )}
       </div>
 

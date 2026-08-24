@@ -168,6 +168,12 @@ layout is plain CSS again, as §9 prefers.
 
 Non-negotiable details:
 
+- **Newest first** (0033). The age timer, not the position in the list, is what
+  says an order has been waiting: a new order appended to the bottom of a long
+  board is an order nobody sees.
+- **A delivery card has a blue 1.5px edge.** It has somewhere to be, and that
+  has to register before anything on the card is read. Blue because gold means
+  brand here and never state, and the status palette is cool throughout.
 - **Age timer** counts up from `created_at` and turns amber past 10 minutes, red
   past 20. This is the entire defence against dropped orders — a card that has
   been sitting has to look wrong.
@@ -207,8 +213,10 @@ refetch to reconcile anything missed.
 
 ## 4. Tracking page
 
-A vertical stepper with five nodes matching the status enum, the current node
-pulsing. Above it: the code in a large monospace-ish treatment, because that is
+A vertical stepper matching the status enum, the current node pulsing — five
+nodes for a pickup, six for a delivery, which has `out_for_delivery` between
+`ready` and `handed_over`. The customer watching this page is precisely the
+person who wants to know which side of that line their food is on. Above it: the code in a large monospace-ish treatment, because that is
 what the customer will be asked for at the counter. Below: the order contents,
 the pickup point and slot or delivery location, the total, and payment state.
 

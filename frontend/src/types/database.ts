@@ -950,7 +950,6 @@ export type Database = {
           p_expected_version: number
           p_note?: string
           p_order_id: string
-          p_override_payment?: boolean
           p_reason_id?: string
           p_to_status: Database["public"]["Enums"]["order_status"]
         }
@@ -1096,6 +1095,7 @@ export type Database = {
         | "accepted"
         | "cooking"
         | "ready"
+        | "out_for_delivery"
         | "handed_over"
         | "cancelled"
         | "rejected"
@@ -1241,6 +1241,7 @@ export const Constants = {
         "accepted",
         "cooking",
         "ready",
+        "out_for_delivery",
         "handed_over",
         "cancelled",
         "rejected",
