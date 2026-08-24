@@ -28,8 +28,8 @@ not part of delivery.
 | | |
 |---|---|
 | Branch | `phase-0-foundations`, pushed, **not merged into `main`** |
-| Migrations | `0001`–`0024`, `db reset` clean from empty |
-| Routes | all 15 are real screens; the `Placeholder` component is deleted |
+| Migrations | `0001`–`0025`, `db reset` clean from empty |
+| Routes | all 16 are real screens; the `Placeholder` component is deleted |
 | Backend suites | `npm test` runs nine: order-code, orders, back-office, config, tracking, rate-limit, slips, ops, reports |
 | Frontend | `npm run check` = tsc + eslint + build, clean |
 | Deployed | **nowhere.** Everything above has only ever run against the local stack |
@@ -48,6 +48,33 @@ not part of delivery.
   `app.functions_url` / `app.service_role_key` so the slip prune and the LINE
   drain can be woken at all — both warn and skip without them rather than
   pretending.
+
+### Landed after the five phases
+
+Four changes to the customer surface, all after the phase checklist below was
+ticked, all with their reasoning in doc 04:
+
+- **A landing page at `/`, and the menu moved to `/menu`.** Opening on a grid of
+  set cards answered "what can I buy" and nothing else. Doc 04 §1.
+- **Shop contact — phone, email, Instagram.** Migration `0025` puts all three on
+  `shop_settings`; `/admin/settings` edits them, the landing page leads with
+  them, and a blank one renders as nothing rather than an empty row. Doc 06
+  Q13b. Local dev has `[DEV]` values in `seed.sql`; the real ones are typed into
+  the back office, never into a migration.
+- **The customer shell is a side nav.** Cart, my orders and the theme toggle
+  moved off the header into a drawer; the cart count rides the menu button so it
+  stays visible with the drawer shut. Doc 04 §1.
+- **Light is the default theme on every device.** The `system` state is gone
+  from the provider and the `prefers-color-scheme` block is gone from
+  `index.css`. Doc 04 §6 — and PROJECT_MAP, because re-adding that block looks
+  like fixing an omission.
+
+`/admin/login` also gained a `กลับหน้าร้าน` link. It sits outside both layouts,
+so before that a customer who tapped the footer entrance had only the browser's
+back button.
+
+**None of the four has been seen in a browser either.** They are newer than the
+paragraph above and inherit every word of it.
 
 ### Still open
 
@@ -352,8 +379,8 @@ snapshots, stock decremented, and a code that survives being read aloud.
       `require_code_on_handover` is true it refuses `ready → handed_over`
       without the order's own code
 - [ ] `set_payment` — slip viewing, manual confirmation
-- [ ] Order board: Kanban on desktop, list on mobile; age timers, claim owner on
-      every card, sound plus highlight on arrival
+- [ ] Order board: one filterable table on every screen; age timers, claim owner
+      on every row, sound plus highlight on arrival
 - [ ] Manual order entry (`source = 'admin'`)
 - [ ] Open/close switch, daily stock screen, `set_stock`
 - [ ] Rejection reasons per Q15

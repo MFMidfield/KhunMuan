@@ -18,16 +18,16 @@
     <title>คุณม้วน</title>
     <script>
       // Applied before first paint so a stored choice never flashes the wrong
-      // theme. No stored choice means no stamp, which leaves the device's
-      // prefers-color-scheme in charge — that is the intended default.
+      // theme. Light is the default and is stamped explicitly: leaving the root
+      // unstamped would hand a dark-mode phone a dark first paint, which is the
+      // behaviour this replaced.
+      var t = 'light'
       try {
-        var t = localStorage.getItem('khunmuan.theme')
-        if (t === 'light' || t === 'dark') {
-          document.documentElement.setAttribute('data-theme', t)
-        }
+        if (localStorage.getItem('khunmuan.theme') === 'dark') t = 'dark'
       } catch (e) {
-        /* private window, blocked storage: fall through to the device theme */
+        /* private window, blocked storage: light, like everyone else */
       }
+      document.documentElement.setAttribute('data-theme', t)
     </script>
   </head>
   <body>

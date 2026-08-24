@@ -12,9 +12,15 @@
 --  this wholesale — the [DEV] prefix is what makes that replacement obvious.
 -- ===========================================================================
 
+-- The contact channels are the shop's own and have not been supplied. These
+-- three are [DEV] values so the landing page renders all three rows locally;
+-- the real ones are typed into /admin/settings, not into a seed file.
 update public.shop_settings
    set is_open = true,
-       closed_message = '[DEV] ปิดรับออเดอร์ชั่วคราว'
+       closed_message = '[DEV] ปิดรับออเดอร์ชั่วคราว',
+       contact_phone = '02-000-0000',
+       contact_email = 'dev@example.com',
+       contact_instagram = 'dev.example'
  where id = 1;
 
 -- --- Staff ------------------------------------------------------------------

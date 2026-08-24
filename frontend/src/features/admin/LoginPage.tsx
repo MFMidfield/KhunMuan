@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/features/auth/useSession'
@@ -58,6 +58,32 @@ export function LoginPage() {
           </p>
         )}
       </Card>
+
+      {/* The way out. This screen sits outside both layouts — no customer
+          header, no admin tab bar — so without this link a customer who tapped
+          the footer entrance out of curiosity has nothing but the browser's
+          back button, and someone who just signed out lands here stranded. */}
+      <Link
+        to="/"
+        className={[
+          'inline-flex min-h-11 items-center justify-center gap-2 self-center',
+          'rounded-btn px-3 text-[0.9rem] text-gold-ink hover:underline',
+        ].join(' ')}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          className="size-4 shrink-0 rtl:-scale-x-100"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M15 5l-7 7 7 7" />
+        </svg>
+        {t('common:backToShop')}
+      </Link>
     </div>
   )
 }

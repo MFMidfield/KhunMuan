@@ -23,7 +23,7 @@ export function CartPage() {
     return (
       <Card className="flex flex-col items-start gap-4 p-5">
         <p className="text-ink-muted">{t('cart:empty')}</p>
-        <Button onClick={() => void navigate('/')}>{t('cart:emptyAction')}</Button>
+        <Button onClick={() => void navigate('/menu')}>{t('cart:emptyAction')}</Button>
       </Card>
     )
   }
