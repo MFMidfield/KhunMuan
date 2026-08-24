@@ -73,7 +73,29 @@ The zero-row case is not an error the user should see as a red toast. The UI
 re-reads the row and shows "รับไปแล้วโดย <name>" — the honest outcome, not a
 failure.
 
-Rules:
+**Claiming is a switch** (migration 0030). `shop_settings.exclusive_claims`,
+default on, is everything below. Off, anyone may move any order and the two
+guards that raise `CLAIMED_BY_SOMEONE_ELSE` do not fire.
+
+Claiming was written for a six-person shift where two people cooking the same
+order is a real and expensive mistake. It is the wrong shape for a shift where
+two people share one tablet and pick up whatever is next — there the ownership
+check is not a safety net, it is a door that keeps locking on the person
+standing at it.
+
+What does not change with the switch is the record: the order is still stamped
+with whoever accepted or started it, because "who cooked this" is asked after
+the fact regardless of what was being enforced at the time. The board hides the
+claim row; the row is still written.
+
+Flipping it in either direction drops every live claim. Switching off, a claim
+that no longer means anything must not sit on a card implying it does; switching
+on, claims recorded while nothing was enforcing them would suddenly lock people
+out of orders they were already working on. It is an ordinary admin power, like
+open/close, and for the same reason — the shape of a shift changes during the
+shift.
+
+Rules, while the switch is on:
 
 - **Accepting an order claims it** (migration 0027). Whoever reads an order and
   decides the shop can make it is the person who then makes it, so there is no

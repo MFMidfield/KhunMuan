@@ -836,6 +836,7 @@ export type Database = {
           contact_phone: string | null
           created_at: string
           delivery_enabled: boolean
+          exclusive_claims: boolean
           id: number
           is_open: boolean
           line_notify_enabled: boolean
@@ -857,6 +858,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           delivery_enabled?: boolean
+          exclusive_claims?: boolean
           id: number
           is_open?: boolean
           line_notify_enabled?: boolean
@@ -878,6 +880,7 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           delivery_enabled?: boolean
+          exclusive_claims?: boolean
           id?: number
           is_open?: boolean
           line_notify_enabled?: boolean
@@ -1059,6 +1062,7 @@ export type Database = {
         }[]
       }
       run_daily_rollover: { Args: never; Returns: Json }
+      set_exclusive_claims: { Args: { p_enabled: boolean }; Returns: Json }
       set_payment: {
         Args: {
           p_note?: string

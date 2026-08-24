@@ -46,6 +46,7 @@ export function BoardPage() {
     // The switch is enforced inside advance_order; this only decides whether
     // the card shows the field, so a stale read here cannot let anything past.
     requireCodeOnHandover: settings?.require_code_on_handover ?? true,
+    exclusiveClaims: settings?.exclusive_claims ?? true,
     unseen: board.unseen,
     markSeen: board.markSeen,
   }
@@ -74,6 +75,7 @@ type BoardData = ReturnType<typeof useOrderBoard>
 interface CardProps {
   currentAdminId: string | null
   requireCodeOnHandover: boolean
+  exclusiveClaims: boolean
   unseen: Set<string>
   markSeen: (id: string) => void
 }
@@ -85,6 +87,7 @@ function renderCard(order: BoardOrder, p: CardProps, showStatus = false) {
       order={order}
       currentAdminId={p.currentAdminId}
       requireCodeOnHandover={p.requireCodeOnHandover}
+      exclusiveClaims={p.exclusiveClaims}
       isNew={p.unseen.has(order.id)}
       onSeen={() => p.markSeen(order.id)}
       showStatus={showStatus}

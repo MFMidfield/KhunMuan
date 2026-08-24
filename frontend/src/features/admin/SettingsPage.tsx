@@ -105,6 +105,22 @@ function OpenCloseCard({ settings, isSuper }: { settings: Settings; isSuper: boo
     onSuccess: refreshSettings,
   })
 
+  // An ordinary admin power, like open/close and for the same reason: the shape
+  // of a shift changes during the shift. RLS on shop_settings is
+  // superadmin-only, so this goes through an RPC rather than a table update.
+  const claims = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const { error } = await supabase.rpc('set_exclusive_claims', { p_enabled: enabled })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      refreshSettings()
+      // Every live claim was just dropped and every order's version bumped, so
+      // the board in the next tab is holding rows it can no longer write to.
+      void queryClient.invalidateQueries({ queryKey: qk.orders('active') })
+    },
+  })
+
   const saveQr = useMutation({
     mutationFn: async (path: string) => {
       const { error } = await supabase
@@ -151,6 +167,23 @@ function OpenCloseCard({ settings, isSuper }: { settings: Settings; isSuper: boo
         {toggle.error && (
           <p role="alert" className="text-[0.85rem] text-st-cancel-fg">
             {actionError(toggle.error, t)}
+          </p>
+        )}
+      </Card>
+
+      <Card className="flex flex-col gap-3 p-5">
+        <h2 className="font-semibold">{t('admin:cfg.claimMode')}</h2>
+        <ActiveToggle
+          checked={settings.exclusive_claims}
+          onChange={(next) => claims.mutate(next)}
+          labelOn={t('admin:cfg.claimExclusive')}
+          labelOff={t('admin:cfg.claimShared')}
+        />
+        <p className="text-[0.8rem] text-ink-muted">{t('admin:cfg.claimModeHint')}</p>
+
+        {claims.error && (
+          <p role="alert" className="text-[0.85rem] text-st-cancel-fg">
+            {actionError(claims.error, t)}
           </p>
         )}
       </Card>

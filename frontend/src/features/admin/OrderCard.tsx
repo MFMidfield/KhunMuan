@@ -26,6 +26,7 @@ export function OrderCard({
   order,
   currentAdminId,
   requireCodeOnHandover,
+  exclusiveClaims,
   isNew,
   onSeen,
   showStatus = false,
@@ -34,6 +35,13 @@ export function OrderCard({
   order: BoardOrder
   currentAdminId: string | null
   requireCodeOnHandover: boolean
+  /**
+   * Whether an order belongs to whoever took it (0030). Off, the whole claim
+   * row disappears: `claimed_by` is still written, but as a record of who acted
+   * rather than a lock, and a card that shows an owner nobody is bound by is
+   * worse than a card that shows nothing.
+   */
+  exclusiveClaims: boolean
   isNew: boolean
   onSeen: () => void
   showStatus?: boolean
@@ -71,7 +79,9 @@ export function OrderCard({
 
   const now = useNow()
   const mine = order.claimed_by !== null && order.claimed_by === currentAdminId
-  const theirs = order.claimed_by !== null && !mine
+  // Only meaningful while the shop is enforcing ownership. With the switch off
+  // the server will not refuse anyone, so neither does the button.
+  const theirs = exclusiveClaims && order.claimed_by !== null && !mine
   const staleClaim =
     order.claimed_at !== null &&
     order.status === 'accepted' &&
@@ -197,6 +207,7 @@ export function OrderCard({
         </div>
       </div>
 
+      {exclusiveClaims && (
       <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
         <span className="text-[0.85rem] text-ink-muted">
           {order.claimed_by_name
@@ -220,6 +231,7 @@ export function OrderCard({
           </button>
         )}
       </div>
+      )}
 
       {order.status === 'ready' && requireCodeOnHandover && (
         <label className="flex flex-col gap-1">

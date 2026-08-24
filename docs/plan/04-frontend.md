@@ -25,7 +25,7 @@
 | `/admin/new` | Key in a phone order | admin |
 | `/admin/menu` | Sets, fillings, add-ons, photos | superadmin |
 | `/admin/stock` | Today's remaining quantities | admin |
-| `/admin/settings` | Open/close, contact channels, pickup points, slots, delivery fee, order limits, handover code | superadmin (open/close: admin) |
+| `/admin/settings` | Open/close, contact channels, pickup points, slots, delivery fee, order limits, handover code, claim mode | superadmin (open/close and claim mode: admin) |
 | `/admin/reports` | Daily sales, top/bottom fillings, stage times | superadmin |
 | `/admin/staff` | Admin allow-list | superadmin |
 
@@ -172,7 +172,10 @@ Non-negotiable details:
   past 20. This is the entire defence against dropped orders — a card that has
   been sitting has to look wrong.
 - **Claim chip** shows the owner's name or `ยังไม่มีคนรับ`. Cards claimed by
-  someone else get a muted border so your eye skips them.
+  someone else get a muted border so your eye skips them. The whole row — chip,
+  stale marker, release — disappears when `exclusive_claims` is off (0030): the
+  name is still recorded, but a card showing an owner nobody is bound by is
+  worse than a card showing nothing.
 - **Payment state** is on the card, not one tap away. It is a top-four failure
   mode; it gets top-level pixels.
 - **Fillings are always visible** on the card, never collapsed. Opening a detail

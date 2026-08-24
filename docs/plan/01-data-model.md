@@ -224,7 +224,7 @@ have to be double-quoted at every use site forever.
 | `subtotal` | `numeric(10,2)` not null | Sum of item totals |
 | `delivery_fee` | `numeric(10,2)` not null default 0 | Snapshot at order time |
 | `total` | `numeric(10,2)` not null | `subtotal + delivery_fee` |
-| `claimed_by` | `uuid` → `admin_users.id` | Who is cooking it |
+| `claimed_by` | `uuid` → `admin_users.id` | Who is cooking it. A lock while `shop_settings.exclusive_claims` is on, a record of who acted when it is off (0030) |
 | `claimed_at` | `timestamptz` | |
 | `created_by_admin` | `uuid` → `admin_users.id` | Set when staff key in a phone order |
 | `source` | `order_source` not null default `'web'` | enum: `web`, `admin` |
