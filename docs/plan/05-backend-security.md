@@ -151,15 +151,20 @@ create policy admins_read on admin_users
 
 create policy admins_super_write on admin_users
   for all to authenticated
-  using (is_superadmin() and role <> 'superadmin')
-  with check (is_superadmin() and role <> 'superadmin');
+  using (is_superadmin() and not is_owner)
+  with check (is_superadmin() and not is_owner);
 ```
 
-The `role <> 'superadmin'` clause on both `using` and `with check` is what makes
-the superadmin row untouchable through the API — it cannot be edited, deleted,
-or duplicated. Combined with the partial unique index from doc 01, the only way
-to change who the superadmin is, is a direct database statement. Exactly as
-specified.
+The `not is_owner` clause on both `using` and `with check` is what makes the
+owner row untouchable through the API — it cannot be edited, deleted, or
+duplicated, and no session can promote itself into it. Combined with the partial
+unique index from doc 01, the only way to change who the owner is, is a direct
+database statement. Exactly as specified.
+
+Until migration 0026 this clause read `role <> 'superadmin'`, which protected
+the same row but also made the tier unusable: a second superadmin could not be
+created, so the staff screen had a role field with one option. Splitting the
+tier from the protected row is what let the field become a real control.
 
 ### `order_events`
 
@@ -245,6 +250,16 @@ amounts. Policies:
   Function, scoped to a single object path derived from the order id. They cannot
   list the bucket, cannot read any object, and cannot overwrite another order's
   slip.
+- Since migration 0028 there is a second one for the slip the checkout screen
+  takes **before** the order exists. `slip-staging-url` has no order to derive a
+  path from and no `client_token` to check, so it mints a path under `staging/`,
+  records it in `staged_slips`, and hands back a signed URL for that one path.
+  `place_order` accepts a `slip_path` only if it finds it in that table
+  unclaimed *and* a file has actually arrived at it. What replaces the token as
+  the defence is the per-IP limit — twelve an hour on the same hashed address —
+  and a six-hour sweep of anything never claimed by an order. An abandoned
+  checkout is somebody's payment screenshot attached to nothing; the shop's
+  90-day retention is about payments and has nothing to say about it.
 - Admins read slips through short-lived signed URLs generated per view, never a
   public link.
 - Uploads are capped at 5 MB and restricted to `image/jpeg`, `image/png`,
@@ -262,7 +277,9 @@ first paint and campus wifi is not fast.
 | Function | Trigger | Job |
 |----------|---------|-----|
 | `track` | HTTP, public | IP-hashing wrapper for `lookup_order` |
-| `slip-upload-url` | HTTP, public | Issue a scoped signed upload URL |
+| `slip-upload-url` | HTTP, public | Issue a signed upload URL scoped to an existing order |
+| `slip-staging-url` | HTTP, public | Same, for a slip whose order does not exist yet (0028) |
+| `slip-prune` | `pg_cron`, 03:41 | Delete slips past retention, and staged slips never claimed |
 | `line-notify` | Queue drain (`pg_cron`, every 15s) | Push new-order messages to the LINE staff group |
 | `daily-rollover` | `pg_cron`, 04:00 Asia/Bangkok | Seed `filling_stock_daily` from `default_daily_qty`; optionally close the shop |
 

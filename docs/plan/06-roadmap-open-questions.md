@@ -156,6 +156,18 @@ only send the order back onto paper.
 superadmin row still comes from migration 0008 and still cannot be created or
 changed through the API; everyone else is added and removed on that screen.
 
+**Q13b — Shop contact channels.** **RESOLVED as configuration** —
+`shop_settings.contact_phone`, `contact_email` and `contact_instagram`, added in
+migration 0025 and edited on `/admin/settings`. The landing page at `/` leads
+with them, and a channel the shop leaves blank renders as nothing rather than as
+an empty row, so a shop with no Instagram simply has no Instagram line.
+
+The three carry format checks in the database because the page turns each one
+into a link. A value that cannot become a working link is worse than a missing
+one: a customer taps it, nothing happens, and they conclude the shop is shut.
+The Instagram handle is stored bare — no leading `@`, which the URL cannot carry
+anyway — and the admin field strips a typed one rather than refusing it.
+
 **Q14 — Handover confirmation.** **RESOLVED** — make it a switch, not a fixed
 rule: `shop_settings.require_code_on_handover`, **default `true`**. With it on,
 `advance_order` refuses the `ready → handed_over` transition unless the caller
@@ -166,6 +178,13 @@ Default `true` because failure mode #3 (wrong handover) is one of the four the
 whole system exists to remove; the shop can turn it off after a shift if the
 seconds cost more than the mistakes. The check lives inside `advance_order`, so
 turning it off cannot be faked from the client either way.
+
+The switch shipped without a control: it existed in the column and in
+`advance_order` from the start, but nothing in the back office could move it, so
+"we do not want to type the code" had no answer short of a hand-written
+`update`. It is now in `/admin/settings` → กติกา, superadmin-only — turning off
+the one check that the person collecting the box is the person who ordered it is
+a shop decision, not a shift decision.
 
 **Q15 — Rejection reasons.** A free-text field, or a fixed list ("ของหมด",
 "คิวเต็ม", "ปิดร้านแล้ว")? A fixed list makes the report useful.

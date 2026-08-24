@@ -11,11 +11,11 @@ import { useSession } from '@/features/auth/useSession'
 import { useCurrentAdmin } from '@/features/auth/useCurrentAdmin'
 import { useShopSettingsAdmin } from './useShopSettingsAdmin'
 import { actionError } from './useOrderActions'
-import { Field } from './config/EditorShell'
+import { ActiveToggle, Field } from './config/EditorShell'
 import { fieldClass } from './config/editorStyles'
 import { PointsEditor, SlotsEditor, ZonesEditor } from './config/FulfillmentEditors'
 
-type Section = 'shop' | 'points' | 'slots' | 'zones' | 'rules'
+type Section = 'shop' | 'contact' | 'points' | 'slots' | 'zones' | 'rules'
 
 /**
  * Open/close is an ordinary admin power (doc 04 §1) — whoever is on shift when
@@ -40,6 +40,7 @@ export function SettingsPage() {
     { key: 'shop', label: t('admin:settings') },
     ...(isSuper
       ? ([
+          { key: 'contact', label: t('admin:cfg.contact') },
           { key: 'points', label: t('admin:cfg.points') },
           { key: 'slots', label: t('admin:cfg.slots') },
           { key: 'zones', label: t('admin:cfg.zones') },
@@ -74,6 +75,7 @@ export function SettingsPage() {
       )}
 
       {section === 'shop' && <OpenCloseCard settings={settings} isSuper={isSuper} />}
+      {section === 'contact' && <ContactCard settings={settings} />}
       {section === 'points' && <PointsEditor />}
       {section === 'slots' && <SlotsEditor />}
       {section === 'zones' && <ZonesEditor />}
@@ -176,6 +178,124 @@ function OpenCloseCard({ settings, isSuper }: { settings: Settings; isSuper: boo
   )
 }
 
+/**
+ * The three contact channels the landing page leads with.
+ *
+ * The patterns are the same three the check constraints in 0025 enforce, copied
+ * rather than derived because there is nowhere to derive them from. Duplicating
+ * them buys a Thai sentence under the field instead of a raw
+ * `violates check constraint "shop_settings_phone_format"` from Postgres — the
+ * database stays the authority, this is only the earlier, kinder telling.
+ */
+const CONTACT_PATTERNS = {
+  phone: /^\+?[0-9][0-9 ()+-]{5,24}$/,
+  email: /^[^@\s]+@[^@\s]+\.[^@\s]+$/,
+  instagram: /^[A-Za-z0-9._]{1,30}$/,
+} as const
+
+function ContactCard({ settings }: { settings: Settings }) {
+  const { t } = useTranslation(['admin', 'common'])
+  const [phone, setPhone] = useState(settings.contact_phone ?? '')
+  const [email, setEmail] = useState(settings.contact_email ?? '')
+  const [instagram, setInstagram] = useState(settings.contact_instagram ?? '')
+
+  // Empty is valid everywhere: a blank field means the shop has no such channel
+  // and the landing page omits the line, which is not the same as a bad value.
+  const errors = {
+    phone:
+      phone.trim() && !CONTACT_PATTERNS.phone.test(phone.trim())
+        ? t('admin:cfg.contactBadPhone')
+        : '',
+    email:
+      email.trim() && !CONTACT_PATTERNS.email.test(email.trim())
+        ? t('admin:cfg.contactBadEmail')
+        : '',
+    instagram:
+      instagram.trim() && !CONTACT_PATTERNS.instagram.test(instagram.trim())
+        ? t('admin:cfg.contactBadInstagram')
+        : '',
+  }
+  const valid = !errors.phone && !errors.email && !errors.instagram
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('shop_settings')
+        .update({
+          contact_phone: phone.trim() || null,
+          contact_email: email.trim().toLowerCase() || null,
+          contact_instagram: instagram.trim() || null,
+        })
+        .eq('id', 1)
+      if (error) throw error
+    },
+    onSuccess: refreshSettings,
+  })
+
+  return (
+    <Card className="flex flex-col gap-3 p-5">
+      <div>
+        <h2 className="font-semibold">{t('admin:cfg.contact')}</h2>
+        <p className="text-[0.85rem] text-ink-muted">{t('admin:cfg.contactHint')}</p>
+      </div>
+
+      <Field label={t('admin:cfg.contactPhone')} hint={errors.phone || t('admin:cfg.contactPhoneHint')}>
+        <input
+          className={fieldClass}
+          type="tel"
+          inputMode="tel"
+          autoComplete="off"
+          aria-invalid={Boolean(errors.phone)}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
+      </Field>
+
+      <Field label={t('admin:cfg.contactEmail')} hint={errors.email || undefined}>
+        <input
+          className={fieldClass}
+          type="email"
+          inputMode="email"
+          autoComplete="off"
+          aria-invalid={Boolean(errors.email)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </Field>
+
+      <Field
+        label={t('admin:cfg.contactInstagram')}
+        hint={errors.instagram || t('admin:cfg.contactInstagramHint')}
+      >
+        <input
+          className={fieldClass}
+          autoComplete="off"
+          aria-invalid={Boolean(errors.instagram)}
+          value={instagram}
+          // The @ is stripped on the way in rather than rejected: everyone types
+          // it, the constraint forbids it, and refusing the most natural input
+          // to teach a storage detail helps nobody.
+          onChange={(e) => setInstagram(e.target.value.replace(/^@+/, ''))}
+        />
+      </Field>
+
+      <Button
+        className="self-start"
+        disabled={save.isPending || !valid}
+        onClick={() => save.mutate()}
+      >
+        {save.isSuccess ? t('admin:cfg.saved') : t('admin:cfg.saveRow')}
+      </Button>
+
+      {save.error && (
+        <p role="alert" className="text-[0.85rem] text-st-cancel-fg">
+          {actionError(save.error, t)}
+        </p>
+      )}
+    </Card>
+  )
+}
+
 function RulesCard({ settings }: { settings: Settings }) {
   const { t } = useTranslation(['admin', 'common'])
   const [minTotal, setMinTotal] = useState(
@@ -184,6 +304,7 @@ function RulesCard({ settings }: { settings: Settings }) {
   const [maxBoxes, setMaxBoxes] = useState(
     settings.max_boxes_per_order === null ? '' : String(settings.max_boxes_per_order),
   )
+  const [requireCode, setRequireCode] = useState(settings.require_code_on_handover)
 
   const save = useMutation({
     mutationFn: async () => {
@@ -195,6 +316,7 @@ function RulesCard({ settings }: { settings: Settings }) {
           // check constraint.
           min_order_total: minTotal === '' ? null : Number(minTotal),
           max_boxes_per_order: maxBoxes === '' ? null : Number(maxBoxes),
+          require_code_on_handover: requireCode,
         })
         .eq('id', 1)
       if (error) throw error
@@ -223,6 +345,22 @@ function RulesCard({ settings }: { settings: Settings }) {
             onChange={(e) => setMaxBoxes(e.target.value.replace(/\D/g, ''))}
           />
         </Field>
+      </div>
+
+      {/* Q14. The switch existed in the database and in advance_order from the
+          start but had no control anywhere, which meant the answer to "we do
+          not want to type the code" was a hand-written UPDATE. It lives in the
+          superadmin section because turning off the one check that the person
+          collecting the box is the person who ordered it is a shop decision,
+          not a shift decision. */}
+      <div className="border-t border-border pt-3">
+        <ActiveToggle
+          checked={requireCode}
+          onChange={setRequireCode}
+          labelOn={t('admin:cfg.codeOnHandoverOn')}
+          labelOff={t('admin:cfg.codeOnHandoverOff')}
+        />
+        <p className="mt-1 text-[0.8rem] text-ink-muted">{t('admin:cfg.codeOnHandoverHint')}</p>
       </div>
 
       <Button className="self-start" disabled={save.isPending} onClick={() => save.mutate()}>
