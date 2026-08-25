@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -204,10 +205,22 @@ function MoreSheet({
       if (e.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+
+    // The page behind must not scroll under the sheet — the one thing this
+    // overlay was missing that both of the others already had.
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = previous
+    }
   }, [onClose])
 
-  return (
+  // Portalled for the same reason as `Modal`: `<main>` wraps every admin page
+  // in `.anim-rise`, and an ancestor that animates a transform is an ancestor
+  // `position: fixed` measures against instead of the viewport.
+  return createPortal(
     <div className="fixed inset-0 z-50 lg:hidden">
       <button
         type="button"
@@ -260,6 +273,7 @@ function MoreSheet({
           {t('admin:signOut')}
         </Button>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

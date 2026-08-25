@@ -26,7 +26,7 @@ KhunMuan/
 │   └── supabase/
 │       ├── config.toml         local stack; Google OAuth reads supabase/.env
 │       ├── .env                Google client id + secret (gitignored)
-│       └── migrations/         0001–0025, applied in filename order
+│       └── migrations/         0001–0035, applied in filename order
 └── frontend/
     ├── .env.local              VITE_SUPABASE_URL + ANON_KEY (gitignored)
     └── src/
@@ -51,7 +51,7 @@ KhunMuan/
 | `0008_seed_superadmin.sql` | **Contains the one line to edit before any cloud deploy** |
 | `0009_rls.sql` | Grants and row-level security |
 
-`0010`–`0025` are the feature migrations and each names its plan doc in its own
+`0010`–`0035` are the feature migrations and each names its plan doc in its own
 header comment. Two are worth knowing about before you touch `shop_settings`:
 `0016` turned the shop's lists into back-office configuration, and `0025` added
 the three contact channels the landing page reads.
@@ -106,6 +106,12 @@ normally.
   grants are added — and RLS alone cannot restrict columns.
 - **`search_path = ''` hides extension operators.** That is why emails are
   lower-cased `text` rather than `citext`; see doc 01 §2.
+- **Every overlay is portalled to `document.body`, and must stay that way.**
+  `Modal`, the customer drawer and the back office's เพิ่มเติม sheet. A `fixed`
+  overlay rendered under an ancestor with a transform — `.anim-rise` on the
+  routed outlet is one — is measured against that ancestor instead of the
+  viewport: the backdrop blur covers a card, and the panel centres on that card
+  rather than the screen. Doc 04 §4 lists what a change here must not break.
 - **No string literals in JSX.** Everything goes through `t()`, placeholders
   included.
 - **`/` is the landing page, not the menu.** The menu lives at `/menu` since the

@@ -107,9 +107,15 @@ export function OrderCard({
       ...extra,
     })
 
+  // Seen is marked on click, not on pointerdown. Clearing `isNew` removes the
+  // "ใหม่" badge from the header below, and on a narrow card that reflows the
+  // header — which slides the accept button out from under the finger between
+  // pointerdown and pointerup, and a pointerup somewhere else is not a click.
+  // That is why a freshly arrived cash order took two taps to accept. A click
+  // fires after the button has already done its work, and still bubbles here.
   return (
     <Card
-      onPointerDown={isNew ? onSeen : undefined}
+      onClick={isNew ? onSeen : undefined}
       className={[
         'flex flex-col gap-3 p-4',
         // A delivery has somewhere to be, and the person reading the board has

@@ -211,6 +211,23 @@ server-side salt and passes the hash down. The raw IP is never stored.
 
 Attempt rows older than 24 hours are deleted by a `pg_cron` job.
 
+### The device that placed the order is exempt (0035)
+
+A caller that presents an order's `client_token` alongside its code is not
+enumerating anything: it already holds both halves. Such a lookup skips the
+check entirely and writes no attempt row at all.
+
+This was not a refinement. The tracking page polls every 30 seconds and
+refetches on every realtime nudge, and the 5-attempts-a-minute rule counts hits
+as well as misses — so a customer with their own order open, or open twice, was
+told to slow down on the one page the code exists to serve. Tapping their own
+order in ออเดอร์ของฉัน spent the same budget.
+
+A wrong or absent token takes the old path unchanged, so this cannot be used to
+probe whether a code is real: the exemption is decided by an equality on
+`(code, client_token)` and a caller who does not already know both learns
+nothing from it. The 639,584 codes are exactly as far away as they were.
+
 ### Signed-in admins are exempt
 
 `is_admin()` short-circuits the whole check. Staff search from the orders table
@@ -224,11 +241,15 @@ Blocking by IP hash catches honest typists too, so two things soften it:
 
 1. The rate-limit screen shown to the customer displays the shop's **phone
    number and LINE** so they can just ask.
-2. The superadmin gets a **blocked list** screen: IP hash, first and last
-   attempt, attempt count, which codes were tried, and a one-tap **unblock**.
+2. **Any admin** gets a **blocked list** screen at `/admin/blocked`: IP hash,
+   first and last attempt, attempt count, which codes were tried, and a one-tap
+   **unblock**.
 
-`unblock_ip(ip_hash)` is a superadmin-only RPC that deletes the offending
-attempt rows. The IP hash is opaque and expires with the log, so this is a way
+`unblock_ip(ip_hash)` deletes the offending attempt rows. It was superadmin-only
+until 0035, which was the wrong tier: the person who takes the call from a
+customer who cannot open their own order is whoever is on shift, and a fix that
+needs the owner's account is a fix that waits until the owner answers their
+phone. `blocked_lookup_ips()` and the table's read policy moved with it. The IP hash is opaque and expires with the log, so this is a way
 to undo a false positive, not a way to identify a person.
 
 A repeated-offender alert surfaces on the board when one IP hash trips the block

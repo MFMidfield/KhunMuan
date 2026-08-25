@@ -358,18 +358,27 @@ warrant it. That is a legitimate trade-off, recorded here so the reasoning is no
 lost. If the shop ever starts taking sensitive delivery details at scale, this is
 the first decision to revisit.
 
-## 9. Blocked users and the superadmin
+## 9. Blocked users, and who unblocks them
 
 Blocking by IP hash punishes honest typists too. Two things soften it:
 
 - The rate-limit screen shows the shop's phone number and LINE so a locked-out
   customer can just ask staff, who can look the order up with no limit at all.
-- The superadmin gets a **blocked list** — IP hash, first and last attempt,
-  attempt count, the codes tried — with a one-tap **unblock**. The IP hash is
-  opaque and expires with the log, so this is not a way to identify people; it is
-  a way to undo a false positive.
+- **Any admin** gets a **blocked list** at `/admin/blocked` — IP hash, first and
+  last attempt, attempt count, the codes tried — with a one-tap **unblock**. The
+  IP hash is opaque and expires with the log, so this is not a way to identify
+  people; it is a way to undo a false positive. It was superadmin-only until
+  0035; the person who takes that phone call is whoever is on shift.
 
 Attempt rows older than 24 hours are deleted by a `pg_cron` job.
+
+The device that placed the order is **exempt** as well (0035): a caller
+presenting the order's `client_token` beside its code already holds both halves
+and is enumerating nothing, so the check is skipped and no attempt row is
+written. Before that, a customer's own tracking page — which polls and refetches
+on realtime — could spend its own allowance and lock them out of the one order
+the code exists to serve. A wrong or absent token changes nothing, so the wall
+in front of the 639,584 codes is exactly as high. Doc 05 §4.
 
 Admins signed in with Google are **exempt** from rate limiting entirely. They
 search from the orders table directly, where RLS already scopes what they can

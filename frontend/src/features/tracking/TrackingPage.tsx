@@ -144,15 +144,20 @@ export function TrackingPage() {
   if (query.error) {
     const message = (query.error as { message?: string }).message
     return (
-      <Card className="p-5">
-        <p className="text-ink-muted">
-          {message === 'ORDER_EXPIRED'
-            ? t('tracking:expired')
-            : message === 'RATE_LIMITED' || message === 'IP_BLOCKED'
-              ? t('tracking:rateLimited')
-              : t('tracking:notFound')}
-        </p>
-      </Card>
+      <div className="mx-auto flex max-w-xl flex-col gap-4">
+        <Card className="p-5">
+          <p className="text-ink-muted">
+            {message === 'ORDER_EXPIRED'
+              ? t('tracking:expired')
+              : message === 'RATE_LIMITED' || message === 'IP_BLOCKED'
+                ? t('tracking:rateLimited')
+                : t('tracking:notFound')}
+          </p>
+        </Card>
+        <Button variant="ghost" size="lg" onClick={() => void navigate('/')}>
+          {t('common:backToShop')}
+        </Button>
+      </div>
     )
   }
 
@@ -359,6 +364,13 @@ export function TrackingPage() {
       {/* Cancelling is the one thing on this page the customer cannot undo: the
           window closes the moment the shop accepts, and stock has already moved
           back by then. */}
+      {/* The way out. Checkout lands here with `replace`, so the browser's back
+          button goes to the cart that no longer exists — without this the
+          screen is a dead end for anyone who is done reading it. */}
+      <Button variant="ghost" size="lg" onClick={() => void navigate('/')}>
+        {t('common:backToShop')}
+      </Button>
+
       {cancelling && (
         <ConfirmDialog
           title={t('tracking:cancelOrder')}

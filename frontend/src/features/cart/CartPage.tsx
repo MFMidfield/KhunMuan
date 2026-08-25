@@ -126,14 +126,25 @@ export function CartPage() {
           'px-4 pt-3 pb-safe lg:static lg:border-0 lg:bg-transparent lg:px-0',
         ].join(' ')}
       >
-        <div className="mx-auto flex max-w-5xl items-center gap-3 pb-3 lg:pb-0">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 pb-3 lg:pb-0">
           <div>
             <p className="text-[0.75rem] text-ink-muted">{t('cart:subtotal')}</p>
             <p className="tnum text-lg font-semibold">{money.format(subtotal)}</p>
           </div>
+          {/* The way back to the menu. With something in the cart the empty
+              state's "ไปดูเมนู" is gone, and the drawer was the only route left
+              — one tap too many for the ordinary case of ordering two things. */}
+          <Button
+            variant="ghost"
+            size="lg"
+            className="ms-auto"
+            onClick={() => void navigate('/menu')}
+          >
+            {t('cart:addMore')}
+          </Button>
           <Button
             size="lg"
-            className="ms-auto flex-1 sm:flex-none sm:px-8"
+            className="flex-1 sm:flex-none sm:px-8"
             onClick={() => void navigate('/checkout')}
           >
             {t('cart:checkout')}

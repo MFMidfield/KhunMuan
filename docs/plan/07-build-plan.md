@@ -28,20 +28,22 @@ not part of delivery.
 | | |
 |---|---|
 | Branch | `phase-0-foundations`, pushed, **not merged into `main`** |
-| Migrations | `0001`–`0025`, `db reset` clean from empty |
-| Routes | all 16 are real screens; the `Placeholder` component is deleted |
-| Backend suites | `npm test` runs nine: order-code, orders, back-office, config, tracking, rate-limit, slips, ops, reports |
+| Migrations | `0001`–`0035`, `db reset` clean from empty |
+| Routes | all 17 are real screens; the `Placeholder` component is deleted |
+| Backend suites | `npm test` runs nine: order-code, orders, back-office, config, tracking, rate-limit, slips, ops, reports. Eight are green; `orders` has three failures and `config` one, all four older than the current work — see below |
 | Frontend | `npm run check` = tsc + eslint + build, clean |
 | Deployed | **nowhere.** Everything above has only ever run against the local stack |
 
 ### The two that matter most, and neither is a question
 
-- **Nobody has looked at any screen.** There is no browser in the environment
-  this was built in. Every route responds, every module transforms, the types
-  and the lint and the build are clean, and not one pixel has been seen. The
-  first time a human clicked through, three bugs surfaced in a minute and two of
-  them were invisible to every check above. The four widths in doc 04 §9 are the
-  gate, and a full round — order, accept, cook, hand over — is the real one.
+- **The first browser round has happened; the second has not.** There is still
+  no browser in the environment this is built in, so every fix from that round
+  was written against a description of the symptom rather than against the
+  screen. Every route responds, every module transforms, the types and the lint
+  and the build are clean, and that has now twice failed to notice a bug a human
+  found in a minute — nine of them the first time round, four of which no check
+  here can see. The four widths in doc 04 §9 are the gate, and a full round —
+  order, accept, cook, hand over — is the real one.
 - **Nothing is deployed.** Before the first push to Supabase Cloud: confirm the
   superadmin address in `0008` (the migration is still the only way to set it,
   by design), generate a fresh `LOOKUP_IP_SALT` for that environment, and set
@@ -73,8 +75,50 @@ ticked, all with their reasoning in doc 04:
 so before that a customer who tapped the footer entrance had only the browser's
 back button.
 
-**None of the four has been seen in a browser either.** They are newer than the
-paragraph above and inherit every word of it.
+**All four landed unseen as well** — they were newer than the paragraph above
+and inherited every word of it, until the round below.
+
+### The first browser round, and what it found
+
+Someone finally clicked through every screen. Nine things came back; all nine
+are fixed, and four of them were invisible to tsc, eslint and every test suite
+because they are layout, not logic.
+
+- **A new cash order took two taps to accept.** `onSeen` was on `onPointerDown`,
+  and clearing it removed the ใหม่ badge — which reflowed the card header and
+  slid the accept button out from under the finger before pointerup. A pointerup
+  somewhere else is not a click. Marking seen on `onClick` fixes it; the
+  mutations also now stay pending until the refetch lands, so a fast second tap
+  cannot send a stale `expected_version`.
+- **Dialogs were pinned to a position on the page rather than the screen**, and
+  the backdrop blur covered a card instead of the viewport. Every overlay is
+  portalled to the body now — doc 04 §4, which also lists what a future change
+  here must not break.
+- **A wide image in the slip dialog stretched the dialog around it** and put its
+  own left edge out of reach. Both axes are capped now.
+- **`ปฏิเสธออเดอร์` in the slip dialog became `ปฏิเสธ`** — the reason dialog it
+  opens is titled `ปฏิเสธ`, and the pair read as two different actions.
+- **The cart had no way back to the menu** once it had something in it.
+- **A pickup order carried no customer name.** Migration 0034; doc 01 §2.
+- **The lookup rate limit counted a customer's reads of their own order** and
+  had no unblock screen. Migration 0035 and `/admin/blocked`; doc 05 §4.
+- **หน้าหลัก was missing from the side nav**, and the tracking page had no way
+  out at all — checkout lands on it with `replace`.
+
+### Found in that round and **not** fixed — both older than it
+
+Both are red in `npm test` today, and both were red before the nine fixes above.
+
+- **`place_order` lost three of its own rules.** `SLOT_CLOSED`,
+  `BELOW_MINIMUM` and `TOO_MANY_BOXES` came in with 0016 and are absent from
+  0028's restatement of the body, so the slot cutoff, the minimum order and the
+  box cap have not been enforced since. Three assertions in
+  `tests/place_order.test.mjs` say so. This is the cost of `create or replace
+  function` having no partial form: the body is copied forward by hand, and a
+  copy can lose a paragraph silently.
+- **`tests/config_crud.test.mjs` expects a second superadmin to be refused.**
+  0026 deliberately allows one — only the `is_owner` row is untouchable — so the
+  test is older than the decision, not a bug in the database.
 
 ### Still open
 

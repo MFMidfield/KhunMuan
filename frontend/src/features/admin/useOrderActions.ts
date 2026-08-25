@@ -22,9 +22,15 @@ export interface AdvanceArgs {
  * someone else moved it half a second earlier — is exactly the confusion
  * expected_version exists to prevent. A refetch of a handful of rows costs less
  * than one wrongly-cooked order.
+ *
+ * The promise is returned rather than dropped, so the mutation stays pending
+ * until the refetch lands. Dropping it let `isPending` — and with it the
+ * disabled state of every button on the card — go false while the board still
+ * held the old row, and the next tap then sent a stale `expected_version` and
+ * came back STALE_ORDER.
  */
 function refreshBoard() {
-  void queryClient.invalidateQueries({ queryKey: qk.orders('active') })
+  return queryClient.invalidateQueries({ queryKey: qk.orders('active') })
 }
 
 /**

@@ -115,7 +115,7 @@ async function main() {
 
 async function placeOrder() {
   const r = await rpc('place_order', { p_payload: {
-    client_request_id: crypto.randomUUID(), fulfillment: 'pickup',
+    client_request_id: crypto.randomUUID(), fulfillment: 'pickup', customer_name: 'ผู้ทดสอบ',
     pickup_point_id: 'c0000000-0000-4000-8000-000000000001',
     pickup_slot_id: '50000000-0000-4000-8000-000000000001',
     payment_method: 'cash',

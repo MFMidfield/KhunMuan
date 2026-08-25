@@ -126,7 +126,13 @@ export function CheckoutPage() {
         note: note.trim() || null,
         ...(method === 'transfer' && slipPath ? { slip_path: slipPath } : {}),
         ...(fulfillment === 'pickup'
-          ? { pickup_point_id: pointId, pickup_slot_id: slotId }
+          ? {
+              pickup_point_id: pointId,
+              pickup_slot_id: slotId,
+              customer_name: name.trim(),
+              customer_room: room.trim() || null,
+              customer_phone: phone.trim() || null,
+            }
           : {
               delivery_zone_id: zoneId,
               delivery_location: location.trim(),
@@ -166,7 +172,7 @@ export function CheckoutPage() {
   const deliveryAllowed = settings?.delivery_enabled ?? true
   const whereIsFilled =
     fulfillment === 'pickup'
-      ? Boolean(pointId && slotId)
+      ? Boolean(pointId && slotId && name.trim())
       : Boolean(zoneId && location.trim() && name.trim() && phone.trim())
 
   // Paying by transfer without attaching the slip is the failure this screen
@@ -249,36 +255,44 @@ export function CheckoutPage() {
         )}
       </Card>
 
-      {fulfillment === 'delivery' && (
-        <Card className="flex flex-col gap-3 p-4">
-          <div>
-            <h2 className="font-semibold">{t('checkout:contact')}</h2>
-            <p className="text-[0.85rem] text-ink-muted">{t('checkout:contactWhy')}</p>
-          </div>
-          <Input
-            label={t('checkout:name')}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            autoComplete="name"
-            required
-          />
-          <Input
-            label={t('checkout:room')}
-            value={room}
-            onChange={(e) => setRoom(e.target.value)}
-            hint={t('common:optional')}
-          />
-          <Input
-            label={t('checkout:phone')}
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            required
-          />
-        </Card>
-      )}
+      {/* Asked for on both routes now. A pickup order used to carry no name at
+          all, which left the counter calling out a four-character code to a
+          crowd — the name is what staff actually say when the food is ready.
+          The phone and the room stay optional there: the customer is standing
+          in front of the shop, so there is nobody to ring and nowhere to go. */}
+      <Card className="flex flex-col gap-3 p-4">
+        <div>
+          <h2 className="font-semibold">{t('checkout:contact')}</h2>
+          <p className="text-[0.85rem] text-ink-muted">
+            {fulfillment === 'pickup'
+              ? t('checkout:contactWhyPickup')
+              : t('checkout:contactWhy')}
+          </p>
+        </div>
+        <Input
+          label={t('checkout:name')}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="name"
+          required
+        />
+        <Input
+          label={t('checkout:room')}
+          value={room}
+          onChange={(e) => setRoom(e.target.value)}
+          hint={t('common:optional')}
+        />
+        <Input
+          label={t('checkout:phone')}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          hint={fulfillment === 'pickup' ? t('common:optional') : undefined}
+          required={fulfillment === 'delivery'}
+        />
+      </Card>
 
       <Card className="flex flex-col gap-3 p-4">
         <h2 className="font-semibold">{t('checkout:payment')}</h2>

@@ -86,6 +86,7 @@ async function newOrder(fillings = [{ filling_id: F_D, qty: 5 }], as = ANON) {
       p_payload: {
         client_request_id: crypto.randomUUID(),
         fulfillment: 'pickup',
+        customer_name: 'ผู้ทดสอบ',
         pickup_point_id: POINT,
         pickup_slot_id: SLOT,
         payment_method: 'cash',
@@ -410,6 +411,7 @@ async function main() {
     p_payload: {
       client_request_id: crypto.randomUUID(),
       fulfillment: 'pickup',
+      customer_name: 'ผู้ทดสอบ',
       pickup_point_id: POINT,
       pickup_slot_id: SLOT,
       payment_method: 'cash',

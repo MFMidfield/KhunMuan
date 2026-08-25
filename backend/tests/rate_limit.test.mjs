@@ -19,7 +19,7 @@ let pass = 0, fail = 0
 const ok=(n,c,x='')=>{ if(c){pass++} else {fail++}; console.log(`  ${c?'ok  ':'FAIL'} · ${n} ${c?'':x}`) }
 
 const placed=await fetch(U+'/rest/v1/rpc/place_order',{method:'POST',headers:H,body:JSON.stringify({p_payload:{
-  client_request_id:crypto.randomUUID(),fulfillment:'pickup',
+  client_request_id:crypto.randomUUID(),fulfillment:'pickup',customer_name:'ผู้ทดสอบ',
   pickup_point_id:'c0000000-0000-4000-8000-000000000001',pickup_slot_id:'50000000-0000-4000-8000-000000000001',
   payment_method:'cash',items:[{set_id:'5e000000-0000-4000-8000-000000000001',quantity:1,
     fillings:[{filling_id:'f1000000-0000-4000-8000-000000000004',qty:5}]}]}})}).then(r=>r.json())
@@ -55,6 +55,29 @@ console.log('\n— an unrelated address is untouched —')
 const clean=await track(placed.code,null,'198.51.100.99')
 ok('someone else can still look up their order', clean.s===200, `${clean.s}`)
 
+console.log('\n— the owner of an order is not rate limited on it (0035) —')
+// The device that placed the order holds its client_token. It polls the
+// tracking page every 30 seconds and refetches on every realtime nudge, so the
+// 5-a-minute rule — which counts hits as well as misses — used to lock a
+// customer out of their own order. A proven owner now skips the check and is
+// not written to the ledger at all.
+const ipOwner='198.51.100.7'
+const ownerRuns=[]
+for (let i=0;i<12;i++) ownerRuns.push(await track(placed.code, placed.client_token, ipOwner))
+ok('twelve reads of your own order all succeed', ownerRuns.every(r=>r.s===200), JSON.stringify(ownerRuns.map(r=>r.s)))
+
+// Same address, no token: the wall is exactly where it was.
+const stranger=[]
+for (let i=0;i<7;i++) stranger.push(await track(placed.code, null, ipOwner))
+ok('the same address without the token still hits the limit', stranger.some(r=>r.s===429), JSON.stringify(stranger.map(r=>r.s)))
+
+// A token that does not belong to the code proves nothing.
+const ipForged='198.51.100.8'
+const forged=[]
+for (const c of ['A2B3','C4D5','E6F7']) forged.push(await track(c, crypto.randomUUID(), ipForged))
+const forgedAfter=await track(placed.code, crypto.randomUUID(), ipForged)
+ok('a made-up token buys no exemption', forgedAfter.s===429, `${forgedAfter.s} ${JSON.stringify(forgedAfter.b)}`)
+
 console.log('\n— the raw address is never stored —')
 const S=(()=>{const c=crypto;const b=o=>Buffer.from(JSON.stringify(o)).toString('base64url')
  const n=Math.floor(Date.now()/1e3),h=b({alg:'HS256',typ:'JWT'}),p=b({iss:'supabase-demo',role:'authenticated',aud:'authenticated',sub:c.randomUUID(),email:'midfieldkanis1@gmail.com',iat:n,exp:n+3600})
@@ -66,6 +89,18 @@ const blocked=await fetch(U+'/rest/v1/rpc/blocked_lookup_ips',{method:'POST',hea
 ok('the blocked list shows the offender to the owner', blocked.length>=1, JSON.stringify(blocked).slice(0,120))
 const un=await fetch(U+'/rest/v1/rpc/unblock_ip',{method:'POST',headers:{apikey:ANON,Authorization:'Bearer '+S,'Content-Type':'application/json'},body:JSON.stringify({p_ip_hash:blocked[0].ip_hash})}).then(r=>r.json())
 ok('unblocking clears their attempts', un?.cleared>0, JSON.stringify(un))
+
+console.log('\n— an admin, not only the owner, can unblock —')
+const A=(email)=>{const c=crypto;const b=o=>Buffer.from(JSON.stringify(o)).toString('base64url')
+ const n=Math.floor(Date.now()/1e3),h=b({alg:'HS256',typ:'JWT'}),p=b({iss:'supabase-demo',role:'authenticated',aud:'authenticated',sub:c.randomUUID(),email,iat:n,exp:n+3600})
+ return h+'.'+p+'.'+c.createHmac('sha256','super-secret-jwt-token-with-at-least-32-characters-long').update(h+'.'+p).digest('base64url')}
+const staff=A('dev-staff-a@example.com')
+const staffHeaders={apikey:ANON,Authorization:'Bearer '+staff,'Content-Type':'application/json'}
+const staffList=await fetch(U+'/rest/v1/rpc/blocked_lookup_ips',{method:'POST',headers:staffHeaders,body:'{}'}).then(r=>r.json())
+ok('a plain admin sees the blocked list', Array.isArray(staffList), JSON.stringify(staffList).slice(0,120))
+ok('and the forged-token address is on it', staffList.length>=1, JSON.stringify(staffList).slice(0,160))
+const staffUn=await fetch(U+'/rest/v1/rpc/unblock_ip',{method:'POST',headers:staffHeaders,body:JSON.stringify({p_ip_hash:staffList[0]?.ip_hash??''})}).then(r=>r.json())
+ok('a plain admin can clear it', staffUn?.cleared>0, JSON.stringify(staffUn))
 
 console.log(`\n${pass} passed, ${fail} failed\n`)
 process.exit(fail === 0 ? 0 : 1)

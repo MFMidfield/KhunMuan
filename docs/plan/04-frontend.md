@@ -28,6 +28,7 @@
 | `/admin/settings` | Open/close, contact channels, pickup points, slots, delivery fee, order limits, handover code, claim mode | superadmin (open/close and claim mode: admin) |
 | `/admin/reports` | Daily sales, top/bottom fillings, stage times | superadmin |
 | `/admin/staff` | Admin allow-list | superadmin |
+| `/admin/blocked` | Devices the lookup rate limit has blocked, and one-tap unblock | admin (doc 05 §4) |
 
 A route guard reads the session, looks up `admin_users` by email, and redirects
 on `is_active = false` or no row. The guard is convenience only — RLS is the
@@ -73,13 +74,17 @@ and refusing the most natural input to teach a storage detail helps nobody.
 ### The customer shell is a side nav
 
 The header carries two things: the wordmark, and the button that opens the
-drawer. Cart, my orders and the light/dark toggle used to sit beside them and
-now live in the drawer. Four controls competing for the top of a 360px screen
+drawer. Home, the menu, cart, my orders and the light/dark toggle live in the
+drawer; the last three used to sit beside the wordmark. Four controls competing for the top of a 360px screen
 was three too many, and none of the three that moved is touched on the way *in*
 to an order — they are the things you reach for after one exists.
 
 Non-negotiable details, in the order they will be broken:
 
+- **หน้าหลัก is a row in the list, not just the wordmark.** The wordmark links
+  to `/` and always did, but a wordmark is a mark rather than a signpost:
+  someone deep in the builder looking for the way out reads the list. The row is
+  `end`-matched, because `/` is a prefix of every other path.
 - **The cart count rides the menu button.** Folding the cart behind a drawer
   otherwise hides the one piece of state a customer needs at a glance: that
   something is waiting in it. The badge is the same gold-fill, ink-edge chip the
@@ -233,6 +238,13 @@ person who wants to know which side of that line their food is on. Above it: the
 what the customer will be asked for at the counter. Below: the order contents,
 the pickup point and slot or delivery location, the total, and payment state.
 
+The checkout asks for a name on **both** routes (0034). A pickup order used to
+carry no name at all, which left the counter reading a four-character code out
+to a crowd; the name is what staff actually say when a box is ready. The room
+and the phone stay optional there — the customer is standing in the shop, so
+there is nobody to ring and nowhere to deliver — and a required field says so on
+its label rather than only by refusing to submit.
+
 While `pending_confirmation`, a `ยกเลิกออเดอร์` button with a confirm dialog.
 The button removes itself the instant the shop accepts — via the same realtime
 subscription — which is a quietly important piece of expectation-setting.
@@ -242,6 +254,11 @@ prompt and the shop's PromptPay QR. Nothing else on the page competes with it.
 Since the checkout screen takes the slip up front, an order reaching this state
 means the customer re-opened the page to replace a slip, or staff keyed the
 order in.
+
+A ghost `กลับหน้าร้าน` button closes the page, on the error branches too.
+Checkout navigates here with `replace`, so the browser's back button goes to a
+cart that no longer exists — without a link out, the screen a customer lands on
+after ordering is a dead end.
 
 A `rejected` or `cancelled` order shows **why** (0029): the label the shop
 picked, and — for the device that placed the order — the note staff typed with
@@ -256,6 +273,38 @@ countdown is *in the button's label*, not beside it — a disabled button is
 skipped by some screen readers, so a separate countdown would go unread. Backing
 out is never delayed; making it slow to leave a dialog is a dark pattern, and
 closing changes nothing.
+
+### Every overlay is portalled to `document.body`
+
+`Modal`, the customer drawer and the back office's เพิ่มเติม sheet all render
+through `createPortal` into the body, and none of them may stop.
+
+`position: fixed` is measured against the viewport only while no ancestor has a
+transform, a filter or `will-change` on either. These overlays open from inside
+cards and page wrappers that do — `.anim-rise` on the routed outlet, `.anim-pop`
+on a panel — and with such an ancestor the overlay is measured against *that
+box* instead: the dim and the blur cover the card rather than the screen, and
+"centred" means the centre of the card, which on a board scrolled halfway down
+is nowhere near the middle of the screen. It reads as a dialog pinned to a
+fixed position on the page, because that is exactly what it is.
+
+The portal takes the question off the table for every caller, present and
+future, rather than asking each screen not to animate above a dialog.
+
+What must keep working, and what the fix is easy to break:
+
+- the backdrop is a real `<button>`, so tapping it closes — and it is reachable
+  by keyboard and by screen reader, which a `<div onClick>` is not
+- Escape closes; a tap inside the panel does not
+- the body does not scroll underneath, and the previous `overflow` is restored
+  rather than cleared
+- focus enters the panel, cycles inside it, and returns to whatever opened it.
+  `aria-modal` claims the rest of the page is unreachable; the trap is what
+  makes that true
+- the panel caps **both** axes. A panel told only to scroll on y still computes
+  `overflow-x: auto`, and one wide child — a landscape photo where a slip was
+  expected — used to stretch it past the screen and push its own left edge
+  somewhere no scroll could reach
 
 ## 5. State management
 

@@ -31,6 +31,7 @@ export const th = {
     nav: {
       open: 'เปิดเมนู',
       title: 'เมนูนำทาง',
+      home: 'หน้าหลัก',
       menu: 'สั่งสินค้า',
     },
     error: {
@@ -111,6 +112,7 @@ export const th = {
     boxes: '{{count}} กล่อง',
     subtotal: 'รวมค่าอาหาร',
     checkout: 'ไปหน้าชำระเงิน',
+    addMore: 'สั่งสินค้าเพิ่ม',
     removeLine: 'ลบ {{name}} ออกจากตะกร้า',
     itemNote: 'หมายเหตุ',
   },
@@ -131,6 +133,7 @@ export const th = {
     phone: 'เบอร์โทร',
     contact: 'ข้อมูลติดต่อ',
     contactWhy: 'ใช้เฉพาะตอนเอาของไปส่งให้',
+    contactWhyPickup: 'ใช้เรียกชื่อตอนของเสร็จ เบอร์กับห้องใส่หรือไม่ใส่ก็ได้',
     payment: 'วิธีจ่ายเงิน',
     cash: 'จ่ายสดตอนรับของ',
     transfer: 'โอน / พร้อมเพย์',
@@ -251,6 +254,7 @@ export const th = {
     settings: 'ตั้งค่าร้าน',
     reports: 'รายงาน',
     staff: 'ทีมงาน',
+    blocked: 'ปลดบล็อคการค้นหา',
     signIn: 'เข้าสู่ระบบด้วย Google',
     signOut: 'ออกจากระบบ',
     signOutTitle: 'ออกจากระบบ?',
@@ -272,7 +276,7 @@ export const th = {
     payReviewTitle: 'สลิปโอนเงิน',
     payReviewAmount: 'ยอดที่ต้องได้',
     payReviewAccept: 'เงินเข้าแล้ว รับออเดอร์',
-    payReviewReject: 'ปฏิเสธออเดอร์',
+    payReviewReject: 'ปฏิเสธ',
     payReviewNoSlip: 'ออเดอร์นี้ไม่มีสลิปแนบมา',
     payReviewSlipFailed: 'เปิดสลิปไม่ได้ ลองใหม่อีกครั้ง',
     payReviewOpenPdf: 'เปิดไฟล์ PDF',
@@ -463,6 +467,22 @@ export const th = {
     stockIsUnlimited: 'ไม่จำกัดอยู่ · ใส่ตัวเลขแล้วกดตั้งจำนวนเพื่อกลับมานับ',
     stockEmpty: 'ยังไม่มีไส้ในระบบ ไปเพิ่มที่จัดการเมนูก่อน',
     goToMenu: 'ไปจัดการเมนู',
+
+    blockedTitle: 'เครื่องที่ถูกบล็อคการค้นหา',
+    blockedHelp:
+      'ระบบบล็อคเครื่องที่พิมพ์รหัสผิดถี่ๆ กันคนไล่สุ่มรหัสออเดอร์คนอื่น ลูกค้าที่พิมพ์ผิดจริงก็ติดด้วย ปลดให้ได้จากตรงนี้ · เปิดออเดอร์ของตัวเองไม่นับ',
+    blockedEmpty: 'ตอนนี้ไม่มีเครื่องไหนถูกบล็อค',
+    blockedDevice: 'เครื่อง (รหัสย่อ)',
+    blockedMisses: 'พิมพ์ผิด',
+    blockedAttempts: 'ค้นทั้งหมด',
+    blockedFirst: 'ครั้งแรก',
+    blockedLast: 'ล่าสุด',
+    blockedCodes: 'รหัสที่ลอง',
+    blockedUnblock: 'ปลดบล็อค',
+    blockedConfirmTitle: 'ปลดบล็อคเครื่องนี้?',
+    blockedConfirmBody:
+      'ลบประวัติการค้นของเครื่องนี้ทิ้ง แล้วเครื่องนี้ค้นหาได้อีกครั้งทันที',
+    blockedUnblocked: 'ปลดบล็อคแล้ว',
 
     shopOpen: 'เปิดรับออเดอร์',
     shopClosed: 'ปิดรับออเดอร์',

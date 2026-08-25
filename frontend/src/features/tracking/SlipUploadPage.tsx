@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
@@ -74,9 +74,12 @@ export function SlipUploadPage() {
 
   if (!token) {
     return (
-      <Card className="mx-auto max-w-xl p-5">
-        <p className="text-ink-muted">{t('tracking:slipOnlyOwner')}</p>
-      </Card>
+      <div className="mx-auto flex max-w-xl flex-col gap-4">
+        <Card className="p-5">
+          <p className="text-ink-muted">{t('tracking:slipOnlyOwner')}</p>
+        </Card>
+        <BackHome />
+      </div>
     )
   }
 
@@ -149,6 +152,19 @@ export function SlipUploadPage() {
           </p>
         )}
       </Card>
+
+      <BackHome />
     </div>
+  )
+}
+
+/** Every customer screen that can be arrived at directly needs one of these. */
+function BackHome() {
+  const { t } = useTranslation(['common'])
+  const navigate = useNavigate()
+  return (
+    <Button variant="ghost" size="lg" onClick={() => void navigate('/')}>
+      {t('common:backToShop')}
+    </Button>
   )
 }

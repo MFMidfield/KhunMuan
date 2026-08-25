@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -123,7 +124,11 @@ function SideNav({ onClose, boxCount }: { onClose: () => void; boxCount: number 
 
   const themeLabel = resolved === 'dark' ? t('common:theme.toLight') : t('common:theme.toDark')
 
-  return (
+  // Into the body, for the same reason `Modal` goes there: the header and the
+  // page wrapper above this both animate a transform, and an ancestor with one
+  // makes `fixed` measure against that box instead of the viewport — a drawer
+  // that covers part of the screen and dims less of it than it covers.
+  return createPortal(
     <div className="fixed inset-0 z-50">
       <button
         type="button"
@@ -169,6 +174,22 @@ function SideNav({ onClose, boxCount }: { onClose: () => void; boxCount: number 
 
         <nav className="flex-1 overflow-y-auto p-2">
           <ul className="flex flex-col">
+            {/* The wordmark in the header goes here too, but a wordmark is not
+                a signpost: someone deep in a builder looking for the way out
+                reads the list, not the logo. */}
+            <NavItem
+              to="/"
+              end
+              onNavigate={onClose}
+              label={t('common:nav.home')}
+              icon={
+                <>
+                  <path d="M4 10.5 12 4l8 6.5" />
+                  <path d="M6 9.8V19a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9.8" />
+                </>
+              }
+            />
+
             <NavItem
               to="/menu"
               onNavigate={onClose}
@@ -235,7 +256,8 @@ function SideNav({ onClose, boxCount }: { onClose: () => void; boxCount: number 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -244,18 +266,22 @@ function NavItem({
   label,
   icon,
   count,
+  end = false,
   onNavigate,
 }: {
   to: string
   label: string
   icon: ReactNode
   count?: number
+  /** `/` matches every path as a prefix, so the home row has to ask for exact. */
+  end?: boolean
   onNavigate: () => void
 }) {
   return (
     <li>
       <NavLink
         to={to}
+        end={end}
         // Closing on the tap rather than by watching the pathname, the same way
         // the back office's "more" sheet does: the tap is the event, and a
         // navigation that does not change the path would otherwise leave the

@@ -77,7 +77,11 @@ export function PaymentReviewDialog({
         <span className="tnum font-semibold text-ink">{money.format(total)}</span>
       </p>
 
-      <div className="anim-fade mt-4 flex min-h-40 items-center justify-center rounded-card border border-border bg-surface-2 p-2">
+      {/* `overflow-auto` so anything that still does not fit is pannable inside
+          this frame rather than stretching the dialog around it. What arrives
+          here is whatever the customer photographed — a screenshot, a receipt
+          shot sideways, once in a while not a slip at all. */}
+      <div className="anim-fade mt-4 flex min-h-40 items-center justify-center overflow-auto rounded-card border border-border bg-surface-2 p-2">
         {!slipPath ? (
           <p className="p-4 text-center text-[0.9rem] text-gold-ink">
             {t('admin:payReviewNoSlip')}
@@ -100,11 +104,14 @@ export function PaymentReviewDialog({
             {t('admin:payReviewOpenPdf')}
           </a>
         ) : (
-          <a href={slip.data} target="_blank" rel="noopener">
+          <a href={slip.data} target="_blank" rel="noopener" className="min-w-0">
+            {/* Both axes are capped. Height alone let a landscape image run
+                past the panel, and a centred overflowing child puts its own
+                left edge where no scroll can reach it. */}
             <img
               src={slip.data}
               alt={t('admin:payReviewTitle')}
-              className="anim-fade max-h-[46vh] w-auto rounded-btn"
+              className="anim-fade max-h-[46vh] max-w-full w-auto rounded-btn object-contain"
             />
           </a>
         )}

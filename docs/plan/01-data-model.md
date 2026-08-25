@@ -230,9 +230,9 @@ have to be double-quoted at every use site forever.
 | `pickup_slot_id` | `uuid` → `pickup_slots.id` | Required when `fulfillment = 'pickup'` |
 | `delivery_zone_id` | `uuid` → `delivery_zones.id` | Required when `fulfillment = 'delivery'` |
 | `delivery_location` | `text` | Required when `fulfillment = 'delivery'` |
-| `customer_name` | `text` | Required for delivery |
-| `customer_room` | `text` | Required for delivery |
-| `customer_phone` | `text` | Required for delivery |
+| `customer_name` | `text` | Required on **both** routes since 0034 — it is what the counter calls out when a box is ready |
+| `customer_room` | `text` | Optional; asked for on both routes |
+| `customer_phone` | `text` | Required for delivery, optional for pickup — the customer is standing in the shop |
 | `note` | `text` | Order-level note |
 | `subtotal` | `numeric(10,2)` not null | Sum of item totals |
 | `delivery_fee` | `numeric(10,2)` not null default 0 | Snapshot at order time |
@@ -244,7 +244,12 @@ have to be double-quoted at every use site forever.
 | `cancelled_reason` | `text` | |
 | `version` | `int` not null default 0 | Optimistic concurrency token |
 
-A `check` constraint enforces the conditional-required columns:
+A `check` constraint enforces the conditional-required columns. The name is not
+in it: it is required by `place_order` (0034) rather than by the table, because
+the orders written before that migration are still valid rows and a table
+constraint would have to call them wrong.
+
+The constraint itself:
 
 ```sql
 constraint orders_fulfillment_fields check (
