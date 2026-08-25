@@ -97,6 +97,20 @@ export const SECONDARY_LINKS: AdminLink[] = [
     ),
   },
   {
+    to: '/admin/blocked',
+    key: 'blocked',
+    end: false,
+    // Not superadmin: the call from a customer who cannot open their own order
+    // lands on whoever is holding the phone.
+    superadmin: false,
+    icon: icon(
+      <>
+        <rect x="4.5" y="10.5" width="15" height="9.5" rx="2" />
+        <path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0" />
+      </>,
+    ),
+  },
+  {
     to: '/admin/reports',
     key: 'reports',
     end: false,

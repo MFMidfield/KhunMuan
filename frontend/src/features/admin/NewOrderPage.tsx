@@ -87,7 +87,13 @@ export function NewOrderPage() {
         payment_method: method,
         note: note.trim() || null,
         ...(fulfillment === 'pickup'
-          ? { pickup_point_id: pointId, pickup_slot_id: slotId }
+          ? {
+              pickup_point_id: pointId,
+              pickup_slot_id: slotId,
+              customer_name: name.trim(),
+              customer_room: room.trim() || null,
+              customer_phone: phone.trim() || null,
+            }
           : {
               delivery_zone_id: zoneId,
               delivery_location: location.trim(),
@@ -131,6 +137,15 @@ export function NewOrderPage() {
       // this one.
       setRequestId(crypto.randomUUID())
       setBoxes([])
+      // And a fresh customer. The next call is a different person, and since
+      // 0034 a leftover name is not inert: it satisfies the required field on
+      // its own, so an order keyed without touching this card would go out
+      // under the previous caller's name — and the board, which now prints that
+      // name, would agree with it right up to the handover.
+      setName('')
+      setRoom('')
+      setPhone('')
+      setLocation('')
     },
   })
 
@@ -147,7 +162,7 @@ export function NewOrderPage() {
   const canSubmit =
     boxes.length > 0 &&
     (fulfillment === 'pickup'
-      ? Boolean(pointId && slotId)
+      ? Boolean(pointId && slotId && name.trim())
       : Boolean(zoneId && location.trim() && name.trim() && phone.trim()))
 
   return (
@@ -255,18 +270,35 @@ export function NewOrderPage() {
               label={t('checkout:deliveryLocation')}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-            />
-            <Input label={t('checkout:name')} value={name} onChange={(e) => setName(e.target.value)} />
-            <Input label={t('checkout:room')} value={room} onChange={(e) => setRoom(e.target.value)} />
-            <Input
-              label={t('checkout:phone')}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              type="tel"
-              inputMode="tel"
+              required
             />
           </>
         )}
+
+        {/* The name is asked for on both routes, exactly as on the customer's
+            checkout: it is what gets called out when the food is ready, and a
+            phone order has a name in it whether or not the form asks. */}
+        <Input
+          label={t('checkout:name')}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <Input
+          label={t('checkout:room')}
+          value={room}
+          onChange={(e) => setRoom(e.target.value)}
+          hint={t('common:optional')}
+        />
+        <Input
+          label={t('checkout:phone')}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          type="tel"
+          inputMode="tel"
+          hint={fulfillment === 'pickup' ? t('common:optional') : undefined}
+          required={fulfillment === 'delivery'}
+        />
       </Card>
 
       <Card className="flex flex-col gap-3 p-4">

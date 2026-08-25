@@ -5,8 +5,8 @@ import { supabase } from '@/lib/supabase'
  * The full settings row, staff-side.
  *
  * Separate from the customer's `useShopSettings` on purpose: anon holds a
- * column-level grant covering four columns, so the customer query names them
- * and cannot select more. Staff have the whole row.
+ * column-level grant covering a subset of the row, so the customer query names
+ * those columns and cannot select more. Staff have the whole row.
  */
 export function useShopSettingsAdmin() {
   return useQuery({

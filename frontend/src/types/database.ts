@@ -79,6 +79,7 @@ export type Database = {
           id: string
           invited_by: string | null
           is_active: boolean
+          is_owner: boolean
           role: Database["public"]["Enums"]["admin_role"]
           updated_at: string
         }
@@ -90,6 +91,7 @@ export type Database = {
           id?: string
           invited_by?: string | null
           is_active?: boolean
+          is_owner?: boolean
           role?: Database["public"]["Enums"]["admin_role"]
           updated_at?: string
         }
@@ -101,6 +103,7 @@ export type Database = {
           id?: string
           invited_by?: string | null
           is_active?: boolean
+          is_owner?: boolean
           role?: Database["public"]["Enums"]["admin_role"]
           updated_at?: string
         }
@@ -175,6 +178,7 @@ export type Database = {
           qty_remaining: number
           qty_total: number
           service_date: string
+          unlimited: boolean
           updated_at: string
         }
         Insert: {
@@ -183,6 +187,7 @@ export type Database = {
           qty_remaining: number
           qty_total: number
           service_date?: string
+          unlimited?: boolean
           updated_at?: string
         }
         Update: {
@@ -191,6 +196,7 @@ export type Database = {
           qty_remaining?: number
           qty_total?: number
           service_date?: string
+          unlimited?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -828,8 +834,12 @@ export type Database = {
         Row: {
           closed_message: string | null
           code_epoch: number
+          contact_email: string | null
+          contact_instagram: string | null
+          contact_phone: string | null
           created_at: string
           delivery_enabled: boolean
+          exclusive_claims: boolean
           id: number
           is_open: boolean
           line_notify_enabled: boolean
@@ -846,8 +856,12 @@ export type Database = {
         Insert: {
           closed_message?: string | null
           code_epoch?: number
+          contact_email?: string | null
+          contact_instagram?: string | null
+          contact_phone?: string | null
           created_at?: string
           delivery_enabled?: boolean
+          exclusive_claims?: boolean
           id: number
           is_open?: boolean
           line_notify_enabled?: boolean
@@ -864,8 +878,12 @@ export type Database = {
         Update: {
           closed_message?: string | null
           code_epoch?: number
+          contact_email?: string | null
+          contact_instagram?: string | null
+          contact_phone?: string | null
           created_at?: string
           delivery_enabled?: boolean
+          exclusive_claims?: boolean
           id?: number
           is_open?: boolean
           line_notify_enabled?: boolean
@@ -889,6 +907,38 @@ export type Database = {
           },
         ]
       }
+      staged_slips: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string
+          order_id: string | null
+          path: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash: string
+          order_id?: string | null
+          path: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string
+          order_id?: string | null
+          path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staged_slips_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -900,7 +950,6 @@ export type Database = {
           p_expected_version: number
           p_note?: string
           p_order_id: string
-          p_override_payment?: boolean
           p_reason_id?: string
           p_to_status: Database["public"]["Enums"]["order_status"]
         }
@@ -911,7 +960,7 @@ export type Database = {
         Returns: Json
       }
       blocked_lookup_ips: {
-        Args: never
+        Args: { p_limit?: number }
         Returns: {
           attempts: number
           codes_tried: string[]
@@ -919,6 +968,7 @@ export type Database = {
           ip_hash: string
           last_seen: string
           misses: number
+          reason: string
         }[]
       }
       cancel_order: {
@@ -926,6 +976,10 @@ export type Database = {
         Returns: Json
       }
       claim_order: { Args: { p_order_id: string }; Returns: Json }
+      confirm_payment_and_accept: {
+        Args: { p_expected_version: number; p_order_id: string }
+        Returns: Json
+      }
       expired_slips: {
         Args: never
         Returns: {
@@ -934,8 +988,13 @@ export type Database = {
         }[]
       }
       forget_slip: { Args: { p_order_id: string }; Returns: undefined }
+      forget_staged_slip: { Args: { p_id: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
       is_superadmin: { Args: never; Returns: boolean }
+      issue_staged_slip: {
+        Args: { p_extension: string; p_ip_hash: string }
+        Returns: string
+      }
       lookup_order: {
         Args: { p_client_token?: string; p_code: string }
         Returns: Json
@@ -943,6 +1002,13 @@ export type Database = {
       lookup_order_tracked: {
         Args: { p_client_token: string; p_code: string; p_ip_hash: string }
         Returns: Json
+      }
+      orphan_staged_slips: {
+        Args: never
+        Returns: {
+          id: string
+          path: string
+        }[]
       }
       outbox_settle: {
         Args: { p_error?: string; p_id: number; p_ok: boolean }
@@ -999,6 +1065,7 @@ export type Database = {
         }[]
       }
       run_daily_rollover: { Args: never; Returns: Json }
+      set_exclusive_claims: { Args: { p_enabled: boolean }; Returns: Json }
       set_payment: {
         Args: {
           p_note?: string
@@ -1011,6 +1078,7 @@ export type Database = {
         Args: { p_filling_id: string; p_qty_total: number }
         Returns: Json
       }
+      set_stock_unlimited: { Args: { p_filling_id: string }; Returns: Json }
       shop_today: { Args: never; Returns: string }
       toggle_shop: {
         Args: { p_is_open: boolean; p_message?: string }
@@ -1028,6 +1096,7 @@ export type Database = {
         | "accepted"
         | "cooking"
         | "ready"
+        | "out_for_delivery"
         | "handed_over"
         | "cancelled"
         | "rejected"
@@ -1173,6 +1242,7 @@ export const Constants = {
         "accepted",
         "cooking",
         "ready",
+        "out_for_delivery",
         "handed_over",
         "cancelled",
         "rejected",

@@ -92,6 +92,10 @@ export function MyOrdersPage() {
           })}
         </ul>
       )}
+
+      <Button variant="ghost" size="lg" onClick={() => void navigate('/')}>
+        {t('common:backToShop')}
+      </Button>
     </div>
   )
 }

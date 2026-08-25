@@ -6,11 +6,12 @@
 
 | Path | Screen | Notes |
 |------|--------|-------|
-| `/` | Menu | Set cards, shop-closed banner, cart badge |
+| `/` | Landing | First impression: what the shop is, the order button, contact, staff entrance |
+| `/menu` | Menu | Set cards, shop-closed banner, cart badge |
 | `/build/:setId` | Set builder | The core interaction — quota allocation |
 | `/cart` | Cart | Edit quantities, remove, re-open builder |
-| `/checkout` | Checkout | Fulfillment, contact, payment method |
-| `/checkout/slip/:code` | Slip upload | Only for `method = 'transfer'` |
+| `/checkout` | Checkout | Fulfillment, contact, payment method; QR + slip when paying by transfer |
+| `/checkout/slip/:code` | Slip upload | Re-upload after the order exists |
 | `/o/:code` | Tracking | Live status; cancel button while pending |
 | `/my-orders` | Device order list | Reads codes from `localStorage` |
 
@@ -23,14 +24,85 @@
 | `/admin/orders/:id` | Order detail / kitchen ticket | admin |
 | `/admin/new` | Key in a phone order | admin |
 | `/admin/menu` | Sets, fillings, add-ons, photos | superadmin |
-| `/admin/stock` | Today's remaining quantities | admin |
-| `/admin/settings` | Open/close, pickup points, slots, delivery fee | superadmin (open/close: admin) |
+| `/admin/stock` | Today's remaining quantities, and "never runs out" | admin |
+| `/admin/settings` | Open/close, contact channels, pickup points, slots, delivery fee, order limits, handover code, claim mode | superadmin (open/close and claim mode: admin) |
 | `/admin/reports` | Daily sales, top/bottom fillings, stage times | superadmin |
 | `/admin/staff` | Admin allow-list | superadmin |
+| `/admin/blocked` | Devices the lookup rate limit has blocked, and one-tap unblock | admin (doc 05 §4) |
 
 A route guard reads the session, looks up `admin_users` by email, and redirects
 on `is_active = false` or no row. The guard is convenience only — RLS is the
 real boundary (doc 05).
+
+### Why `/` is not the menu any more
+
+The menu held `/` through Phases 1–4 and it was the wrong screen to open on. A
+grid of set cards answers "what can I buy" and nothing else: not what this shop
+is, not whether it is taking orders right now, and not how to reach a person
+when something has gone wrong with an order already placed. A first-time visitor
+arriving from a poster or a friend's link got a price list.
+
+`/` is now a landing page and the menu moved to `/menu`. The landing page is the
+only screen in the app whose job is persuasion rather than a task, and it does
+four things in this order, because that is the order a phone reads them in:
+
+1. **Open or closed, and what the shop sells.** The open state is a chip with a
+   dot and a word, in the cool status palette — never gold, which means *brand*
+   everywhere in this app and never *state*.
+2. **The order button.** Gold fill, ink text, 1.5px ink edge — the primary
+   button construction, rendered as an `<a>` because it is a navigation. One of
+   them, in the hero. There was briefly a second copy below the contact card for
+   readers who had scrolled past the first; the side nav made it redundant,
+   because the menu link is now one tap away from anywhere on the page.
+3. **Contact — phone, email, Instagram.** All three come from `shop_settings`
+   (migration 0025) and are edited in `/admin/settings`. Each is a whole-row
+   link: `tel:`, `mailto:`, and the profile URL. A channel the shop has not
+   filled in renders as nothing at all, not as an empty row.
+4. **The staff entrance**, as a small footer link. Six people use it; everyone
+   else must not wonder whether they were supposed to sign in.
+
+The page renders without waiting on a query. The settings read decorates it —
+the chip, the closed message, the contact rows — but the hero and the order
+button are there while the request is in flight and still there if it fails. A
+landing page that shows a spinner has failed at the one thing it exists to do.
+
+The Instagram handle is stored **bare, without the leading `@`**, and both the
+display `@` and the URL are built from it. The admin field strips a typed `@`
+rather than rejecting it: everyone types it, the check constraint forbids it,
+and refusing the most natural input to teach a storage detail helps nobody.
+
+### The customer shell is a side nav
+
+The header carries two things: the wordmark, and the button that opens the
+drawer. Home, the menu, cart, my orders and the light/dark toggle live in the
+drawer; the last three used to sit beside the wordmark. Four controls competing for the top of a 360px screen
+was three too many, and none of the three that moved is touched on the way *in*
+to an order — they are the things you reach for after one exists.
+
+Non-negotiable details, in the order they will be broken:
+
+- **หน้าหลัก is a row in the list, not just the wordmark.** The wordmark links
+  to `/` and always did, but a wordmark is a mark rather than a signpost:
+  someone deep in the builder looking for the way out reads the list. The row is
+  `end`-matched, because `/` is a prefix of every other path.
+- **The cart count rides the menu button.** Folding the cart behind a drawer
+  otherwise hides the one piece of state a customer needs at a glance: that
+  something is waiting in it. The badge is the same gold-fill, ink-edge chip the
+  header used before, moved.
+- **One drawer at every width.** No permanent rail above `lg`. A rail takes a
+  column out of every customer screen, and the builder grid and the checkout
+  summary were both laid out against the full container width.
+- **The drawer closes on the tap, not on the pathname.** Same as the back
+  office's `เพิ่มเติม` sheet, and for the same reason: the tap is the event, and
+  a navigation that does not change the path would leave the drawer hanging over
+  the page it just took you to.
+- **Escape closes it, the backdrop closes it, and the body does not scroll
+  underneath it.** The scroll lock restores the previous value rather than
+  clearing it.
+- The theme control is a **full-width row** inside the drawer rather than the
+  round `ThemeToggle` button. Same action and the same label; a 44px circle in a
+  list of rows reads as a stray control. `ThemeToggle` itself is unchanged and
+  still used by the back office and the login screen.
 
 ## 2. The set builder — the screen that matters most
 
@@ -60,27 +132,40 @@ too easy to lose track of.
 
 ## 3. The order board — the screen that runs the shop
 
-Layout is **responsive by role of the device, not by breakpoint alone**:
+**One filtered list, at every width.** A sticky search box and chip row —
+`ทั้งหมด` plus one chip per status, each carrying its count — and below them the
+cards for whatever is selected. `ทั้งหมด` is the default. Both stick under the
+header, so narrowing the board stays reachable however far it has been scrolled.
 
-- **Phone (<768px):** a single scrollable list with a sticky status filter chip
-  row — `ทั้งหมด` plus one chip per column, each carrying its count — newest
-  relevant first. Six staff on phones need one column and big tap targets, not
-  four squeezed ones. The chip row sticks under the header, so the filter stays
-  reachable however far the list has been scrolled.
-- **Tablet (768–1023px):** **two** Kanban columns, with a two-button switch
-  above them selecting which pair is on screen: `รอยืนยัน · รับแล้ว` or
-  `กำลังทำ · รอรับ`. An iPad in portrait has room for two real columns and not
-  for four; giving it the phone list wasted the second half of the screen, and
-  giving it four made every card unreadable.
-- **Desktop (≥1024px):** four Kanban columns — `รอยืนยัน`, `รับแล้ว`, `กำลังทำ`,
-  `รอรับ`. Drag is *not* the primary interaction; each card has explicit action
-  buttons. Drag-and-drop on a shared realtime board with six users invites
-  accidents.
+**Search spans the whole board and ignores the chip.** Someone typing a code
+does not know which status the order is sitting in — that is usually the
+question they are asking. It matches the code, the customer's name and phone,
+the delivery location, pickup point and slot, the claimer, the order note, and
+every set, filling and add-on name on the card; a phone is compared digits-only
+so `080-000-0000` and `0800000000` are the same search. It is a filter over the
+rows already in the browser, so it is instant and has no loading state — and it
+therefore only reaches orders still on the board. An order already handed over
+or cancelled is not findable here, which the empty state says out loud.
 
-The same data, three presentations, one `useOrderBoard()` hook. The board is one
-of the few places allowed to branch on a JS breakpoint rather than CSS, because
-the three layouts are genuinely different DOM — rendering all three and hiding
-two would triple the card count and the realtime subscribers. See §9.
+One narrowing mechanism is active at a time: tapping a chip while a search is
+open clears the box, because that tap is the gesture for "put the board back"
+and a chip that quietly did nothing would read as broken.
+
+Width changes how many cards fit on a row and nothing else: one on a phone, two
+from `sm`, three from `xl`. Cards keep their status badge even when a single
+status is selected, because the filter is at the top of a page that scrolls and
+a card has to say what it is without scrolling back up.
+
+Drag is not an interaction here at all; each card has explicit action buttons.
+Drag-and-drop on a shared realtime board with six users invites accidents.
+
+This replaced a Kanban board that was three different DOM trees behind a JS
+breakpoint — one list on a phone, two columns on a tablet with a pair switch,
+four on a desktop. Four columns fit on a desktop and nowhere else, and on the
+two smaller layouts the column a card sat in was already not the thing anyone
+looked at: the chip row was. Filtering was what staff were doing anyway, so it
+became the only mechanism. `useBreakpoint()` is no longer used by the board; the
+layout is plain CSS again, as §9 prefers.
 
 ### Card anatomy
 
@@ -92,7 +177,7 @@ two would triple the card count and the realtime subscribers. See §9.
 │  กุ้ง ×3 · หมู ×4 · ปูอัด ×3             │
 │  🥣 น้ำจิ้มสุกี้ ×2   📝 ไม่ใส่ผักชี      │
 │  ─────────────────────────────────────  │
-│  📍 หน้าตึก 3 · 12:00–12:15             │
+│  สมชาย · หน้าตึก 3 · 12:00–12:15        │
 │  💵 โอน · รอตรวจสลิป          ฿259      │
 │  ─────────────────────────────────────  │
 │  👤 ยังไม่มีคนรับ        [ รับงาน ]      │
@@ -101,17 +186,43 @@ two would triple the card count and the realtime subscribers. See §9.
 
 Non-negotiable details:
 
+- **The customer's name leads the meta row, and is the only line there in full
+  ink.** It is what gets called out when the box is ready, which is the whole
+  reason 0034 made it required — a required field nobody on this side can see is
+  a field collected for nothing. The room and the phone follow it, muted.
+- **Newest first** (0033). The age timer, not the position in the list, is what
+  says an order has been waiting: a new order appended to the bottom of a long
+  board is an order nobody sees.
+- **A delivery card has a blue 1.5px edge.** It has somewhere to be, and that
+  has to register before anything on the card is read. Blue because gold means
+  brand here and never state, and the status palette is cool throughout.
 - **Age timer** counts up from `created_at` and turns amber past 10 minutes, red
   past 20. This is the entire defence against dropped orders — a card that has
   been sitting has to look wrong.
 - **Claim chip** shows the owner's name or `ยังไม่มีคนรับ`. Cards claimed by
-  someone else get a muted border so your eye skips them.
+  someone else get a muted border so your eye skips them. The whole row — chip,
+  stale marker, release — disappears when `exclusive_claims` is off (0030): the
+  name is still recorded, but a card showing an owner nobody is bound by is
+  worse than a card showing nothing.
 - **Payment state** is on the card, not one tap away. It is a top-four failure
   mode; it gets top-level pixels.
 - **Fillings are always visible** on the card, never collapsed. Opening a detail
   view to see what to cook is one tap too many during a rush.
-- The `[ รับงาน ]` button becomes `[ เริ่มทำ ]` once claimed by you, and
+- There is no `[ รับงาน ]` button any more (0027): accepting an order claims it.
+  The primary button is `[ เริ่มทำ ]` in the accepted column and
   `[ เสร็จแล้ว ]` in the cooking column.
+- **A transfer order is confirmed, not accepted** (0029). In `รอยืนยัน` its
+  primary button reads `ตรวจสลิป / ยืนยันจ่าย` rather than `รับออเดอร์`, because
+  since 0028 the slip is already attached and the first real question is whether
+  the money arrived. It opens a dialog that shows the slip inline — a decision
+  that can be taken without looking at the evidence is one that will be — with
+  the confirm button dead for three seconds. Confirming marks the payment paid
+  and accepts the order in **one** RPC; the half-done state, paid but still
+  pending, looks to everyone who arrives later like a customer who paid and was
+  ignored. Rejecting from that dialog goes straight into the reason dialog,
+  which is itself the second confirmation and cannot be submitted without a
+  reason. Cash orders are unchanged: there is nothing to look at, so they keep
+  the plain `รับออเดอร์`.
 
 ### Realtime
 
@@ -124,10 +235,19 @@ refetch to reconcile anything missed.
 
 ## 4. Tracking page
 
-A vertical stepper with five nodes matching the status enum, the current node
-pulsing. Above it: the code in a large monospace-ish treatment, because that is
+A vertical stepper matching the status enum, the current node pulsing — five
+nodes for a pickup, six for a delivery, which has `out_for_delivery` between
+`ready` and `handed_over`. The customer watching this page is precisely the
+person who wants to know which side of that line their food is on. Above it: the code in a large monospace-ish treatment, because that is
 what the customer will be asked for at the counter. Below: the order contents,
 the pickup point and slot or delivery location, the total, and payment state.
+
+The checkout asks for a name on **both** routes (0034). A pickup order used to
+carry no name at all, which left the counter reading a four-character code out
+to a crowd; the name is what staff actually say when a box is ready. The room
+and the phone stay optional there — the customer is standing in the shop, so
+there is nobody to ring and nowhere to deliver — and a required field says so on
+its label rather than only by refusing to submit.
 
 While `pending_confirmation`, a `ยกเลิกออเดอร์` button with a confirm dialog.
 The button removes itself the instant the shop accepts — via the same realtime
@@ -135,6 +255,60 @@ subscription — which is a quietly important piece of expectation-setting.
 
 For `transfer` orders that are still `unpaid`, the page leads with the upload
 prompt and the shop's PromptPay QR. Nothing else on the page competes with it.
+Since the checkout screen takes the slip up front, an order reaching this state
+means the customer re-opened the page to replace a slip, or staff keyed the
+order in.
+
+A ghost `กลับหน้าร้าน` button closes the page, on the error branches too.
+Checkout navigates here with `replace`, so the browser's back button goes to a
+cart that no longer exists — without a link out, the screen a customer lands on
+after ordering is a dead end.
+
+A `rejected` or `cancelled` order shows **why** (0029): the label the shop
+picked, and — for the device that placed the order — the note staff typed with
+it. One word and no explanation is the version of this screen that generates a
+phone call.
+
+### Confirm dialogs
+
+Two irreversible actions on the customer side get a `ConfirmDialog`: placing an
+order and cancelling one. Its confirm button is dead for three seconds and the
+countdown is *in the button's label*, not beside it — a disabled button is
+skipped by some screen readers, so a separate countdown would go unread. Backing
+out is never delayed; making it slow to leave a dialog is a dark pattern, and
+closing changes nothing.
+
+### Every overlay is portalled to `document.body`
+
+`Modal`, the customer drawer and the back office's เพิ่มเติม sheet all render
+through `createPortal` into the body, and none of them may stop.
+
+`position: fixed` is measured against the viewport only while no ancestor has a
+transform, a filter or `will-change` on either. These overlays open from inside
+cards and page wrappers that do — `.anim-rise` on the routed outlet, `.anim-pop`
+on a panel — and with such an ancestor the overlay is measured against *that
+box* instead: the dim and the blur cover the card rather than the screen, and
+"centred" means the centre of the card, which on a board scrolled halfway down
+is nowhere near the middle of the screen. It reads as a dialog pinned to a
+fixed position on the page, because that is exactly what it is.
+
+The portal takes the question off the table for every caller, present and
+future, rather than asking each screen not to animate above a dialog.
+
+What must keep working, and what the fix is easy to break:
+
+- the backdrop is a real `<button>`, so tapping it closes — and it is reachable
+  by keyboard and by screen reader, which a `<div onClick>` is not
+- Escape closes; a tap inside the panel does not
+- the body does not scroll underneath, and the previous `overflow` is restored
+  rather than cleared
+- focus enters the panel, cycles inside it, and returns to whatever opened it.
+  `aria-modal` claims the rest of the page is unreachable; the trap is what
+  makes that true
+- the panel caps **both** axes. A panel told only to scroll on y still computes
+  `overflow-x: auto`, and one wide child — a landscape photo where a slip was
+  expected — used to stretch it past the screen and push its own left edge
+  somewhere no scroll could reach
 
 ## 5. State management
 
@@ -188,9 +362,9 @@ work in Tailwind classes and in raw CSS.
 }
 ```
 
-Dark values are redefined under `@media (prefers-color-scheme: dark)` guarded as
-`:root:not([data-theme="light"])`, and again under `:root[data-theme="dark"]` so
-an explicit toggle wins in both directions.
+Dark values are redefined under `:root[data-theme="dark"]` and nowhere else.
+There is deliberately no `@media (prefers-color-scheme: dark)` block — see
+**Theme** below.
 
 ### The two-gold rule
 
@@ -241,11 +415,29 @@ jitters as it updates.
 
 ### Theme
 
-Both surfaces ship light and dark. **First load follows the device** —
-`prefers-color-scheme`, no stamp on the root element. Both the customer app and
-the back office carry a manual toggle whose choice is stored in `localStorage`
-and stamps `data-theme`. The kitchen works under varying light and the toggle
+Both surfaces ship light and dark. **Light is the default, on every device.**
+Both the customer app and the back office carry a manual toggle whose choice is
+stored in `localStorage`. The kitchen works under varying light and the toggle
 costs almost nothing once the tokens exist.
+
+First load used to follow the device — `prefers-color-scheme`, no stamp on the
+root element, a third `system` state in the provider. It does not any more, and
+the change is worth stating rather than leaving as a diff. The shop's first
+impression should not depend on a setting the shop cannot see or check, and a
+phone in dark mode is usually there from a system-wide schedule rather than a
+decision anyone made about this page. Someone who wants dark is still one tap
+from it, and the choice is remembered.
+
+Mechanically that means three things, and all three have to hold together:
+
+- The root element is **always stamped**. The pre-paint script in `index.html`
+  writes `data-theme="light"` unless `localStorage` holds exactly `'dark'`, so
+  nothing is left to a media query on the first paint.
+- The provider is **two states, not three**. `system` is gone from
+  `ThemeChoice`; a stored `'system'` from an older deploy reads back as light.
+- `index.css` carries **no `prefers-color-scheme` block at all**. That query
+  would be the one remaining path to a dark first paint nobody asked for — and
+  with JavaScript off, the one nothing could correct afterwards.
 
 ### Imagery
 
@@ -268,6 +460,34 @@ deliberate call: brand recognition over icon legibility.
 - **Touch targets ≥ 44px** in the back office. It is used with wet hands, fast.
 - **Motion is functional only** — a new card sliding in, a status node advancing.
   Nothing decorative animates.
+
+### Motion
+
+One vocabulary, four verbs: things **fade**, things **rise** a little, panels
+**pop** from the middle, sheets **slide** from an edge. Durations are 120–220ms.
+Every one of these sits in front of somebody trying to finish a task during a
+rush, so motion that has to be waited for is a cost rather than a polish.
+
+It is opt-in through a class — `.anim-fade`, `.anim-rise`, `.anim-pop`,
+`.anim-slide-up`, `.anim-slide-end`. Nothing animates because it happens to be a
+div. Where it is used:
+
+| Thing | Motion |
+|-------|--------|
+| Modal backdrop, drawer backdrop | fade, plus a 3px blur |
+| Modal panel | pop |
+| Admin `เพิ่มเติม` sheet | slide up |
+| Customer side nav | slide from the end edge |
+| Route change | the outlet rises, keyed on the pathname |
+| Board cards, menu grid, stock list | rise, keyed on the filter or search |
+| Buttons, chips, status badges | colour transition only |
+
+**Transitions never touch layout.** A row of buttons that reflows under a thumb
+already travelling towards one of them is worse than no motion at all.
+
+Lists are keyed on *what is being shown* — the filter, the search string — not
+on the rows themselves. Changing the filter replays the entrance for the new
+set; a realtime update to one card does not restart the animation on the rest.
 
 ## 6b. The order-code input
 
@@ -305,6 +525,11 @@ worse than building it.
   palette work has to account for that from the start.
 - Full keyboard operation of the back office. Six staff, some on laptops, and
   keyboard-driven claiming is measurably faster than a trackpad.
+- **`prefers-reduced-motion: reduce` collapses every animation and transition to
+  a single frame.** Vestibular disorders are not rare and "reduce" is a request,
+  not a preference to weigh against a design. Animations are collapsed rather
+  than removed, so anything that waits for one to finish still completes. The
+  backdrop blur goes with them.
 
 ## 9. Responsive system
 
@@ -339,8 +564,9 @@ layout with a fluid width.
   `pb-safe` / `pb-tabbar` utilities. The bottom inset is the one that matters:
   without it the admin tab bar sits on the iPhone home indicator, and staff
   mis-tap in a rush.
-- **The page never scrolls sideways.** Anything intrinsically wide — a Kanban
-  row, a report table, a long code — scrolls inside its own container.
+- **The page never scrolls sideways.** Anything intrinsically wide — the board's
+  filter chip row, a report table, a long code — scrolls inside its own
+  container.
 - **Sticky, not fixed, for headers.** The one fixed element in the whole app is
   the admin tab bar.
 - **Text wraps, containers do not.** Long set names, notes and email addresses
@@ -355,6 +581,8 @@ narrow further where a single reading column beats spreading out.
 
 | Screen | Phone | Tablet | Desktop |
 |--------|-------|--------|---------|
+| Shell | Sticky header: wordmark + menu button carrying the cart count. Side drawer holds menu, cart, my orders, theme | Same | Same — the drawer does not become a rail |
+| Landing | Hero stacked, buttons full width, steps 1 per row | Buttons side by side, steps 3 per row | Same, larger hero type |
 | Menu | 1 set card per row, full-bleed photo | 2 per row | 3 per row |
 | Set builder | 2 filling cards per row, sticky quota header, sticky total bar above the safe area | 3 per row, quota header still sticky | 4 per row, quota header and summary in a right-hand rail |
 | Cart | Stacked rows, quantity stepper right-aligned | Same, wider | Same, capped width |
@@ -368,7 +596,7 @@ narrow further where a single reading column beats spreading out.
 | Screen | Phone | Tablet | Desktop |
 |--------|-------|--------|---------|
 | Shell | Sticky header + **fixed bottom tab bar**: `บอร์ด`, `คีย์ออเดอร์`, `สต็อก`, `เพิ่มเติม` | Same tab bar, wider content | No tab bar; every link inline in the header |
-| Board | 1 list + sticky filter chips | 2 Kanban columns + pair switch | 4 Kanban columns |
+| Board | Sticky filter chips, 1 card per row | Same chips, 2 per row | Same chips, 3 per row |
 | Order detail | Full-screen, actions in a sticky bottom bar | Full-screen, wider | Two columns — ticket left, actions and history right |
 | Key in an order | One field per row, one section at a time | Two fields per row | Two columns |
 | Stock | One filling per row, stepper right-aligned, ≥44px | 2 per row | Table |

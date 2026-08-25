@@ -7,12 +7,12 @@
      customer  ───► │   pending_   │ ──── admin rejects ───► rejected  (terminal)
      places order   │ confirmation │ ──── customer cancels ► cancelled (terminal)
                     └──────┬───────┘
-                           │ admin accepts
+                           │ admin accepts (and thereby claims)
                            ▼
                     ┌──────────────┐
                     │   accepted   │ ──── admin cancels ───► cancelled
                     └──────┬───────┘
-                           │ admin claims + starts
+                           │ the claimer starts
                            ▼
                     ┌──────────────┐
                     │   cooking    │ ──── admin cancels ───► cancelled
@@ -22,7 +22,14 @@
                     ┌──────────────┐
                     │    ready     │
                     └──────┬───────┘
-                           │ handed to customer (payment must be `paid`)
+                           │ pickup: handed over at the counter
+                           │ delivery: leaves the shop first
+                           ▼
+                    ┌──────────────────┐
+                    │ out_for_delivery │ ─── admin cancels ──► cancelled
+                    │  (delivery only) │
+                    └──────┬───────────┘
+                           │ handed to customer — payment MUST be `paid`
                            ▼
                     ┌──────────────┐
                     │ handed_over  │  (terminal)
@@ -33,14 +40,33 @@
 
 | From | To | Who | Guard |
 |------|----|-----|-------|
-| `pending_confirmation` | `accepted` | admin | shop context only |
+| `pending_confirmation` | `accepted` | admin | shop context only; claims the order for the accepter. For a transfer order the board goes through `confirm_payment_and_accept`, which marks the payment paid and calls `advance_order` in the same transaction (0029) |
 | `pending_confirmation` | `rejected` | admin | reason required; restores stock |
 | `pending_confirmation` | `cancelled` | customer | **only** state where the customer may cancel; restores stock |
 | `accepted` | `cooking` | admin | must be the claimer, or claim happens implicitly |
 | `accepted` \| `cooking` | `cancelled` | admin | reason required; restores stock |
 | `cooking` | `ready` | admin | must be the claimer |
-| `ready` | `handed_over` | admin | `payments.state = 'paid'`, or admin explicitly overrides with a note |
+| `ready` | `handed_over` | admin | **pickup only**; `payments.state = 'paid'` |
+| `ready` | `out_for_delivery` | admin | **delivery only**; no payment requirement — cash is collected at the door |
+| `out_for_delivery` | `handed_over` | admin | `payments.state = 'paid'` |
+| `out_for_delivery` | `cancelled` | admin | reason required; restores stock |
 | `ready` | `cooking` | admin | correction path — "we need to remake this" |
+
+**`ready` forks on fulfillment** (0033). It used to mean two things: for a
+pickup, the box is on the shelf; for a delivery, it meant that *and* went on
+meaning it while somebody was out on a bike — the board could not tell "cooked,
+still here" from "cooked, gone, nearly there", which is the difference the shop
+gets phoned about. A delivery may not skip the middle step, and there is no
+re-cooking something already on a bike.
+
+**There is no payment override** (0033). `advance_order` used to take
+`p_override_payment` plus a note, letting staff hand over an unpaid order and
+explain afterwards. It existed for the case where money moved and the system did
+not know it — but the honest fix for that is to mark the payment paid, which is
+one tap away on the same card and records who confirmed it and when. The
+override wrote nothing into that record, and it was the only path by which food
+left the shop with no evidence of being paid for. The money is still required at
+handover and nowhere earlier, which is what lets a cash delivery go out at all.
 
 Everything else is rejected by the RPC. The client never writes `orders.status`
 directly; RLS denies `update` on the column.
@@ -73,12 +99,43 @@ The zero-row case is not an error the user should see as a red toast. The UI
 re-reads the row and shows "รับไปแล้วโดย <name>" — the honest outcome, not a
 failure.
 
-Rules:
+**Claiming is a switch** (migration 0030). `shop_settings.exclusive_claims`,
+default on, is everything below. Off, anyone may move any order and the two
+guards that raise `CLAIMED_BY_SOMEONE_ELSE` do not fire.
 
+Claiming was written for a six-person shift where two people cooking the same
+order is a real and expensive mistake. It is the wrong shape for a shift where
+two people share one tablet and pick up whatever is next — there the ownership
+check is not a safety net, it is a door that keeps locking on the person
+standing at it.
+
+What does not change with the switch is the record: the order is still stamped
+with whoever accepted or started it, because "who cooked this" is asked after
+the fact regardless of what was being enforced at the time. The board hides the
+claim row; the row is still written.
+
+Flipping it in either direction drops every live claim. Switching off, a claim
+that no longer means anything must not sit on a card implying it does; switching
+on, claims recorded while nothing was enforcing them would suddenly lock people
+out of orders they were already working on. It is an ordinary admin power, like
+open/close, and for the same reason — the shape of a shift changes during the
+shift.
+
+Rules, while the switch is on:
+
+- **Accepting an order claims it** (migration 0027). Whoever reads an order and
+  decides the shop can make it is the person who then makes it, so there is no
+  separate "รับงาน" button and no accepted-but-unclaimed state to explain. The
+  claim happens inside `advance_order`, not as a second call the client could
+  fail to make.
 - Claiming is **required** before moving an order into `cooking`. The "เริ่มทำ"
-  button performs claim-and-advance in one RPC when the order is unclaimed.
+  button performs claim-and-advance in one RPC when the order is unclaimed,
+  which is the path an order takes after being released.
 - Any admin can **release** their own claim. The superadmin can force-release
-  anyone's — for the case where a phone died mid-shift.
+  anyone's — for the case where a phone died mid-shift. A released order goes
+  back to unclaimed and the next person to tap "เริ่มทำ" takes it.
+- `claim_order` still exists and is still granted; nothing in the board calls it
+  now. It is the only path that claims without also moving the order.
 - A claim older than 45 minutes on an order still in `accepted` gets a visual
   stale marker on the board. It is not auto-released; a silent auto-release
   would recreate the double-cooking problem it is meant to prevent.
@@ -100,6 +157,13 @@ payload. Steps, all inside one transaction:
 3. **Validate fulfillment.** For pickup: point and slot active, and the slot's
    remaining capacity for `shop_today()` is > 0. For delivery: name, phone and
    location present, `delivery_enabled` true.
+3a. **The slip, for a transfer** (migration 0028). A public caller paying by
+   transfer must send a `slip_path`, or the call raises `SLIP_REQUIRED`; the
+   order is created with `payments.state = 'slip_uploaded'` rather than
+   `unpaid`. Staff keying in a phone order are exempt — they do not have the
+   customer's slip in front of them, and refusing would push those orders back
+   onto paper. The path must be one `slip-staging-url` issued and nobody has
+   claimed, and a file must have arrived at it: see doc 05 §5.
 4. **Lock and decrement stock.** For each distinct filling across all items,
    ordered by `filling_id` to give every concurrent transaction the same lock
    order and eliminate deadlocks:

@@ -10,6 +10,7 @@ import { useTableCrud } from './useTableCrud'
 import type { Database } from '@/types/database'
 
 type AdminRow = Database['public']['Tables']['admin_users']['Row']
+type AdminRole = Database['public']['Enums']['admin_role']
 
 /**
  * The allow-list, which is what Q13 turned into.
@@ -19,14 +20,19 @@ type AdminRow = Database['public']['Tables']['admin_users']['Row']
  * of them staff. Adding someone who has already tried and been refused works
  * too — a trigger links their existing auth row on the way in.
  *
- * The superadmin row is rendered but not editable. RLS refuses any write
- * touching `role = 'superadmin'` on either side, so the screen states the rule
- * rather than offering a control the database will reject.
+ * Both tiers are offered. Since 0026 the row RLS refuses to touch is the one
+ * flagged `is_owner`, not every superadmin, so a second superadmin is a normal
+ * write and the screen can offer it. The owner row is still rendered without
+ * controls, because the database still refuses every write that touches it.
  */
 export function StaffPage() {
   const { t } = useTranslation(['admin', 'common'])
   const { list, insert, update, remove } = useTableCrud('admin_users', 'created_at')
-  const [draft, setDraft] = useState({ email: '', display_name: '' })
+  const [draft, setDraft] = useState<{ email: string; display_name: string; role: AdminRole }>({
+    email: '',
+    display_name: '',
+    role: 'admin',
+  })
 
   if (list.isPending) return <PageSpinner />
   if (list.error) return <ErrorCard error={list.error} />
@@ -41,13 +47,13 @@ export function StaffPage() {
 
       <EditorList>
         {list.data.map((row) =>
-          row.role === 'superadmin' ? (
+          row.is_owner ? (
             <li key={row.id}>
               <Card className="p-4">
                 <p className="font-medium break-words">{row.display_name}</p>
                 <p className="text-[0.85rem] break-all text-ink-muted">{row.email}</p>
                 <p className="mt-2 text-[0.8rem] text-ink-muted">
-                  {t('admin:cfg.roleSuperadmin')} · {t('admin:cfg.ownerLocked')}
+                  {t('admin:cfg.roleOwner')} · {t('admin:cfg.ownerLocked')}
                 </p>
               </Card>
             </li>
@@ -65,9 +71,9 @@ export function StaffPage() {
               // means the row the owner sees matches the row that was stored.
               email: draft.email.trim().toLowerCase(),
               display_name: draft.display_name.trim(),
-              role: 'admin',
+              role: draft.role,
             })
-            setDraft({ email: '', display_name: '' })
+            setDraft({ email: '', display_name: '', role: 'admin' })
           }}
         >
           <Field label={t('admin:cfg.staffEmail')}>
@@ -88,18 +94,30 @@ export function StaffPage() {
             />
           </Field>
 
-          {/* Shown so the field is visible rather than implied, with the reason
-              it offers one option: the owner tier is unique and RLS refuses to
-              create a second one, so a second entry here would be a control
-              that always fails. */}
-          <Field label={t('admin:cfg.staffRole')} hint={t('admin:cfg.roleOnlyStaff')}>
-            <select className={fieldClass} value="admin" disabled>
-              <option value="admin">{t('admin:cfg.roleAdmin')}</option>
-            </select>
+          {/* Defaulting to the lower tier rather than to whatever is first in
+              the enum: adding a cook is the common case, and a mis-click here
+              hands out the menu, the settings and the reports. */}
+          <Field label={t('admin:cfg.staffRole')} hint={t('admin:cfg.roleHint')}>
+            <RoleSelect value={draft.role} onChange={(role) => setDraft({ ...draft, role })} />
           </Field>
         </AddRow>
       </EditorList>
     </div>
+  )
+}
+
+function RoleSelect({ value, onChange }: { value: AdminRole; onChange: (role: AdminRole) => void }) {
+  const { t } = useTranslation(['admin'])
+
+  return (
+    <select
+      className={fieldClass}
+      value={value}
+      onChange={(e) => onChange(e.target.value as AdminRole)}
+    >
+      <option value="admin">{t('admin:cfg.roleAdmin')}</option>
+      <option value="superadmin">{t('admin:cfg.roleSuperadmin')}</option>
+    </select>
   )
 }
 
@@ -115,6 +133,7 @@ function StaffRow({
   const { t } = useTranslation(['admin', 'common'])
   const [d, setD] = useState({
     display_name: row.display_name,
+    role: row.role,
     is_active: row.is_active,
   })
 
@@ -135,8 +154,14 @@ function StaffRow({
         />
       </Field>
 
+      {/* Editable in both directions, including on the row belonging to the
+          person doing the editing. Demoting yourself is survivable precisely
+          because the owner row exists and cannot be reached from here. */}
+      <Field label={t('admin:cfg.staffRole')} hint={t('admin:cfg.roleHint')}>
+        <RoleSelect value={d.role} onChange={(role) => setD({ ...d, role })} />
+      </Field>
+
       <p className="text-[0.8rem] text-ink-muted">
-        {t('admin:cfg.roleAdmin')} ·{' '}
         {row.auth_user_id ? t('admin:cfg.signedInOnce') : t('admin:cfg.neverSignedIn')}
       </p>
 
@@ -156,7 +181,7 @@ function StaffRow({
         onClick={() =>
           onSave({
             id: row.id,
-            patch: { display_name: d.display_name.trim(), is_active: d.is_active },
+            patch: { display_name: d.display_name.trim(), role: d.role, is_active: d.is_active },
           })
         }
       >

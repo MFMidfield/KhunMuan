@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { createPortal } from 'react-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { useSession } from '@/features/auth/useSession'
 import { useCurrentAdmin } from '@/features/auth/useCurrentAdmin'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { Button } from '@/components/ui/Button'
 import {
@@ -30,6 +32,8 @@ export function AdminLayout() {
   const { session } = useSession()
   const { data: admin } = useCurrentAdmin(session?.user.email)
   const isSuper = admin?.role === 'superadmin'
+  const location = useLocation()
+  const [signingOut, setSigningOut] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
 
   const primary = visibleLinks(PRIMARY_LINKS, isSuper)
@@ -72,7 +76,7 @@ export function AdminLayout() {
             <Button
               variant="ghost"
               className="hidden lg:inline-flex"
-              onClick={() => void supabase.auth.signOut()}
+              onClick={() => setSigningOut(true)}
             >
               {t('admin:signOut')}
             </Button>
@@ -82,7 +86,9 @@ export function AdminLayout() {
 
       {/* pb-tabbar keeps the last card clear of the fixed bar; lg drops it. */}
       <main className="mx-auto max-w-7xl px-3 py-4 pb-tabbar sm:px-4 lg:py-6 lg:pb-6">
-        <Outlet />
+        <div key={location.pathname} className="anim-rise">
+          <Outlet />
+        </div>
       </main>
 
       <TabBar
@@ -91,7 +97,36 @@ export function AdminLayout() {
         onToggleMore={() => setMoreOpen((v) => !v)}
       />
 
-      {moreOpen && <MoreSheet links={secondary} onClose={() => setMoreOpen(false)} />}
+      {moreOpen && (
+        <MoreSheet
+          links={secondary}
+          onClose={() => setMoreOpen(false)}
+          onSignOut={() => {
+            setMoreOpen(false)
+            setSigningOut(true)
+          }}
+        />
+      )}
+
+      {/* Signing out is not destructive — the way back is to sign in again —
+          but on a shared counter tablet it is the tap that hands the next
+          person somebody else's session, and it sits next to the navigation.
+          The three seconds are the same three the rest of the app uses. */}
+      {signingOut && (
+        <ConfirmDialog
+          title={t('admin:signOutTitle')}
+          body={admin?.display_name
+            ? t('admin:signOutBody', { name: admin.display_name })
+            : undefined}
+          confirmLabel={t('admin:signOut')}
+          cancelLabel={t('admin:signOutStay')}
+          onClose={() => setSigningOut(false)}
+          onConfirm={() => {
+            setSigningOut(false)
+            void supabase.auth.signOut()
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -154,7 +189,15 @@ function TabBar({
   )
 }
 
-function MoreSheet({ links, onClose }: { links: AdminLink[]; onClose: () => void }) {
+function MoreSheet({
+  links,
+  onClose,
+  onSignOut,
+}: {
+  links: AdminLink[]
+  onClose: () => void
+  onSignOut: () => void
+}) {
   const { t } = useTranslation(['admin', 'common'])
 
   useEffect(() => {
@@ -162,16 +205,28 @@ function MoreSheet({ links, onClose }: { links: AdminLink[]; onClose: () => void
       if (e.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+
+    // The page behind must not scroll under the sheet — the one thing this
+    // overlay was missing that both of the others already had.
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = previous
+    }
   }, [onClose])
 
-  return (
+  // Portalled for the same reason as `Modal`: `<main>` wraps every admin page
+  // in `.anim-rise`, and an ancestor that animates a transform is an ancestor
+  // `position: fixed` measures against instead of the viewport.
+  return createPortal(
     <div className="fixed inset-0 z-50 lg:hidden">
       <button
         type="button"
         aria-label={t('common:close')}
         onClick={onClose}
-        className="absolute inset-0 bg-ink/40"
+        className="backdrop-dim anim-fade absolute inset-0"
       />
 
       <div
@@ -179,7 +234,7 @@ function MoreSheet({ links, onClose }: { links: AdminLink[]; onClose: () => void
         aria-modal="true"
         aria-label={t('admin:moreTitle')}
         className={[
-          'absolute inset-x-0 bottom-0 rounded-t-card border-t border-border',
+          'anim-slide-up absolute inset-x-0 bottom-0 rounded-t-card border-t border-border',
           'bg-surface px-3 pt-3 pb-tabbar',
         ].join(' ')}
       >
@@ -212,15 +267,13 @@ function MoreSheet({ links, onClose }: { links: AdminLink[]; onClose: () => void
           ))}
         </ul>
 
-        <Button
-          variant="ghost"
-          size="lg"
-          className="mt-2 w-full"
-          onClick={() => void supabase.auth.signOut()}
-        >
+        {/* Closes the sheet on the way to the dialog. Two stacked overlays is
+            two backdrops and two Escape handlers arguing over one key. */}
+        <Button variant="ghost" size="lg" className="mt-2 w-full" onClick={onSignOut}>
           {t('admin:signOut')}
         </Button>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

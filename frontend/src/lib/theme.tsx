@@ -5,20 +5,24 @@
    is a full reload instead of hot-reload when editing this one file. */
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { STORAGE_KEYS, removeLocal } from './storage'
+import { STORAGE_KEYS } from './storage'
 
 /**
- * Three states, not two. `system` is the default and stamps nothing on the root
- * element, which leaves prefers-color-scheme in charge — that is what "first
- * load follows the device" means. An explicit choice stamps data-theme and wins
- * in both directions.
+ * Two states, and **light is the default** — the device preference does not get
+ * a vote any more.
+ *
+ * It used to: `system` was a third state that stamped nothing and left
+ * prefers-color-scheme in charge. That made the shop's first impression depend
+ * on a setting the shop cannot see, and half the phones on a campus sit in dark
+ * mode from a system-wide schedule rather than a deliberate choice. The theme
+ * is always stamped on the root element now, so nothing is left to the media
+ * query, and someone who wants dark still has one tap to it — remembered.
  */
-export type ThemeChoice = 'light' | 'dark' | 'system'
+export type ThemeChoice = 'light' | 'dark'
 
 interface ThemeContextValue {
-  choice: ThemeChoice
-  /** What is actually on screen right now, device preference resolved. */
-  resolved: 'light' | 'dark'
+  /** What is on screen. With no third state, this is the choice itself. */
+  resolved: ThemeChoice
   setChoice: (next: ThemeChoice) => void
   toggle: () => void
 }
@@ -27,59 +31,36 @@ const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 function readStoredChoice(): ThemeChoice {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.theme)
-    return raw === 'light' || raw === 'dark' ? raw : 'system'
+    // Anything other than a stored 'dark' is light, including a blocked read
+    // and a value written by an older deploy — 'system' used to be storable.
+    return localStorage.getItem(STORAGE_KEYS.theme) === 'dark' ? 'dark' : 'light'
   } catch {
-    return 'system'
+    return 'light'
   }
-}
-
-function devicePrefersDark(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  )
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [choice, setChoiceState] = useState<ThemeChoice>(readStoredChoice)
-  const [systemDark, setSystemDark] = useState(devicePrefersDark)
 
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
-
-  useEffect(() => {
-    const root = document.documentElement
-    if (choice === 'system') {
-      root.removeAttribute('data-theme')
-      removeLocal(STORAGE_KEYS.theme)
-    } else {
-      root.setAttribute('data-theme', choice)
-      try {
-        // Stored raw, not JSON-encoded: the pre-paint script in index.html
-        // compares this value directly and must not have to parse anything.
-        localStorage.setItem(STORAGE_KEYS.theme, choice)
-      } catch {
-        /* blocked storage: the choice simply does not survive a reload */
-      }
+    document.documentElement.setAttribute('data-theme', choice)
+    try {
+      // Stored raw, not JSON-encoded: the pre-paint script in index.html
+      // compares this value directly and must not have to parse anything.
+      localStorage.setItem(STORAGE_KEYS.theme, choice)
+    } catch {
+      /* blocked storage: the choice simply does not survive a reload */
     }
   }, [choice])
 
-  const resolved: 'light' | 'dark' =
-    choice === 'system' ? (systemDark ? 'dark' : 'light') : choice
-
   const setChoice = useCallback((next: ThemeChoice) => setChoiceState(next), [])
   const toggle = useCallback(
-    () => setChoiceState(resolved === 'dark' ? 'light' : 'dark'),
-    [resolved],
+    () => setChoiceState((c) => (c === 'dark' ? 'light' : 'dark')),
+    [],
   )
 
   return (
-    <ThemeContext value={{ choice, resolved, setChoice, toggle }}>
+    <ThemeContext value={{ resolved: choice, setChoice, toggle }}>
       {children}
     </ThemeContext>
   )

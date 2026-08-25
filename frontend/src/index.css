@@ -47,42 +47,14 @@
   --shadow-hairline: 0 1px 2px rgb(16 23 32 / 0.04);
 }
 
-/* First load follows the device: no stamp on the root element. The :not()
-   guard is what lets an explicit "light" choice win over a dark device. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --ground: #0e1319;
-    --surface: #161d26;
-    --surface-2: #1d2531;
-    --ink: #e6eaf0;
-    --ink-muted: #94a3b8;
-    --border: #26303c;
-    --border-strong: #36424f;
+/* Dark is opt-in, and there is deliberately no
+   `@media (prefers-color-scheme: dark)` block to be found here.
 
-    --gold: #f5d68a;
-    --gold-hover: #fae3ac;
-    --gold-edge: #f5d68a;
-    --gold-ink: #f2ce74;
-    --gold-wash: #2a2113;
-
-    --st-pending-fg: #cbd5e1;
-    --st-pending-bg: #1e293b;
-    --st-accept-fg: #7dd8ee;
-    --st-accept-bg: #0b3947;
-    --st-cook-fg: #93b4fd;
-    --st-cook-bg: #132c63;
-    --st-ready-fg: #6ee7b7;
-    --st-ready-bg: #06372a;
-    --st-done-fg: #94a3b8;
-    --st-done-bg: #1a222e;
-    --st-cancel-fg: #fca5a5;
-    --st-cancel-bg: #4a1414;
-
-    --shadow-hairline: 0 1px 2px rgb(0 0 0 / 0.35);
-  }
-}
-
-/* An explicit toggle wins in both directions. */
+   Light is the default and the root is always stamped — by the pre-paint script
+   in index.html, then by the theme provider. A media query would be the one
+   remaining path that could hand a dark first paint to someone who never asked
+   for it, including with JavaScript off, which is exactly when nothing can
+   correct it afterwards. */
 :root[data-theme='dark'] {
   --ground: #0e1319;
   --surface: #161d26;
@@ -161,11 +133,8 @@
   }
 
   html {
-    /* Keeps form controls and scrollbars in step with the token palette. */
-    color-scheme: light dark;
-  }
-
-  :root[data-theme='light'] {
+    /* Keeps form controls and scrollbars in step with the token palette. Light,
+       not `light dark`: the palette no longer follows the device either. */
     color-scheme: light;
   }
 
@@ -238,5 +207,90 @@
 
   .snap-item {
     scroll-snap-align: start;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Motion
+ *
+ * One vocabulary, four verbs: things fade, things rise a little, panels pop
+ * from the middle, sheets slide from an edge. Durations are short — 120–220ms —
+ * because every one of these sits in front of somebody trying to finish a task
+ * during a rush, and motion that has to be waited for is a cost, not a polish.
+ *
+ * Everything here is opt-in through a class. Nothing animates because it
+ * happens to be a div.
+ * ------------------------------------------------------------------------- */
+@keyframes km-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes km-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Modal panels. The scale starts near 1: a panel that grows from small reads
+ * as a notification, and these are questions that need answering. */
+@keyframes km-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes km-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: none; }
+}
+
+@keyframes km-slide-end {
+  from { transform: translateX(100%); }
+  to   { transform: none; }
+}
+
+@layer utilities {
+  .anim-fade      { animation: km-fade 140ms ease-out both; }
+  .anim-rise      { animation: km-rise 180ms ease-out both; }
+  .anim-pop       { animation: km-pop 200ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .anim-slide-up  { animation: km-slide-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .anim-slide-end { animation: km-slide-end 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* Behind a modal: dim plus a shallow blur, so the page reads as out of reach
+   * rather than merely darker. Kept shallow — a heavy blur costs a repaint of
+   * the whole viewport on every frame, and these run on shop phones. */
+  .backdrop-dim {
+    background-color: color-mix(in srgb, var(--ink) 38%, transparent);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+
+  /* Interactive polish. Colour and shadow only — never layout, which would
+   * make a list of cards reflow while someone is aiming at one. */
+  .tap-target {
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease,
+      opacity 120ms ease;
+  }
+}
+
+/* The accessibility floor (doc 04 §8). Vestibular disorders are not rare, and
+ * "reduce" is a request, not a preference to weigh against a design. Animations
+ * are collapsed to a single frame rather than removed, so anything relying on
+ * an animation having run still completes. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .backdrop-dim {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }

@@ -151,15 +151,20 @@ create policy admins_read on admin_users
 
 create policy admins_super_write on admin_users
   for all to authenticated
-  using (is_superadmin() and role <> 'superadmin')
-  with check (is_superadmin() and role <> 'superadmin');
+  using (is_superadmin() and not is_owner)
+  with check (is_superadmin() and not is_owner);
 ```
 
-The `role <> 'superadmin'` clause on both `using` and `with check` is what makes
-the superadmin row untouchable through the API — it cannot be edited, deleted,
-or duplicated. Combined with the partial unique index from doc 01, the only way
-to change who the superadmin is, is a direct database statement. Exactly as
-specified.
+The `not is_owner` clause on both `using` and `with check` is what makes the
+owner row untouchable through the API — it cannot be edited, deleted, or
+duplicated, and no session can promote itself into it. Combined with the partial
+unique index from doc 01, the only way to change who the owner is, is a direct
+database statement. Exactly as specified.
+
+Until migration 0026 this clause read `role <> 'superadmin'`, which protected
+the same row but also made the tier unusable: a second superadmin could not be
+created, so the staff screen had a role field with one option. Splitting the
+tier from the protected row is what let the field become a real control.
 
 ### `order_events`
 
@@ -206,6 +211,23 @@ server-side salt and passes the hash down. The raw IP is never stored.
 
 Attempt rows older than 24 hours are deleted by a `pg_cron` job.
 
+### The device that placed the order is exempt (0035)
+
+A caller that presents an order's `client_token` alongside its code is not
+enumerating anything: it already holds both halves. Such a lookup skips the
+check entirely and writes no attempt row at all.
+
+This was not a refinement. The tracking page polls every 30 seconds and
+refetches on every realtime nudge, and the 5-attempts-a-minute rule counts hits
+as well as misses — so a customer with their own order open, or open twice, was
+told to slow down on the one page the code exists to serve. Tapping their own
+order in ออเดอร์ของฉัน spent the same budget.
+
+A wrong or absent token takes the old path unchanged, so this cannot be used to
+probe whether a code is real: the exemption is decided by an equality on
+`(code, client_token)` and a caller who does not already know both learns
+nothing from it. The 639,584 codes are exactly as far away as they were.
+
 ### Signed-in admins are exempt
 
 `is_admin()` short-circuits the whole check. Staff search from the orders table
@@ -219,11 +241,34 @@ Blocking by IP hash catches honest typists too, so two things soften it:
 
 1. The rate-limit screen shown to the customer displays the shop's **phone
    number and LINE** so they can just ask.
-2. The superadmin gets a **blocked list** screen: IP hash, first and last
-   attempt, attempt count, which codes were tried, and a one-tap **unblock**.
+2. **Any admin** gets a **blocked list** screen at `/admin/blocked`: IP hash,
+   first and last attempt, attempt count, which codes were tried, and a one-tap
+   **unblock**.
 
-`unblock_ip(ip_hash)` is a superadmin-only RPC that deletes the offending
-attempt rows. The IP hash is opaque and expires with the log, so this is a way
+The list asks the limit rather than restating it (0036): it calls
+`private.check_lookup_limit` once per address seen in the window and reports
+what that function says, including which refusal — `RATE_LIMITED` and
+`IP_BLOCKED` are two different conversations to have with a customer. The
+earlier version carried its own copy of the rule ("three misses in fifteen
+minutes") and was wrong in both directions: a device refused for *speed* has no
+misses and never appeared, which is the common case behind a shared campus NAT
+and therefore exactly the person phoning the shop; and a device whose three
+misses were twenty minutes apart was listed as blocked when it never was.
+
+The result is capped — 100 rows, 20 codes each — because the moment this screen
+is worth watching is a distributed attempt, which is also the moment the
+uncapped version is largest.
+
+The **global circuit breaker** cannot be shown here and cannot be lifted here: it
+refuses everyone, no per-address row expresses it, and `unblock_ip` clears one
+hash. It expires within the minute on its own, which is the only reason that is
+tolerable.
+
+`unblock_ip(ip_hash)` deletes the offending attempt rows. It was superadmin-only
+until 0035, which was the wrong tier: the person who takes the call from a
+customer who cannot open their own order is whoever is on shift, and a fix that
+needs the owner's account is a fix that waits until the owner answers their
+phone. `blocked_lookup_ips()` and the table's read policy moved with it. The IP hash is opaque and expires with the log, so this is a way
 to undo a false positive, not a way to identify a person.
 
 A repeated-offender alert surfaces on the board when one IP hash trips the block
@@ -245,6 +290,16 @@ amounts. Policies:
   Function, scoped to a single object path derived from the order id. They cannot
   list the bucket, cannot read any object, and cannot overwrite another order's
   slip.
+- Since migration 0028 there is a second one for the slip the checkout screen
+  takes **before** the order exists. `slip-staging-url` has no order to derive a
+  path from and no `client_token` to check, so it mints a path under `staging/`,
+  records it in `staged_slips`, and hands back a signed URL for that one path.
+  `place_order` accepts a `slip_path` only if it finds it in that table
+  unclaimed *and* a file has actually arrived at it. What replaces the token as
+  the defence is the per-IP limit — twelve an hour on the same hashed address —
+  and a six-hour sweep of anything never claimed by an order. An abandoned
+  checkout is somebody's payment screenshot attached to nothing; the shop's
+  90-day retention is about payments and has nothing to say about it.
 - Admins read slips through short-lived signed URLs generated per view, never a
   public link.
 - Uploads are capped at 5 MB and restricted to `image/jpeg`, `image/png`,
@@ -262,7 +317,9 @@ first paint and campus wifi is not fast.
 | Function | Trigger | Job |
 |----------|---------|-----|
 | `track` | HTTP, public | IP-hashing wrapper for `lookup_order` |
-| `slip-upload-url` | HTTP, public | Issue a scoped signed upload URL |
+| `slip-upload-url` | HTTP, public | Issue a signed upload URL scoped to an existing order |
+| `slip-staging-url` | HTTP, public | Same, for a slip whose order does not exist yet (0028) |
+| `slip-prune` | `pg_cron`, 03:41 | Delete slips past retention, and staged slips never claimed |
 | `line-notify` | Queue drain (`pg_cron`, every 15s) | Push new-order messages to the LINE staff group |
 | `daily-rollover` | `pg_cron`, 04:00 Asia/Bangkok | Seed `filling_stock_daily` from `default_daily_qty`; optionally close the shop |
 

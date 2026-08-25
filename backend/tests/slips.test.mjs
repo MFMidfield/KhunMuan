@@ -43,12 +43,28 @@ const PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
   'base64')
 
-async function place() {
+/**
+ * A staged slip, the way the checkout screen makes one: mint a path, PUT the
+ * bytes, and hand the path to place_order (0028).
+ */
+async function stage() {
+  const grant = await fn('slip-staging-url', { content_type: 'image/png' })
+  if (grant.s !== 200) throw new Error(`slip-staging-url ${grant.s} ${JSON.stringify(grant.b)}`)
+  const put = await fetch(
+    `${URL}/storage/v1/object/upload/sign/slips/${grant.b.path}?token=${grant.b.token}`,
+    { method: 'PUT', headers: { 'Content-Type': 'image/png' }, body: PNG },
+  )
+  if (put.status !== 200) throw new Error(`staging PUT ${put.status}`)
+  return grant.b.path
+}
+
+async function place(slipPath) {
   const r = await rpc('place_order', { p_payload: {
-    client_request_id: crypto.randomUUID(), fulfillment: 'pickup',
+    client_request_id: crypto.randomUUID(), fulfillment: 'pickup', customer_name: 'ผู้ทดสอบ',
     pickup_point_id: 'c0000000-0000-4000-8000-000000000001',
     pickup_slot_id: '50000000-0000-4000-8000-000000000001',
     payment_method: 'transfer',
+    ...(slipPath ? { slip_path: slipPath } : {}),
     items: [{ set_id: '5e000000-0000-4000-8000-000000000001', quantity: 1,
               fillings: [{ filling_id: 'f1000000-0000-4000-8000-000000000004', qty: 5 }] }],
   } })
@@ -56,8 +72,35 @@ async function place() {
 }
 
 async function main() {
-  const order = await place()
-  const other = await place()
+  console.log('\n— the slip comes first (0028) —')
+  const noSlip = await place()
+  ok('a public transfer order without a slip is refused',
+     noSlip?.message === 'SLIP_REQUIRED', JSON.stringify(noSlip))
+
+  const unissued = await place('staging/not-a-path-we-issued.png')
+  ok('a path nobody issued is refused',
+     unissued?.message === 'SLIP_NOT_STAGED', JSON.stringify(unissued))
+
+  const neverUploaded = await fn('slip-staging-url', { content_type: 'image/png' })
+  const emptyGrant = await place(neverUploaded.b.path)
+  ok('a path issued but never written to is refused',
+     emptyGrant?.message === 'SLIP_NOT_UPLOADED', JSON.stringify(emptyGrant))
+
+  const stagedPath = await stage()
+  const order = await place(stagedPath)
+  ok('with the slip staged, the order is placed', Boolean(order?.code), JSON.stringify(order))
+
+  const [staged] = await fetch(
+    `${URL}/rest/v1/payments?select=state,slip_path&order_id=eq.${order.id}`,
+    { headers: h(STAFF) }).then((r) => r.json())
+  ok('and it arrives already at slip_uploaded, never paid',
+     staged.state === 'slip_uploaded' && staged.slip_path === stagedPath, JSON.stringify(staged))
+
+  const reused = await place(stagedPath)
+  ok('the same staged slip cannot be spent twice',
+     reused?.message === 'SLIP_NOT_STAGED', JSON.stringify(reused))
+
+  const other = await place(await stage())
 
   console.log('\n— getting permission to upload —')
   const noToken = await fn('slip-upload-url', { code: order.code, client_token: crypto.randomUUID(), content_type: 'image/png' })

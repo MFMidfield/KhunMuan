@@ -332,6 +332,12 @@ slot, the status and the total. Names, phone numbers and room numbers are
    the code alone sees status, order contents, pickup point, slot and total — and
    **never** `customer_name`, `customer_room` or `customer_phone`. A scanner that
    gets lucky learns what someone ordered, not who they are.
+
+   The rejection reason splits along the same line (0029): the **label** the
+   shop picked goes to any caller who knows the code, because it comes from a
+   fixed list the shop wrote and "ของหมด" describes the kitchen rather than the
+   customer. The **free-text note** is full-view only — staff type real
+   sentences into it, and a sentence about one order can be about its customer.
 4. **24-hour expiry** after handover, as above.
 5. **Misses are logged** and surfaced to the superadmin (doc 05 §4).
 
@@ -352,18 +358,29 @@ warrant it. That is a legitimate trade-off, recorded here so the reasoning is no
 lost. If the shop ever starts taking sensitive delivery details at scale, this is
 the first decision to revisit.
 
-## 9. Blocked users and the superadmin
+## 9. Blocked users, and who unblocks them
 
 Blocking by IP hash punishes honest typists too. Two things soften it:
 
 - The rate-limit screen shows the shop's phone number and LINE so a locked-out
   customer can just ask staff, who can look the order up with no limit at all.
-- The superadmin gets a **blocked list** — IP hash, first and last attempt,
-  attempt count, the codes tried — with a one-tap **unblock**. The IP hash is
-  opaque and expires with the log, so this is not a way to identify people; it is
-  a way to undo a false positive.
+- **Any admin** gets a **blocked list** at `/admin/blocked`, judged by the limit
+  itself rather than by a second copy of its rule (0036), and labelled with
+  which refusal it is — IP hash, first and
+  last attempt, attempt count, the codes tried — with a one-tap **unblock**. The
+  IP hash is opaque and expires with the log, so this is not a way to identify
+  people; it is a way to undo a false positive. It was superadmin-only until
+  0035; the person who takes that phone call is whoever is on shift.
 
 Attempt rows older than 24 hours are deleted by a `pg_cron` job.
+
+The device that placed the order is **exempt** as well (0035): a caller
+presenting the order's `client_token` beside its code already holds both halves
+and is enumerating nothing, so the check is skipped and no attempt row is
+written. Before that, a customer's own tracking page — which polls and refetches
+on realtime — could spend its own allowance and lock them out of the one order
+the code exists to serve. A wrong or absent token changes nothing, so the wall
+in front of the 639,584 codes is exactly as high. Doc 05 §4.
 
 Admins signed in with Google are **exempt** from rate limiting entirely. They
 search from the orders table directly, where RLS already scopes what they can

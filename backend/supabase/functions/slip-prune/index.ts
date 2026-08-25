@@ -23,23 +23,50 @@ Deno.serve(async () => {
   }
 
   const rows = (expired ?? []) as { order_id: string; slip_path: string }[]
-  if (rows.length === 0) {
-    return new Response(JSON.stringify({ deleted: 0 }), { status: 200 })
+
+  if (rows.length > 0) {
+    const { error: removeError } = await supabase.storage
+      .from('slips')
+      .remove(rows.map((r) => r.slip_path))
+
+    if (removeError) {
+      return new Response(JSON.stringify({ message: removeError.message }), { status: 500 })
+    }
+
+    // Only after the bytes are gone. Clearing the column first would leave a
+    // file nothing points at, which is the worst of both outcomes.
+    for (const row of rows) {
+      await supabase.rpc('forget_slip', { p_order_id: row.order_id })
+    }
   }
 
-  const { error: removeError } = await supabase.storage
-    .from('slips')
-    .remove(rows.map((r) => r.slip_path))
+  // Abandoned checkouts (0028). These are slips whose order was never placed,
+  // so they belong to nobody and the shop's retention window — which is about
+  // how long a *payment* is kept — has nothing to say about them. Six hours.
+  const { data: orphans, error: orphanError } = await supabase.rpc('orphan_staged_slips')
 
-  if (removeError) {
-    return new Response(JSON.stringify({ message: removeError.message }), { status: 500 })
+  if (orphanError) {
+    return new Response(JSON.stringify({ message: orphanError.message }), { status: 500 })
   }
 
-  // Only after the bytes are gone. Clearing the column first would leave a file
-  // nothing points at, which is the worst of both outcomes.
-  for (const row of rows) {
-    await supabase.rpc('forget_slip', { p_order_id: row.order_id })
+  const staged = (orphans ?? []) as { id: string; path: string }[]
+
+  if (staged.length > 0) {
+    const { error: removeError } = await supabase.storage
+      .from('slips')
+      .remove(staged.map((r) => r.path))
+
+    if (removeError) {
+      return new Response(JSON.stringify({ message: removeError.message }), { status: 500 })
+    }
+
+    for (const row of staged) {
+      await supabase.rpc('forget_staged_slip', { p_id: row.id })
+    }
   }
 
-  return new Response(JSON.stringify({ deleted: rows.length }), { status: 200 })
+  return new Response(
+    JSON.stringify({ deleted: rows.length, staged_deleted: staged.length }),
+    { status: 200 },
+  )
 })

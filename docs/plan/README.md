@@ -42,8 +42,10 @@ open and must be answered before the corresponding phase starts.
   location and pays a fee. The fee comes from a `delivery_zones` table seeded
   with one row; the checkout hides the zone selector while only one zone is
   active, so per-zone pricing later costs a back-office row, not a migration.
-- Identity: pickup customers enter nothing. Delivery customers enter name,
-  room/class and phone. No customer login at all.
+- Identity: every customer gives a **name** — it is what the counter calls out
+  when a box is ready, and a pickup order used to carry nothing but a code
+  (0034). Room/class and phone are required for delivery and optional for
+  pickup. No customer login at all.
 - Order identity: a single 4-character code, globally unique forever, alphabet
   `A–Z 2–9` minus `I L O 0 1`, and **every code mixes letters and digits** —
   which makes all-letter profanity, repeated characters and all-digit unlucky
@@ -51,16 +53,25 @@ open and must be answered before the corresponding phase starts.
   blocklist are superadmin-configurable. The code is both the label and the
   tracking key; there is no token in the link.
 - Code lookup is rate limited hard: 5 per minute per IP, three misses triggers a
-  15-minute block, signed-in staff exempt, superadmin can see and unblock.
+  15-minute block. Signed-in staff are exempt, and so is the device that placed
+  the order — it holds the `client_token`, so it is enumerating nothing (0035).
+  **Any admin** sees the blocked list at `/admin/blocked` and can unblock.
   Code-only lookups never reveal a customer's name, room or phone.
 - Payment: cash on handover, or bank/PromptPay transfer where the customer
-  uploads a slip and an admin confirms it manually.
+  uploads a slip and an admin confirms it manually. The slip is taken at
+  checkout, before the order is placed, and a public transfer order without one
+  is refused by `place_order` (0028).
 - Status flow: `pending_confirmation → accepted → cooking → ready → handed_over`.
 - Customers may cancel only before the shop accepts.
 - Handover may require the customer's code to be read back before staff can mark
   `handed_over` — `shop_settings.require_code_on_handover`, default on, enforced
   inside `advance_order`.
 - The shop is **คุณม้วน** in the interface, **khunmuan** in Latin.
+- `/` is a **landing page**, not the menu: open/closed, what the shop sells, the
+  order button (twice), the shop's phone, email and Instagram, and a small staff
+  entrance in the footer. The menu moved to `/menu`. The three contact channels
+  live in `shop_settings` and are edited in the back office; a blank one is
+  simply not shown. See doc 04 §1.
 - Customer tracking page updates live (Supabase Realtime). No push, no SMS.
 - Back office: Google OAuth, allow-listed emails only. Two roles: `superadmin`
   (one hard-locked email, editable only in the DB) and `admin`.
@@ -82,5 +93,11 @@ open and must be answered before the corresponding phase starts.
   same construction the logo uses on its letterforms, and the only way a soft
   yellow control meets the 3:1 non-text contrast rule. 16px card corners, 12px
   buttons, near-hairline shadows, square 1:1 filling photos, logo used whole
-  everywhere including the favicon. Light and dark both ship; first load follows
-  the device, with a manual toggle on both surfaces.
+  everywhere including the favicon. Light and dark both ship; **light is the
+  default on every device**, with a manual toggle on both surfaces. Doc 04 §6
+  has why the device preference stopped getting a vote.
+- The customer shell is a **side nav**: the header holds the wordmark and the
+  button that opens it, and the drawer holds home, the menu link, the cart, my
+  orders and the light/dark toggle. The cart count rides the menu button so it is still
+  visible with the drawer shut. Same drawer at every width — no permanent rail
+  on a desktop. See doc 04 §1.

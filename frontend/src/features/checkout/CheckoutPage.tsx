@@ -9,6 +9,9 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { PageSpinner } from '@/components/ui/Spinner'
+import { MenuImage } from '@/components/ui/MenuImage'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { SLIP_TYPES, stageSlip } from '@/lib/slip'
 import { useCart } from '@/features/cart/cartContext'
 import { rememberOrder } from '@/features/tracking/myOrders'
 import {
@@ -57,6 +60,11 @@ export function CheckoutPage() {
   const [phone, setPhone] = useState('')
   const [note, setNote] = useState('')
   const [method, setMethod] = useState<PaymentMethod>('cash')
+  // The staged slip's storage path, set once the upload lands. It is what makes
+  // the submit button live for a transfer — see migration 0028.
+  const [slipPath, setSlipPath] = useState<string | null>(null)
+  const [slipName, setSlipName] = useState('')
+  const [confirming, setConfirming] = useState(false)
 
   // Generated once per checkout attempt, not per click: that is the whole point
   // of an idempotency key. A double-tap or a retry after a dropped connection
@@ -103,6 +111,11 @@ export function CheckoutPage() {
   // own the day a second zone is added in the back office.
   const showZonePicker = (zones?.length ?? 0) > 1
 
+  const upload = useMutation({
+    mutationFn: stageSlip,
+    onSuccess: (path) => setSlipPath(path),
+  })
+
   const place = useMutation({
     mutationFn: async (): Promise<PlaceOrderResult> => {
       const payload = {
@@ -111,8 +124,15 @@ export function CheckoutPage() {
         payment_method: method,
         client_total: total,
         note: note.trim() || null,
+        ...(method === 'transfer' && slipPath ? { slip_path: slipPath } : {}),
         ...(fulfillment === 'pickup'
-          ? { pickup_point_id: pointId, pickup_slot_id: slotId }
+          ? {
+              pickup_point_id: pointId,
+              pickup_slot_id: slotId,
+              customer_name: name.trim(),
+              customer_room: room.trim() || null,
+              customer_phone: phone.trim() || null,
+            }
           : {
               delivery_zone_id: zoneId,
               delivery_location: location.trim(),
@@ -150,17 +170,24 @@ export function CheckoutPage() {
   if (!sets || !addons || !points || !slots || !zones) return <PageSpinner />
 
   const deliveryAllowed = settings?.delivery_enabled ?? true
-  const canSubmit =
+  const whereIsFilled =
     fulfillment === 'pickup'
-      ? Boolean(pointId && slotId)
+      ? Boolean(pointId && slotId && name.trim())
       : Boolean(zoneId && location.trim() && name.trim() && phone.trim())
+
+  // Paying by transfer without attaching the slip is the failure this screen
+  // exists to stop: an order arrives on the board saying "โอนแล้ว" and nobody
+  // can tell whether money moved. place_order refuses it too — the button is
+  // disabled so the customer finds out here rather than after a round trip.
+  const slipReady = method !== 'transfer' || Boolean(slipPath)
+  const canSubmit = whereIsFilled && slipReady
 
   return (
     <form
       className="flex flex-col gap-4 pb-40 lg:pb-0"
       onSubmit={(e) => {
         e.preventDefault()
-        if (canSubmit && !place.isPending) place.mutate()
+        if (canSubmit && !place.isPending) setConfirming(true)
       }}
     >
       <h1 className="text-xl font-semibold sm:text-2xl">{t('checkout:title')}</h1>
@@ -228,36 +255,44 @@ export function CheckoutPage() {
         )}
       </Card>
 
-      {fulfillment === 'delivery' && (
-        <Card className="flex flex-col gap-3 p-4">
-          <div>
-            <h2 className="font-semibold">{t('checkout:contact')}</h2>
-            <p className="text-[0.85rem] text-ink-muted">{t('checkout:contactWhy')}</p>
-          </div>
-          <Input
-            label={t('checkout:name')}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            autoComplete="name"
-            required
-          />
-          <Input
-            label={t('checkout:room')}
-            value={room}
-            onChange={(e) => setRoom(e.target.value)}
-            hint={t('common:optional')}
-          />
-          <Input
-            label={t('checkout:phone')}
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            required
-          />
-        </Card>
-      )}
+      {/* Asked for on both routes now. A pickup order used to carry no name at
+          all, which left the counter calling out a four-character code to a
+          crowd — the name is what staff actually say when the food is ready.
+          The phone and the room stay optional there: the customer is standing
+          in front of the shop, so there is nobody to ring and nowhere to go. */}
+      <Card className="flex flex-col gap-3 p-4">
+        <div>
+          <h2 className="font-semibold">{t('checkout:contact')}</h2>
+          <p className="text-[0.85rem] text-ink-muted">
+            {fulfillment === 'pickup'
+              ? t('checkout:contactWhyPickup')
+              : t('checkout:contactWhy')}
+          </p>
+        </div>
+        <Input
+          label={t('checkout:name')}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="name"
+          required
+        />
+        <Input
+          label={t('checkout:room')}
+          value={room}
+          onChange={(e) => setRoom(e.target.value)}
+          hint={t('common:optional')}
+        />
+        <Input
+          label={t('checkout:phone')}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          hint={fulfillment === 'pickup' ? t('common:optional') : undefined}
+          required={fulfillment === 'delivery'}
+        />
+      </Card>
 
       <Card className="flex flex-col gap-3 p-4">
         <h2 className="font-semibold">{t('checkout:payment')}</h2>
@@ -273,6 +308,71 @@ export function CheckoutPage() {
             label={t('checkout:transfer')}
           />
         </div>
+
+        {method === 'transfer' && (
+          <div className="flex flex-col gap-3 border-t border-border pt-3">
+            {settings?.promptpay_qr_path ? (
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-[0.85rem] text-ink-muted">{t('checkout:scanToPay')}</p>
+                <div className="w-52 max-w-full">
+                  <MenuImage
+                    path={settings.promptpay_qr_path}
+                    alt={t('checkout:scanToPay')}
+                  />
+                </div>
+                <p className="tnum text-lg font-semibold">{money.format(total)}</p>
+              </div>
+            ) : (
+              // The QR is a back-office upload and may simply not be there yet.
+              // Saying so beats rendering a blank square the customer will read
+              // as a broken page.
+              <p className="text-[0.85rem] text-gold-ink">{t('checkout:noQr')}</p>
+            )}
+
+            <div className="flex flex-col gap-2">
+              <p className="text-[0.9rem] font-medium">{t('checkout:slipRequired')}</p>
+              <input
+                type="file"
+                accept={SLIP_TYPES.join(',')}
+                id="checkout-slip"
+                className="hidden"
+                disabled={upload.isPending}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    setSlipName(file.name)
+                    upload.mutate(file)
+                  }
+                  e.target.value = ''
+                }}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={upload.isPending}
+                onClick={() => document.getElementById('checkout-slip')?.click()}
+              >
+                {upload.isPending
+                  ? t('checkout:slipUploading')
+                  : slipPath
+                    ? t('checkout:slipReplace')
+                    : t('checkout:slipPick')}
+              </Button>
+
+              {slipPath && (
+                <p className="text-[0.85rem] break-all text-st-ready-fg">
+                  {t('checkout:slipAttached', { name: slipName })}
+                </p>
+              )}
+
+              {upload.error && (
+                <p role="alert" className="text-[0.85rem] text-st-cancel-fg">
+                  {t(`checkout:${(upload.error as Error).message}`)}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </Card>
 
       <Card className="flex flex-col gap-3 p-4">
@@ -322,7 +422,28 @@ export function CheckoutPage() {
             {place.isPending ? t('checkout:submitting') : t('checkout:submit')}
           </Button>
         </div>
+
+        {whereIsFilled && !slipReady && (
+          <p className="mx-auto max-w-5xl pb-3 text-[0.8rem] text-ink-muted lg:pb-0">
+            {t('checkout:slipBlocks')}
+          </p>
+        )}
       </div>
+
+      {confirming && (
+        <ConfirmDialog
+          title={t('checkout:confirmTitle')}
+          body={t('checkout:confirmBody', { total: money.format(total) })}
+          confirmLabel={t('checkout:confirmPlace')}
+          cancelLabel={t('checkout:confirmBack')}
+          busy={place.isPending}
+          onClose={() => setConfirming(false)}
+          onConfirm={() => {
+            setConfirming(false)
+            place.mutate()
+          }}
+        />
+      )}
     </form>
   )
 }

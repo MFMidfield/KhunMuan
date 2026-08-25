@@ -21,7 +21,7 @@ const mint=e=>{const b=o=>Buffer.from(JSON.stringify(o)).toString('base64url');c
 const customer=createClient(URL,ANON)
 const rpc=(fn,b,tok=ANON)=>fetch(`${URL}/rest/v1/rpc/${fn}`,{method:'POST',headers:{apikey:ANON,Authorization:`Bearer ${tok}`,'Content-Type':'application/json'},body:JSON.stringify(b)}).then(async r=>({s:r.status,b:await r.json().catch(()=>null)}))
 
-const placed=await rpc('place_order',{p_payload:{client_request_id:crypto.randomUUID(),fulfillment:'pickup',
+const placed=await rpc('place_order',{p_payload:{client_request_id:crypto.randomUUID(),fulfillment:'pickup',customer_name:'ผู้ทดสอบ',
   pickup_point_id:'c0000000-0000-4000-8000-000000000001',pickup_slot_id:'50000000-0000-4000-8000-000000000001',
   payment_method:'cash',items:[{set_id:'5e000000-0000-4000-8000-000000000001',quantity:1,
   fillings:[{filling_id:'f1000000-0000-4000-8000-000000000004',qty:5}]}]}})

@@ -28,7 +28,9 @@ export function OfflineBanner() {
     <div
       role="status"
       className={[
-        'sticky top-0 z-50 bg-st-cancel-bg px-4 py-2 text-center',
+        // z-40, below the modal layer. A dialog is the top of the app while it
+        // is open; a banner tied with it at z-50 wins on document order alone.
+        'sticky top-0 z-40 bg-st-cancel-bg px-4 py-2 text-center',
         'text-[0.85rem] font-medium text-st-cancel-fg',
       ].join(' ')}
     >

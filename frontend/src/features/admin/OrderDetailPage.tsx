@@ -64,6 +64,7 @@ export function OrderDetailPage() {
             order={order}
             currentAdminId={admin?.id ?? null}
             requireCodeOnHandover={settings?.require_code_on_handover ?? true}
+            exclusiveClaims={settings?.exclusive_claims ?? true}
             isNew={board.unseen.has(order.id)}
             onSeen={() => board.markSeen(order.id)}
             linkToDetail={false}

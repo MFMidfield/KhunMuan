@@ -53,6 +53,7 @@ shop will ever consume; see doc 03 for why the size still matters.
 | `email` | `text` unique not null, check `= lower(email)` | Matched against the Google OAuth JWT email |
 | `display_name` | `text` not null | Shown on claimed order cards |
 | `role` | `admin_role` not null default `'admin'` | enum: `superadmin`, `admin` |
+| `is_owner` | `boolean` not null default false | The one row no API write may touch |
 | `is_active` | `boolean` not null default true | Soft disable instead of delete |
 | `auth_user_id` | `uuid` → `auth.users.id`, nullable | Linked on first successful sign-in |
 | `invited_by` | `uuid` → `admin_users.id` | |
@@ -71,18 +72,33 @@ A `before insert or update` trigger lower-cases and trims the address instead, s
 already stores `auth.users.email` lower-cased, so both sides match with plain
 text equality and no extension in the picture.
 
-**Superadmin rule.** Exactly one row may have `role = 'superadmin'`, enforced by
-a partial unique index:
+**Owner rule.** `role` and "the untouchable row" started out as the same flag
+and were split by migration 0026, because one flag was doing two jobs and the
+back office could therefore never offer the higher tier at all. `role` is now
+only the permission tier and may be granted to as many people as the owner
+likes. `is_owner` is the protected row, and exactly one may exist:
 
 ```sql
-create unique index admin_users_one_superadmin
-  on admin_users ((true)) where role = 'superadmin';
+create unique index admin_users_one_owner
+  on admin_users ((true)) where is_owner;
+
+alter table admin_users add constraint admin_users_owner_is_superadmin
+  check (not is_owner or role = 'superadmin');
 ```
 
 That row is seeded by migration and cannot be created, modified or deleted
-through the API — RLS blocks any write where `role = 'superadmin'` is involved
-on either the old or the new row. Changing the superadmin is a deliberate
-database operation, exactly as requested.
+through the API — RLS blocks any write where `is_owner` is involved on either
+the old or the new row. Changing the owner is a deliberate database operation,
+exactly as requested.
+
+The check constraint pairs with it: RLS never sees a direct database statement,
+so it is the only thing stopping a hand-written `update` from leaving an owner
+sitting at `admin` and locking the shop out of its own back office.
+
+Keeping the owner unreachable is also what makes the second superadmin safe to
+offer. A compromised superadmin session can remove other superadmins, but not
+the owner, so a way back in always exists. A flat model — every superadmin able
+to delete every other one — would not have that property.
 
 ### `pickup_points`
 
@@ -166,9 +182,22 @@ the schema is not painted into a corner.
 | `service_date` | `date`, PK part | Local shop date, not UTC |
 | `qty_total` | `int` not null | Set by staff each morning, or copied from `default_daily_qty` |
 | `qty_remaining` | `int` not null check `>= 0` | Decremented atomically on order placement |
+| `unlimited` | `boolean` not null default false | Today this filling is not counted at all (0031) |
 
 The `check (qty_remaining >= 0)` constraint is the last line of defence against
 overselling; the row lock in `place_order` is the first. Both are load-bearing.
+
+**Two ways of saying unlimited, and why there are two.** A filling with no row
+for today and no `default_daily_qty` has always been uncounted — that is the
+state a filling starts in. `unlimited` is how a filling says it *while a row
+exists*, which is what the stock screen's button needs: deleting the row would
+not work, because `place_order` re-creates it from `default_daily_qty` the
+moment the next order touches that filling.
+
+The qty columns are kept rather than zeroed when the flag goes on. They are the
+record of what today has already sold, and `set_stock` subtracts it — a filling
+switched to unlimited at noon and back to 40 at two has still sold whatever it
+sold that morning.
 
 ### `addons`
 
@@ -201,21 +230,26 @@ have to be double-quoted at every use site forever.
 | `pickup_slot_id` | `uuid` → `pickup_slots.id` | Required when `fulfillment = 'pickup'` |
 | `delivery_zone_id` | `uuid` → `delivery_zones.id` | Required when `fulfillment = 'delivery'` |
 | `delivery_location` | `text` | Required when `fulfillment = 'delivery'` |
-| `customer_name` | `text` | Required for delivery |
-| `customer_room` | `text` | Required for delivery |
-| `customer_phone` | `text` | Required for delivery |
+| `customer_name` | `text` | Required on **both** routes since 0034 — it is what the counter calls out when a box is ready |
+| `customer_room` | `text` | Optional; asked for on both routes |
+| `customer_phone` | `text` | Required for delivery, optional for pickup — the customer is standing in the shop |
 | `note` | `text` | Order-level note |
 | `subtotal` | `numeric(10,2)` not null | Sum of item totals |
 | `delivery_fee` | `numeric(10,2)` not null default 0 | Snapshot at order time |
 | `total` | `numeric(10,2)` not null | `subtotal + delivery_fee` |
-| `claimed_by` | `uuid` → `admin_users.id` | Who is cooking it |
+| `claimed_by` | `uuid` → `admin_users.id` | Who is cooking it. A lock while `shop_settings.exclusive_claims` is on, a record of who acted when it is off (0030) |
 | `claimed_at` | `timestamptz` | |
 | `created_by_admin` | `uuid` → `admin_users.id` | Set when staff key in a phone order |
 | `source` | `order_source` not null default `'web'` | enum: `web`, `admin` |
 | `cancelled_reason` | `text` | |
 | `version` | `int` not null default 0 | Optimistic concurrency token |
 
-A `check` constraint enforces the conditional-required columns:
+A `check` constraint enforces the conditional-required columns. The name is not
+in it: it is required by `place_order` (0034) rather than by the table, because
+the orders written before that migration are still valid rows and a table
+constraint would have to call them wrong.
+
+The constraint itself:
 
 ```sql
 constraint orders_fulfillment_fields check (

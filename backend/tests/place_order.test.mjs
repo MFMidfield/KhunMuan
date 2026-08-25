@@ -61,6 +61,7 @@ function ok(name, cond, extra = '') {
 const pickup = (items, extra = {}) => ({
   client_request_id: crypto.randomUUID(),
   fulfillment: 'pickup',
+  customer_name: 'ผู้ทดสอบ',
   pickup_point_id: POINT,
   pickup_slot_id: SLOT_FREE,
   payment_method: 'cash',
@@ -146,7 +147,9 @@ async function main() {
       delivery_location: 'ตึกตัวอย่าง',
       customer_name: 'ทดสอบ',
       customer_phone: '0800000000',
-      payment_method: 'transfer',
+      // Cash, because this case is about the arithmetic. A public transfer
+      // order needs a staged slip since 0028, and that path is slips.test.mjs.
+      payment_method: 'cash',
       items: [
         {
           set_id: SET_SMALL,
@@ -170,6 +173,9 @@ async function main() {
     ['quantity 0 → INVALID_QUANTITY', pickup([{ set_id: SET_SMALL, quantity: 0, fillings: [fill(F_A, 5)] }]), 'INVALID_QUANTITY'],
     ['addon over max_qty → ADDON_QTY_INVALID', pickup([{ set_id: SET_SMALL, quantity: 1, fillings: [fill(F_A, 5)], addons: [{ addon_id: SAUCE_PAID, qty: 9 }] }]), 'ADDON_QTY_INVALID'],
     ['delivery without a name → INVALID_PAYLOAD', { client_request_id: crypto.randomUUID(), fulfillment: 'delivery', delivery_zone_id: ZONE, delivery_location: 'x', customer_phone: '08', payment_method: 'cash', items: [{ set_id: SET_SMALL, quantity: 1, fillings: [fill(F_A, 5)] }] }, 'INVALID_PAYLOAD'],
+    // 0034: the name is required on both routes, not only on a delivery.
+    ['pickup without a name → INVALID_PAYLOAD', { client_request_id: crypto.randomUUID(), fulfillment: 'pickup', pickup_point_id: POINT, pickup_slot_id: SLOT_FREE, payment_method: 'cash', items: [{ set_id: SET_SMALL, quantity: 1, fillings: [fill(F_A, 5)] }] }, 'INVALID_PAYLOAD'],
+    ['pickup with a blank name → INVALID_PAYLOAD', { client_request_id: crypto.randomUUID(), fulfillment: 'pickup', customer_name: '   ', pickup_point_id: POINT, pickup_slot_id: SLOT_FREE, payment_method: 'cash', items: [{ set_id: SET_SMALL, quantity: 1, fillings: [fill(F_A, 5)] }] }, 'INVALID_PAYLOAD'],
     ['no request id → MISSING_REQUEST_ID', { fulfillment: 'pickup', pickup_point_id: POINT, pickup_slot_id: SLOT_FREE, payment_method: 'cash', items: [{ set_id: SET_SMALL, quantity: 1, fillings: [fill(F_A, 5)] }] }, 'MISSING_REQUEST_ID'],
   ]
   for (const [name, p, expected] of cases) {
@@ -196,6 +202,7 @@ async function main() {
   const slotBody = (n) => ({
     client_request_id: crypto.randomUUID(),
     fulfillment: 'pickup',
+    customer_name: 'ผู้ทดสอบ',
     pickup_point_id: POINT,
     pickup_slot_id: SLOT_CAP2,
     payment_method: 'cash',
@@ -238,6 +245,7 @@ async function main() {
   const raceOrder = (fillings, slot = SLOT_FREE, setId = SET_SMALL) => ({
     client_request_id: crypto.randomUUID(),
     fulfillment: 'pickup',
+    customer_name: 'ผู้ทดสอบ',
     pickup_point_id: POINT,
     pickup_slot_id: slot,
     payment_method: 'cash',
@@ -298,6 +306,7 @@ async function main() {
     p_payload: {
       client_request_id: crypto.randomUUID(),
       fulfillment: 'pickup',
+      customer_name: 'ผู้ทดสอบ',
       pickup_point_id: POINT,
       pickup_slot_id: SLOT_CLOSED_ALWAYS,
       payment_method: 'cash',
@@ -312,6 +321,7 @@ async function main() {
       p_payload: {
         client_request_id: crypto.randomUUID(),
         fulfillment: 'pickup',
+        customer_name: 'ผู้ทดสอบ',
         pickup_point_id: POINT,
         pickup_slot_id: SLOT_CLOSED_ALWAYS,
         payment_method: 'cash',

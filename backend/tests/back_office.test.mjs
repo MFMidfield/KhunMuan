@@ -19,6 +19,7 @@ const SET = '5e000000-0000-4000-8000-000000000001' // quota 5
 const F_A = 'f1000000-0000-4000-8000-000000000001'
 const F_C = 'f1000000-0000-4000-8000-000000000003' // limited stock
 const F_D = 'f1000000-0000-4000-8000-000000000004' // unlimited
+const ZONE = 'd0000000-0000-4000-8000-000000000001'
 const POINT = 'c0000000-0000-4000-8000-000000000001'
 const SLOT = '50000000-0000-4000-8000-000000000001'
 
@@ -85,6 +86,7 @@ async function newOrder(fillings = [{ filling_id: F_D, qty: 5 }], as = ANON) {
       p_payload: {
         client_request_id: crypto.randomUUID(),
         fulfillment: 'pickup',
+        customer_name: 'ผู้ทดสอบ',
         pickup_point_id: POINT,
         pickup_slot_id: SLOT,
         payment_method: 'cash',
@@ -93,6 +95,24 @@ async function newOrder(fillings = [{ filling_id: F_D, qty: 5 }], as = ANON) {
     },
     as,
   )
+  const [row] = await read(`orders?select=id,version,code&code=eq.${r.body.code}`, A)
+  return { ...row, client_token: r.body.client_token }
+}
+
+/** Same order, delivered — the path that has an extra status since 0033. */
+async function newDeliveryOrder(fillings = [{ filling_id: F_D, qty: 5 }]) {
+  const r = await rpc('place_order', {
+    p_payload: {
+      client_request_id: crypto.randomUUID(),
+      fulfillment: 'delivery',
+      delivery_zone_id: ZONE,
+      delivery_location: 'ตึกตัวอย่าง',
+      customer_name: 'ทดสอบ',
+      customer_phone: '0800000000',
+      payment_method: 'cash',
+      items: [{ set_id: SET, quantity: 1, fillings }],
+    },
+  })
   const [row] = await read(`orders?select=id,version,code&code=eq.${r.body.code}`, A)
   return { ...row, client_token: r.body.client_token }
 }
@@ -158,6 +178,9 @@ async function main() {
   ok('pending → accepted', accepted.body?.status === 'accepted')
   ok('the version moved', accepted.body?.version === o3.version + 1)
 
+  const [afterAccept] = await read(`orders?select=claimed_by,version&id=eq.${o3.id}`, A)
+  ok('accepting claimed it for A (0027)', afterAccept.claimed_by !== null)
+
   const replay = await rpc(
     'advance_order',
     { p_order_id: o3.id, p_to_status: 'accepted', p_expected_version: o3.version },
@@ -171,7 +194,25 @@ async function main() {
     { p_order_id: o3.id, p_to_status: 'cooking', p_expected_version: accepted.body.version },
     B,
   )
-  ok('B may start it — nobody had claimed it', cookByB.body?.status === 'cooking')
+  ok(
+    'B may not start what A accepted',
+    cookByB.body?.message === 'CLAIMED_BY_SOMEONE_ELSE',
+    JSON.stringify(cookByB.body),
+  )
+
+  // Released, the order is anyone's again — and picking it up is still one tap,
+  // because starting work claims implicitly.
+  await rpc('release_order', { p_order_id: o3.id }, A)
+  // Releasing bumps the version too, so the next call has to quote the new one.
+  const [afterRelease] = await read(`orders?select=claimed_by,version&id=eq.${o3.id}`, A)
+  ok('releasing left it unclaimed', afterRelease.claimed_by === null)
+
+  const cookByBAgain = await rpc(
+    'advance_order',
+    { p_order_id: o3.id, p_to_status: 'cooking', p_expected_version: afterRelease.version },
+    B,
+  )
+  ok('B may start it once A released it', cookByBAgain.body?.status === 'cooking')
 
   const [afterCook] = await read(`orders?select=claimed_by,version&id=eq.${o3.id}`, A)
   ok('starting work claimed it implicitly', afterCook.claimed_by !== null)
@@ -226,7 +267,9 @@ async function main() {
   )
   ok('right code but unpaid → PAYMENT_NOT_SETTLED', unpaid.body?.message === 'PAYMENT_NOT_SETTLED')
 
-  const silentOverride = await rpc(
+  // The override is gone (0033). There is no argument that hands over an
+  // unpaid order any more, so the old signature does not resolve at all.
+  const override = await rpc(
     'advance_order',
     {
       p_order_id: o3.id,
@@ -238,8 +281,9 @@ async function main() {
     B,
   )
   ok(
-    'overriding payment without a note → OVERRIDE_NOTE_REQUIRED',
-    silentOverride.body?.message === 'OVERRIDE_NOTE_REQUIRED',
+    'there is no way to hand over an unpaid order',
+    override.status === 404 || String(override.body?.message ?? '').includes('does not exist'),
+    `${override.status} ${JSON.stringify(override.body)}`,
   )
 
   const paid = await rpc('set_payment', { p_order_id: o3.id, p_state: 'paid' }, B)
@@ -256,6 +300,34 @@ async function main() {
     B,
   )
   ok('paid + correct code → handed_over', handed.body?.status === 'handed_over')
+
+  console.log('\n— a delivery goes out on the road first (0033) —')
+  const d1 = await newDeliveryOrder()
+  const dv = async (to, extra = {}) => {
+    const [row] = await read(`orders?select=version&id=eq.${d1.id}`, A)
+    return rpc('advance_order',
+      { p_order_id: d1.id, p_to_status: to, p_expected_version: row.version, ...extra }, A)
+  }
+  await dv('accepted')
+  await dv('cooking')
+  await dv('ready')
+
+  const skipped = await dv('handed_over', { p_code: d1.code })
+  ok('a delivery may not skip out_for_delivery',
+     skipped.body?.message === 'ILLEGAL_TRANSITION', JSON.stringify(skipped.body))
+
+  const onTheRoad = await dv('out_for_delivery')
+  ok('it goes out unpaid — cash is collected at the door',
+     onTheRoad.body?.status === 'out_for_delivery', JSON.stringify(onTheRoad.body))
+
+  const arrivedUnpaid = await dv('handed_over', { p_code: d1.code })
+  ok('but it cannot arrive unpaid',
+     arrivedUnpaid.body?.message === 'PAYMENT_NOT_SETTLED', JSON.stringify(arrivedUnpaid.body))
+
+  await rpc('set_payment', { p_order_id: d1.id, p_state: 'paid' }, A)
+  const delivered = await dv('handed_over', { p_code: d1.code })
+  ok('paid at the door → handed_over', delivered.body?.status === 'handed_over',
+     JSON.stringify(delivered.body))
 
   console.log('\n— rejection needs a reason from the list —')
   const o4 = await newOrder([{ filling_id: F_C, qty: 2 }, { filling_id: F_D, qty: 3 }])
@@ -339,6 +411,7 @@ async function main() {
     p_payload: {
       client_request_id: crypto.randomUUID(),
       fulfillment: 'pickup',
+      customer_name: 'ผู้ทดสอบ',
       pickup_point_id: POINT,
       pickup_slot_id: SLOT,
       payment_method: 'cash',

@@ -37,7 +37,7 @@ export function MenuPage() {
       {sets.length === 0 ? (
         <Card className="p-5 text-ink-muted">{t('menu:empty')}</Card>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="anim-rise grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sets.map((set) => (
             <li key={set.id}>
               <Card className="flex h-full flex-col overflow-hidden">

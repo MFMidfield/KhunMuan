@@ -11,7 +11,9 @@ import { MenuAdminPage } from '@/features/admin/config/MenuAdminPage'
 import { StaffPage } from '@/features/admin/config/StaffPage'
 import { ReportsPage } from '@/features/admin/ReportsPage'
 import { OrderDetailPage } from '@/features/admin/OrderDetailPage'
+import { BlockedPage } from '@/features/admin/BlockedPage'
 import { SettingsPage } from '@/features/admin/SettingsPage'
+import { HomePage } from '@/features/home/HomePage'
 import { MenuPage } from '@/features/menu/MenuPage'
 import { BuilderPage } from '@/features/builder/BuilderPage'
 import { CartPage } from '@/features/cart/CartPage'
@@ -28,7 +30,12 @@ export const router = createBrowserRouter([
     element: <CustomerLayout />,
     errorElement: <RouteError />,
     children: [
-      { path: '/', element: <MenuPage /> },
+      // `/` is the landing page and `/menu` is the menu. The menu used to be
+      // the landing page; it opened on a grid of set cards, which answers "what
+      // can I buy" and nothing else — not what the shop is, not whether it is
+      // open right now, not how to reach a human when something goes wrong.
+      { path: '/', element: <HomePage /> },
+      { path: '/menu', element: <MenuPage /> },
       { path: '/build/:setId', element: <BuilderPage /> },
       { path: '/cart', element: <CartPage /> },
       { path: '/checkout', element: <CheckoutPage /> },
@@ -56,6 +63,9 @@ export const router = createBrowserRouter([
           // without phoning the owner. The superadmin-only editors on this
           // screen arrive in Phase 4.
           { path: '/admin/settings', element: <SettingsPage /> },
+          // Ordinary admin, deliberately: the person who takes the call from a
+          // customer stuck behind the lookup rate limit is whoever is on shift.
+          { path: '/admin/blocked', element: <BlockedPage /> },
         ],
       },
     ],

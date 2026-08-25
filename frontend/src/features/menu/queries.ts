@@ -30,7 +30,7 @@ export function useShopSettings() {
         // a concatenation — supabase-js infers the row type from the literal
         // and gives up the moment it is built at runtime.
         // prettier-ignore
-        .select('is_open, closed_message, delivery_enabled, promptpay_qr_path, min_order_total, max_boxes_per_order')
+        .select('is_open, closed_message, delivery_enabled, promptpay_qr_path, min_order_total, max_boxes_per_order, contact_phone, contact_email, contact_instagram')
         .eq('id', 1)
         .single()
       if (error) throw error
@@ -98,6 +98,10 @@ export function useStockToday() {
       const { data, error } = await supabase
         .from('filling_stock_daily')
         .select('filling_id, qty_remaining')
+        // A row flagged unlimited (0031) is deliberately left out of the map,
+        // so it reads exactly like a filling with no row at all: no number, no
+        // "หมดวันนี้", nothing counted.
+        .eq('unlimited', false)
       if (error) throw error
       return new Map(data.map((r) => [r.filling_id, r.qty_remaining]))
     },
