@@ -22,11 +22,13 @@ for putting the risky parts first.
   with stock decremented
 
 ### Phase 2 — Back office
-- Order board: Kanban on desktop, list on mobile
+- Order board: Kanban on desktop, two columns on tablet, list on mobile
 - Claim / release, guarded transitions, age timers, sound and highlight
 - Payment confirmation, slip viewing
 - Manual order entry
 - Open/close switch, daily stock screen
+- **Menu, settings and staff management** — promoted from Phase 4 when Q4–Q13
+  became configuration rather than answers
 - **Exit:** a full shift can be run on the app with paper as backup only
 
 ### Phase 3 — Operations hardening
@@ -38,8 +40,8 @@ for putting the risky parts first.
 
 ### Phase 4 — Reporting and polish
 - Daily sales, per-filling popularity, stage timing
-- Menu management UI with image upload and cropping
-- Staff management UI
+- ~~Menu management UI~~ and ~~staff management UI~~ — moved to Phase 2
+- Image cropping on upload, and the resize-to-WebP Edge Function
 - Empty states, error states, offline banner, PWA install prompt
 - **Exit:** the superadmin stops asking anyone for numbers
 
@@ -71,15 +73,36 @@ afterwards.
 the Latin spelling for the domain and for asset names is **khunmuan**. The
 top-level domain is still to be bought and does not block anything.
 
+### The shape of Q4–Q13 changed
+
+**These are no longer questions.** They were framed as lists the shop had to
+hand over before the corresponding phase could start — the sets, the fillings,
+the sauces, the delivery fee, the pickup points, the slots, the staff. Every one
+of them is a thing that *changes*: a filling comes off the menu, a price goes
+up, a slot moves half an hour, someone joins in October. Data that changes does
+not belong in a migration that needs a developer, and answering them once would
+only have deferred the problem to the first time an answer went stale.
+
+So they become **back-office screens** instead. The tables already existed and
+already carried superadmin-only write policies from migration 0009; what was
+missing was the UI and, for three of them, the fact that they were rules rather
+than rows. Migration 0016 adds those three and the storage the photos need.
+
+The cost is honest and worth stating: the menu-management and staff screens were
+Phase 4 work, and this promotes them into Phase 2. In exchange, nothing is
+blocked on an email any more.
+
+`seed.sql` stays a `[DEV]` fixture for local development and always will be.
+
 ### Blocking Phase 1
 
-**Q4 — The actual sets.** Names, piece quotas, prices. How many are there?
+**Q4 — The actual sets.** **RESOLVED as configuration** — `/admin/menu`.
 
-**Q5 — The actual fillings.** Full list with names. Any that need a
-`max_per_set` cap?
+**Q5 — The actual fillings.** **RESOLVED as configuration** — `/admin/menu`,
+including the per-filling `max_per_set` cap and the daily default quantity.
 
-**Q6 — Sauces and utensils.** Full list, and which of them carry a charge and
-how much.
+**Q6 — Sauces and utensils.** **RESOLVED as configuration** — `/admin/menu`,
+with the price and the per-set maximum on each one.
 
 **Q7 — Delivery fee.** **RESOLVED (shape only)** — build the `delivery_zones`
 table from day one and seed it with a **single** zone. The checkout hides the
@@ -93,8 +116,7 @@ change, no nullable column bolted onto historical orders.
 and is snapshotted onto `orders.delivery_fee` at placement as before. See doc 01
 §2 for the table.
 
-Still needed as data, not as a decision: **the zone name and the fee amount** for
-that first seeded row.
+The zone name and the fee are entered in `/admin/settings`, not seeded.
 
 **Q8 — Order code.** **RESOLVED** — 4 characters, alphabet `A–Z 2–9` minus
 `I L O 0 1`, every code must mix letters and digits, 639,584 usable codes. See
@@ -111,16 +133,28 @@ generate (doc 03 §2). What remains is a short list of mixed patterns. Needed: t
 specific Thai karaoke spellings and number superstitions the shop wants
 excluded — anything beyond an obvious `*666` suffix rule.
 
-**Q10 — Minimum order.** Is there one? Any cap on quantity per order?
+**Q10 — Minimum order.** **RESOLVED as configuration** — `shop_settings.min_order_total`
+and `shop_settings.max_boxes_per_order`, both nullable, both null meaning no
+limit, both enforced inside `place_order`. The minimum is compared against the
+food subtotal rather than the total: a delivery fee dragging a small order over
+the line would be a minimum in name only.
 
 ### Blocking Phase 2
 
-**Q11 — Pickup points.** The real list, with names people will recognise.
+**Q11 — Pickup points.** **RESOLVED as configuration** — `/admin/settings`.
 
-**Q12 — Pickup slots.** The real time slots, and whether each has a capacity.
-Also: how long before a slot does ordering for it close?
+**Q12 — Pickup slots.** **RESOLVED as configuration** — `/admin/settings`, with
+`capacity` and `cutoff_minutes` on each slot. Null cutoff means no automatic
+cutoff at all, which is deliberately not the same as zero: zero closes the slot
+exactly at its start time, null leaves it open until staff switch it off.
 
-**Q13 — Staff emails.** The initial admin allow-list.
+**Staff are exempt from the cutoff.** Someone phoning at 11:58 for the 12:00
+slot is a conversation the shop has already agreed to, and refusing it would
+only send the order back onto paper.
+
+**Q13 — Staff emails.** **RESOLVED as configuration** — `/admin/staff`. The
+superadmin row still comes from migration 0008 and still cannot be created or
+changed through the API; everyone else is added and removed on that screen.
 
 **Q14 — Handover confirmation.** **RESOLVED** — make it a switch, not a fixed
 rule: `shop_settings.require_code_on_handover`, **default `true`**. With it on,
@@ -142,9 +176,11 @@ turning it off cannot be faked from the client either way.
 API channel? Is the target a group chat the bot has been invited to, or
 individual pushes to each staff member?
 
-**Q17 — PromptPay QR.** Static image, or generated per order with the exact
-amount encoded? Per-order amounts make slip checking dramatically faster and are
-not hard to generate.
+**Q17 — PromptPay QR.** **RESOLVED** — one static image, uploaded in the back
+office and stored at `shop_settings.promptpay_qr_path` in the public `menu`
+bucket. Per-order generation was offered and declined: one image the shop can
+see and check beats a generator that has to stay correct, and the exact amount
+is already on the tracking page beside it.
 
 **Q18 — Slip retention.** 90 days is proposed. Confirm or change.
 

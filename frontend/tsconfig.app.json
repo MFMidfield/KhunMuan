@@ -16,7 +16,14 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Paths — no baseUrl: it is deprecated in TS 6 and removed in TS 7. */
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
     /* Linting */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,

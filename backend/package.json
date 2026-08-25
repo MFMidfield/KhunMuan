@@ -1,0 +1,28 @@
+{
+  "name": "khunmuan-backend",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Supabase project for KhunMuan \u2014 migrations, edge functions, seed",
+  "scripts": {
+    "start": "supabase start",
+    "stop": "supabase stop",
+    "status": "supabase status",
+    "reset": "supabase db reset",
+    "diff": "supabase db diff",
+    "new": "supabase migration new",
+    "types": "supabase gen types typescript --local > ../frontend/src/types/database.ts",
+    "test:order-code": "docker exec -i supabase_db_backend psql -U postgres -d postgres -v ON_ERROR_STOP=1 < supabase/tests/order_code_property.sql",
+    "test:orders": "supabase db reset >/dev/null && node tests/place_order.test.mjs",
+    "test:back-office": "supabase db reset >/dev/null && node tests/back_office.test.mjs",
+    "test:tracking": "supabase db reset >/dev/null && node tests/tracking_broadcast.test.mjs",
+    "test:config": "supabase db reset >/dev/null && node tests/config_crud.test.mjs",
+    "test": "npm run test:order-code && npm run test:orders && npm run test:back-office && npm run test:config && npm run test:tracking && npm run test:rate-limit && npm run test:slips && npm run test:ops && npm run test:reports",
+    "test:rate-limit": "supabase db reset >/dev/null && node tests/rate_limit.test.mjs",
+    "test:slips": "supabase db reset >/dev/null && node tests/slips.test.mjs",
+    "test:ops": "supabase db reset >/dev/null && node tests/ops.test.mjs",
+    "test:reports": "supabase db reset >/dev/null && node tests/reports.test.mjs"
+  },
+  "devDependencies": {
+    "supabase": "^2.60.4"
+  }
+}

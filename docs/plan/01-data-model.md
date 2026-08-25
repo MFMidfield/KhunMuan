@@ -50,12 +50,26 @@ shop will ever consume; see doc 03 for why the size still matters.
 | Column | Type | Notes |
 |--------|------|-------|
 | `id` | `uuid` PK default `gen_random_uuid()` | |
-| `email` | `citext` unique not null | Matched against the Google OAuth JWT email |
+| `email` | `text` unique not null, check `= lower(email)` | Matched against the Google OAuth JWT email |
 | `display_name` | `text` not null | Shown on claimed order cards |
 | `role` | `admin_role` not null default `'admin'` | enum: `superadmin`, `admin` |
 | `is_active` | `boolean` not null default true | Soft disable instead of delete |
 | `auth_user_id` | `uuid` → `auth.users.id`, nullable | Linked on first successful sign-in |
 | `invited_by` | `uuid` → `admin_users.id` | |
+
+**Email is `text`, lower-cased on write — not `citext`.** This looks like a
+downgrade and is not. Every security-relevant function in this database runs
+with `search_path = ''`, which is what makes a `SECURITY DEFINER` function safe.
+citext's `=` operator lives in the `extensions` schema, so with an empty
+`search_path` Postgres cannot see it, silently falls back to `text = text`, and
+the comparison becomes **case-sensitive without raising anything**. A staff
+member whose allow-list address was typed with one capital letter would never be
+recognised, and the failure looks exactly like "the allow-list is broken".
+
+A `before insert or update` trigger lower-cases and trims the address instead, so
+`"  Somchai@Gmail.com "` and `somchai@gmail.com` cannot become two rows. GoTrue
+already stores `auth.users.email` lower-cased, so both sides match with plain
+text equality and no extension in the picture.
 
 **Superadmin rule.** Exactly one row may have `role = 'superadmin'`, enforced by
 a partial unique index:
@@ -161,12 +175,15 @@ overselling; the row lock in `place_order` is the first. Both are load-bearing.
 | Column | Type | Notes |
 |--------|------|-------|
 | `id` | `uuid` PK | |
-| `group` | `addon_group` not null | enum: `sauce`, `utensil`, `packaging` |
+| `kind` | `addon_group` not null | enum: `sauce`, `utensil`, `packaging` |
 | `name` | `text` not null | |
 | `price` | `numeric(10,2)` not null default 0 | 0 = free, per the "depends on the item" answer |
 | `max_qty` | `int` not null default 5 | Per set |
 | `is_active` | `boolean` not null default true | |
 | `sort_order` | `int` not null default 0 | |
+
+The column is `kind`, not `group`: `GROUP` is a reserved word in SQL and would
+have to be double-quoted at every use site forever.
 
 ## 4. Orders
 
@@ -175,7 +192,7 @@ overselling; the row lock in `place_order` is the first. Both are load-bearing.
 | Column | Type | Notes |
 |--------|------|-------|
 | `id` | `uuid` PK default `gen_random_uuid()` | Internal key, never shown |
-| `code` | `char(4)` unique not null | The customer-facing code, see doc 03 |
+| `code` | `text` unique not null, check `^[A-Z0-9]{3,12}$` | The customer-facing code, see doc 03 |
 | `code_seq` | `bigint` unique not null | The counter the code was derived from |
 | `service_date` | `date` not null | Shop-local business date |
 | `status` | `order_status` not null default `'pending_confirmation'` | enum, see doc 02 |
@@ -210,6 +227,11 @@ constraint orders_fulfillment_fields check (
      and customer_name is not null and customer_phone is not null)
 )
 ```
+
+`code` is `text`, not `char(4)`. `order_code_length` is superadmin-configurable,
+and a fixed-width column would contradict that the moment the length changed;
+`char(n)` also pads with trailing spaces, which turns every comparison into a
+small trap. The length is bounded by a check constraint instead.
 
 Prices are **snapshotted** onto the order, never joined live from `sets`. When
 the superadmin raises a price next month, last week's revenue must not change.

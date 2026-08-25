@@ -15,21 +15,34 @@ would not take effect until their token expired. Instead every policy resolves
 the role from `admin_users` at query time, so removing someone is immediate.
 
 ```sql
-create or replace function current_admin()
-returns admin_users
-language sql stable security definer set search_path = public as $$
-  select a.* from admin_users a
-   where a.email = (auth.jwt() ->> 'email')::citext
+create or replace function private.current_admin()
+returns public.admin_users
+language sql stable security definer set search_path = '' as $$
+  select a.* from public.admin_users a
+   where a.email = lower((select auth.jwt()) ->> 'email')
      and a.is_active
    limit 1
 $$;
 
-create or replace function is_admin() returns boolean
-language sql stable as $$ select (current_admin()).id is not null $$;
+create or replace function public.is_admin() returns boolean
+language sql stable set search_path = '' as $$
+  select (private.current_admin()).id is not null $$;
 
-create or replace function is_superadmin() returns boolean
-language sql stable as $$ select (current_admin()).role = 'superadmin' $$;
+create or replace function public.is_superadmin() returns boolean
+language sql stable set search_path = '' as $$
+  select (private.current_admin()).role = 'superadmin' $$;
 ```
+
+Three details in there are load-bearing:
+
+- **`private`, not `public`.** `current_admin()` bypasses RLS by design, so it
+  is not exposed through the Data API. `EXECUTE` is granted to `authenticated`
+  and to nobody else; it can only ever return the caller's own row.
+- **`search_path = ''`** on every one of them, which is what stops a
+  `SECURITY DEFINER` function from being hijacked by a shadowed table name.
+- **`lower(...)`, not a `citext` cast.** With an empty `search_path` the citext
+  `=` operator is invisible and the comparison silently degrades to a
+  case-sensitive `text = text`. See doc 01 §2.
 
 The lookup is cheap and hits a unique index; if it ever shows up in a profile,
 cache it per-transaction rather than moving it into the token.
@@ -46,6 +59,39 @@ signs them straight back out with `ไม่มีสิทธิ์เข้า
 ## 2. RLS policies
 
 RLS is enabled on every table. Nothing is readable or writable by default.
+
+### RLS is only the second gate
+
+This project runs with `auto_expose_new_tables` off, so a table is unreachable
+through the Data API until it is `GRANT`ed by name. Every table therefore passes
+two independent checks: **GRANT** decides whether the role may touch the table at
+all, **RLS** decides which rows.
+
+That distinction is load-bearing, because a policy cannot restrict *columns*.
+`for update` covers every column in the row, so an RLS-only rule would still let
+any signed-in admin `PATCH` `status`, `total` or `version` straight past
+`place_order` and `advance_order` — exactly what the policies below claim to
+prevent. The columns a human legitimately corrects on a live ticket are granted
+explicitly and nothing else is:
+
+```sql
+grant select, delete on orders to authenticated;
+grant update (note, cancelled_reason, customer_name, customer_room,
+              customer_phone, delivery_location, delivery_zone_id,
+              pickup_point_id, pickup_slot_id)
+  on orders to authenticated;
+
+-- payments carries the money: read only, state moves through set_payment()
+grant select on payments to authenticated;
+```
+
+Everything carrying money, ownership or state is reachable only through a
+`SECURITY DEFINER` function, which also writes the matching `order_events` row.
+This applies to the superadmin too — there is no API path to `orders.status`.
+
+RLS is **not** forced (`force row level security`). The order logic runs in
+`SECURITY DEFINER` functions owned by `postgres`, and forcing RLS would subject
+those functions to the very policies they exist to enforce correctly.
 
 ### Menu tables (`sets`, `fillings`, `addons`, `pickup_points`, `pickup_slots`)
 

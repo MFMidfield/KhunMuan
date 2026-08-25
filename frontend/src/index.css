@@ -1,111 +1,242 @@
+@import 'tailwindcss';
+
+/* ===========================================================================
+   Design tokens — doc 04 §6. Locked.
+
+   THE TWO-GOLD RULE, and it is the easiest thing here to get wrong six months
+   from now:
+
+     --gold      is a FILL. On white it measures 1.19:1. Text set in it is
+                 unreadable. There is no exception.
+     --gold-ink  is TEXT. 5.02:1 on white. Never use it as a background.
+
+   In dark mode the two swap roles, which is exactly why neither value may be
+   hard-coded anywhere: the tokens carry the swap, the components do not.
+   The Tailwind names below are deliberately `gold-fill` and `gold-ink` so that
+   `text-gold-fill` reads as wrong on sight.
+   =========================================================================== */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --ground: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #eff2f6;
+  --ink: #101720;
+  --ink-muted: #5a6675;
+  --border: #e3e7ec;
+  --border-strong: #cdd5de;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --gold: #f5d68a;
+  --gold-hover: #efc65f;
+  --gold-edge: #101720;
+  --gold-ink: #b45309;
+  --gold-wash: #fdf6e4;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --st-pending-fg: #334155;
+  --st-pending-bg: #e2e8f0;
+  --st-accept-fg: #155e75;
+  --st-accept-bg: #cff3fb;
+  --st-cook-fg: #1e40af;
+  --st-cook-bg: #dbe7fe;
+  --st-ready-fg: #065f46;
+  --st-ready-bg: #d1fae9;
+  --st-done-fg: #475569;
+  --st-done-bg: #f1f5f9;
+  --st-cancel-fg: #991b1b;
+  --st-cancel-bg: #fee2e2;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --shadow-hairline: 0 1px 2px rgb(16 23 32 / 0.04);
 }
 
+/* First load follows the device: no stamp on the root element. The :not()
+   guard is what lets an explicit "light" choice win over a dark device. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+  :root:not([data-theme='light']) {
+    --ground: #0e1319;
+    --surface: #161d26;
+    --surface-2: #1d2531;
+    --ink: #e6eaf0;
+    --ink-muted: #94a3b8;
+    --border: #26303c;
+    --border-strong: #36424f;
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
+    --gold: #f5d68a;
+    --gold-hover: #fae3ac;
+    --gold-edge: #f5d68a;
+    --gold-ink: #f2ce74;
+    --gold-wash: #2a2113;
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
+    --st-pending-fg: #cbd5e1;
+    --st-pending-bg: #1e293b;
+    --st-accept-fg: #7dd8ee;
+    --st-accept-bg: #0b3947;
+    --st-cook-fg: #93b4fd;
+    --st-cook-bg: #132c63;
+    --st-ready-fg: #6ee7b7;
+    --st-ready-bg: #06372a;
+    --st-done-fg: #94a3b8;
+    --st-done-bg: #1a222e;
+    --st-cancel-fg: #fca5a5;
+    --st-cancel-bg: #4a1414;
 
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+    --shadow-hairline: 0 1px 2px rgb(0 0 0 / 0.35);
   }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+
+/* An explicit toggle wins in both directions. */
+:root[data-theme='dark'] {
+  --ground: #0e1319;
+  --surface: #161d26;
+  --surface-2: #1d2531;
+  --ink: #e6eaf0;
+  --ink-muted: #94a3b8;
+  --border: #26303c;
+  --border-strong: #36424f;
+
+  --gold: #f5d68a;
+  --gold-hover: #fae3ac;
+  --gold-edge: #f5d68a;
+  --gold-ink: #f2ce74;
+  --gold-wash: #2a2113;
+
+  --st-pending-fg: #cbd5e1;
+  --st-pending-bg: #1e293b;
+  --st-accept-fg: #7dd8ee;
+  --st-accept-bg: #0b3947;
+  --st-cook-fg: #93b4fd;
+  --st-cook-bg: #132c63;
+  --st-ready-fg: #6ee7b7;
+  --st-ready-bg: #06372a;
+  --st-done-fg: #94a3b8;
+  --st-done-bg: #1a222e;
+  --st-cancel-fg: #fca5a5;
+  --st-cancel-bg: #4a1414;
+
+  --shadow-hairline: 0 1px 2px rgb(0 0 0 / 0.35);
+}
+
+/* `inline` makes the generated utilities reference var(--ground) rather than
+   copying today's value, which is what lets the theme swap at runtime. */
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-gold-fill: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-gold-edge: var(--gold-edge);
+  --color-gold-ink: var(--gold-ink);
+  --color-gold-wash: var(--gold-wash);
+
+  --color-st-pending-fg: var(--st-pending-fg);
+  --color-st-pending-bg: var(--st-pending-bg);
+  --color-st-accept-fg: var(--st-accept-fg);
+  --color-st-accept-bg: var(--st-accept-bg);
+  --color-st-cook-fg: var(--st-cook-fg);
+  --color-st-cook-bg: var(--st-cook-bg);
+  --color-st-ready-fg: var(--st-ready-fg);
+  --color-st-ready-bg: var(--st-ready-bg);
+  --color-st-done-fg: var(--st-done-fg);
+  --color-st-done-bg: var(--st-done-bg);
+  --color-st-cancel-fg: var(--st-cancel-fg);
+  --color-st-cancel-bg: var(--st-cancel-bg);
+
+  --radius-card: 16px;
+  --radius-btn: 12px;
+
+  --shadow-hairline: var(--shadow-hairline);
+
+  --font-sans: 'IBM Plex Sans Thai', 'Noto Sans Thai', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Keeps form controls and scrollbars in step with the token palette. */
+    color-scheme: light dark;
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Codes, prices and timers must not jitter as they update. */
+  .tnum {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* iOS zooms the page when a focused input is under 16px. Every control in
+     this app is at least 16px for that reason, not for taste. */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1rem);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gold-ink);
+    outline-offset: 2px;
   }
 }
-p {
-  margin: 0;
-}
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
+@layer utilities {
+  /* Safe areas. The bottom one is the important one: the admin tab bar sits on
+     the home indicator otherwise, and staff tap the wrong thing in a rush. */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .px-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Content sitting above a fixed bottom bar. 4rem bar + the inset. */
+  .pb-tabbar {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Horizontal chip and column strips: swipeable, snapping, no visible bar. */
+  .scroll-strip {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .scroll-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .snap-item {
+    scroll-snap-align: start;
+  }
 }
