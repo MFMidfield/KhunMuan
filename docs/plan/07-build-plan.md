@@ -28,7 +28,7 @@ not part of delivery.
 | | |
 |---|---|
 | Branch | `phase-0-foundations`, pushed, **not merged into `main`** |
-| Migrations | `0001`–`0035`, `db reset` clean from empty |
+| Migrations | `0001`–`0036`, `db reset` clean from empty |
 | Routes | all 17 are real screens; the `Placeholder` component is deleted |
 | Backend suites | `npm test` runs nine: order-code, orders, back-office, config, tracking, rate-limit, slips, ops, reports. Eight are green; `orders` has three failures and `config` one, all four older than the current work — see below |
 | Frontend | `npm run check` = tsc + eslint + build, clean |
@@ -104,6 +104,28 @@ because they are layout, not logic.
   had no unblock screen. Migration 0035 and `/admin/blocked`; doc 05 §4.
 - **หน้าหลัก was missing from the side nav**, and the tracking page had no way
   out at all — checkout lands on it with `replace`.
+
+### The review round after it
+
+A review of that commit found six more, all fixed in the next one. Three were
+the same shape: a rule was enforced in one place and restated in another.
+
+- **The name was required and then shown nowhere.** The board card and the
+  detail view rendered the pickup point and the phone, never `customer_name` —
+  so the counter still had nothing to call out. It now leads the meta row, with
+  the room beside it, and both joined the search haystack.
+- **`/admin/new` kept the contact card between orders.** It cleared the boxes
+  and minted a fresh request id, and left the name. Before 0034 that was inert;
+  after it, a leftover name satisfies the required field on its own, so the next
+  caller's order went out under the previous caller's name — and the board, now
+  printing that name, would have agreed with it right to the handover.
+- **`/admin/blocked` used a different rule from the limit** (0036). Fixed by
+  calling `check_lookup_limit` instead of paraphrasing it; the row now says
+  which refusal it is, and the result is capped.
+- `checkout:errors` gained `INVALID_PAYLOAD`, so a tab left open across this
+  deploy says which field is missing instead of "try again", which for a missing
+  name never succeeds.
+- One dead i18n key removed.
 
 ### Found in that round and **not** fixed — both older than it
 

@@ -26,6 +26,7 @@ export interface BoardOrder {
   fulfillment: Database['public']['Enums']['fulfillment_type']
   delivery_location: string | null
   customer_name: string | null
+  customer_room: string | null
   customer_phone: string | null
   claimed_by: string | null
   claimed_at: string | null
@@ -48,7 +49,8 @@ export interface BoardOrder {
 
 const SELECT = `
   id, code, status, total, created_at, version, source, note, fulfillment,
-  delivery_location, customer_name, customer_phone, claimed_by, claimed_at,
+  delivery_location, customer_name, customer_room, customer_phone,
+  claimed_by, claimed_at,
   claimed:admin_users!orders_claimed_by_fkey ( display_name ),
   point:pickup_points ( name ),
   slot:pickup_slots ( label ),
@@ -156,6 +158,7 @@ interface RawOrder {
   fulfillment: Database['public']['Enums']['fulfillment_type']
   delivery_location: string | null
   customer_name: string | null
+  customer_room: string | null
   customer_phone: string | null
   claimed_by: string | null
   claimed_at: string | null
@@ -192,6 +195,7 @@ function normalise(row: RawOrder): BoardOrder {
     fulfillment: row.fulfillment,
     delivery_location: row.delivery_location,
     customer_name: row.customer_name,
+    customer_room: row.customer_room,
     customer_phone: row.customer_phone,
     claimed_by: row.claimed_by,
     claimed_at: row.claimed_at,

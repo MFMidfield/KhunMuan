@@ -106,6 +106,7 @@ function haystack(o: BoardOrder): string {
   return [
     o.code,
     o.customer_name,
+    o.customer_room,
     o.customer_phone,
     o.delivery_location,
     o.point_name,

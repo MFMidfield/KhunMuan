@@ -364,7 +364,9 @@ Blocking by IP hash punishes honest typists too. Two things soften it:
 
 - The rate-limit screen shows the shop's phone number and LINE so a locked-out
   customer can just ask staff, who can look the order up with no limit at all.
-- **Any admin** gets a **blocked list** at `/admin/blocked` — IP hash, first and
+- **Any admin** gets a **blocked list** at `/admin/blocked`, judged by the limit
+  itself rather than by a second copy of its rule (0036), and labelled with
+  which refusal it is — IP hash, first and
   last attempt, attempt count, the codes tried — with a one-tap **unblock**. The
   IP hash is opaque and expires with the log, so this is not a way to identify
   people; it is a way to undo a false positive. It was superadmin-only until

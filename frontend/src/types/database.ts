@@ -960,7 +960,7 @@ export type Database = {
         Returns: Json
       }
       blocked_lookup_ips: {
-        Args: never
+        Args: { p_limit?: number }
         Returns: {
           attempts: number
           codes_tried: string[]
@@ -968,6 +968,7 @@ export type Database = {
           ip_hash: string
           last_seen: string
           misses: number
+          reason: string
         }[]
       }
       cancel_order: {

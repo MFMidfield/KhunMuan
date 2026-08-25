@@ -137,6 +137,15 @@ export function NewOrderPage() {
       // this one.
       setRequestId(crypto.randomUUID())
       setBoxes([])
+      // And a fresh customer. The next call is a different person, and since
+      // 0034 a leftover name is not inert: it satisfies the required field on
+      // its own, so an order keyed without touching this card would go out
+      // under the previous caller's name — and the board, which now prints that
+      // name, would agree with it right up to the handover.
+      setName('')
+      setRoom('')
+      setPhone('')
+      setLocation('')
     },
   })
 

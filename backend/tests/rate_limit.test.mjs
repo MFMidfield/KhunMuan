@@ -90,6 +90,23 @@ ok('the blocked list shows the offender to the owner', blocked.length>=1, JSON.s
 const un=await fetch(U+'/rest/v1/rpc/unblock_ip',{method:'POST',headers:{apikey:ANON,Authorization:'Bearer '+S,'Content-Type':'application/json'},body:JSON.stringify({p_ip_hash:blocked[0].ip_hash})}).then(r=>r.json())
 ok('unblocking clears their attempts', un?.cleared>0, JSON.stringify(un))
 
+console.log('\n— the list matches the limit, not a second copy of its rule (0036) —')
+// Five *hits* in a minute is RATE_LIMITED with zero misses. Under the old
+// misses-only listing this device did not appear at all — and behind a shared
+// campus NAT it is the common case, i.e. exactly the person phoning the shop.
+// The burst is fresh here because the rule's window is 60 seconds and the
+// sections above take longer than that to run.
+const ipFast='198.51.100.30'
+const fast=[]
+for (let i=0;i<6;i++) fast.push(await track(placed.code, null, ipFast))
+ok('a fast reader is refused', fast.some(r=>r.s===429), JSON.stringify(fast.map(r=>r.s)))
+const listNow=await fetch(U+'/rest/v1/rpc/blocked_lookup_ips',{method:'POST',headers:{apikey:ANON,Authorization:'Bearer '+S,'Content-Type':'application/json'},body:'{}'}).then(r=>r.json())
+const fastRow=listNow.find(r=>r.misses===0)
+ok('and appears on the list with zero misses', Boolean(fastRow), JSON.stringify(listNow).slice(0,200))
+ok('labelled RATE_LIMITED, not IP_BLOCKED', fastRow?.reason==='RATE_LIMITED', JSON.stringify(fastRow))
+ok('every listed row is one the limit is actually refusing', listNow.every(r=>r.reason==='RATE_LIMITED'||r.reason==='IP_BLOCKED'), JSON.stringify(listNow.map(r=>r.reason)))
+ok('codes_tried is capped at 20', listNow.every(r=>(r.codes_tried?.length??0)<=20))
+
 console.log('\n— an admin, not only the owner, can unblock —')
 const A=(email)=>{const c=crypto;const b=o=>Buffer.from(JSON.stringify(o)).toString('base64url')
  const n=Math.floor(Date.now()/1e3),h=b({alg:'HS256',typ:'JWT'}),p=b({iss:'supabase-demo',role:'authenticated',aud:'authenticated',sub:c.randomUUID(),email,iat:n,exp:n+3600})

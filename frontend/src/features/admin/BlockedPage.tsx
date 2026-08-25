@@ -8,17 +8,12 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { PageSpinner } from '@/components/ui/Spinner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import type { Database } from '@/types/database'
 
 const KEY = ['blocked-lookup-ips'] as const
 
-interface BlockedRow {
-  ip_hash: string
-  misses: number
-  attempts: number
-  first_seen: string
-  last_seen: string
-  codes_tried: string[]
-}
+/** Generated, so a change to the function's shape breaks the build here. */
+type BlockedRow = Database['public']['Functions']['blocked_lookup_ips']['Returns'][number]
 
 /**
  * The other half of the rate limit (doc 05 §4).
@@ -45,9 +40,9 @@ export function BlockedPage() {
     staleTime: 5_000,
     refetchInterval: 15_000,
     queryFn: async (): Promise<BlockedRow[]> => {
-      const { data, error } = await supabase.rpc('blocked_lookup_ips')
+      const { data, error } = await supabase.rpc('blocked_lookup_ips', { p_limit: 100 })
       if (error) throw error
-      return (data ?? []) as unknown as BlockedRow[]
+      return data ?? []
     },
   })
 
@@ -101,6 +96,12 @@ export function BlockedPage() {
                       never enough to be anything else. */}
                   <span className="tnum font-semibold break-all">
                     {row.ip_hash.slice(0, 12)}
+                  </span>
+                  {/* Which refusal, because they are two different
+                      conversations to have with the customer: "you typed too
+                      fast" and "you got three codes wrong". */}
+                  <span className="ms-auto rounded-full bg-surface-2 px-2 py-0.5 text-[0.75rem] text-ink-muted">
+                    {t(`admin:blockedReason.${row.reason}`)}
                   </span>
                 </div>
 

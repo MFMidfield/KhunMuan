@@ -26,7 +26,7 @@ KhunMuan/
 │   └── supabase/
 │       ├── config.toml         local stack; Google OAuth reads supabase/.env
 │       ├── .env                Google client id + secret (gitignored)
-│       └── migrations/         0001–0035, applied in filename order
+│       └── migrations/         0001–0036, applied in filename order
 └── frontend/
     ├── .env.local              VITE_SUPABASE_URL + ANON_KEY (gitignored)
     └── src/
@@ -51,7 +51,7 @@ KhunMuan/
 | `0008_seed_superadmin.sql` | **Contains the one line to edit before any cloud deploy** |
 | `0009_rls.sql` | Grants and row-level security |
 
-`0010`–`0035` are the feature migrations and each names its plan doc in its own
+`0010`–`0036` are the feature migrations and each names its plan doc in its own
 header comment. Two are worth knowing about before you touch `shop_settings`:
 `0016` turned the shop's lists into back-office configuration, and `0025` added
 the three contact channels the landing page reads.

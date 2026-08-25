@@ -177,6 +177,9 @@ export const th = {
       SLIP_REQUIRED: 'จ่ายแบบโอนต้องแนบสลิปก่อน',
       SLIP_NOT_STAGED: 'สลิปหมดอายุแล้ว แนบใหม่อีกครั้ง',
       SLIP_NOT_UPLOADED: 'สลิปส่งไม่ครบ แนบใหม่อีกครั้ง',
+      // A tab left open across a deploy still sends the old payload. Naming the
+      // field beats "try again", which for a missing name never succeeds.
+      INVALID_PAYLOAD: 'กรอกข้อมูลไม่ครบ ({{detail}}) โหลดหน้าใหม่แล้วลองอีกครั้ง',
       unknown: 'ส่งออเดอร์ไม่สำเร็จ ลองใหม่อีกครั้ง',
     },
   },
@@ -482,7 +485,10 @@ export const th = {
     blockedConfirmTitle: 'ปลดบล็อคเครื่องนี้?',
     blockedConfirmBody:
       'ลบประวัติการค้นของเครื่องนี้ทิ้ง แล้วเครื่องนี้ค้นหาได้อีกครั้งทันที',
-    blockedUnblocked: 'ปลดบล็อคแล้ว',
+    blockedReason: {
+      IP_BLOCKED: 'พิมพ์รหัสผิดถี่เกิน',
+      RATE_LIMITED: 'ค้นถี่เกิน',
+    },
 
     shopOpen: 'เปิดรับออเดอร์',
     shopClosed: 'ปิดรับออเดอร์',

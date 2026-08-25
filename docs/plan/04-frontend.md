@@ -177,7 +177,7 @@ layout is plain CSS again, as §9 prefers.
 │  กุ้ง ×3 · หมู ×4 · ปูอัด ×3             │
 │  🥣 น้ำจิ้มสุกี้ ×2   📝 ไม่ใส่ผักชี      │
 │  ─────────────────────────────────────  │
-│  📍 หน้าตึก 3 · 12:00–12:15             │
+│  สมชาย · หน้าตึก 3 · 12:00–12:15        │
 │  💵 โอน · รอตรวจสลิป          ฿259      │
 │  ─────────────────────────────────────  │
 │  👤 ยังไม่มีคนรับ        [ รับงาน ]      │
@@ -186,6 +186,10 @@ layout is plain CSS again, as §9 prefers.
 
 Non-negotiable details:
 
+- **The customer's name leads the meta row, and is the only line there in full
+  ink.** It is what gets called out when the box is ready, which is the whole
+  reason 0034 made it required — a required field nobody on this side can see is
+  a field collected for nothing. The room and the phone follow it, muted.
 - **Newest first** (0033). The age timer, not the position in the list, is what
   says an order has been waiting: a new order appended to the bottom of a long
   board is an order nobody sees.

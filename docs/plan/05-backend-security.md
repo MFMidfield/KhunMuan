@@ -245,6 +245,25 @@ Blocking by IP hash catches honest typists too, so two things soften it:
    first and last attempt, attempt count, which codes were tried, and a one-tap
    **unblock**.
 
+The list asks the limit rather than restating it (0036): it calls
+`private.check_lookup_limit` once per address seen in the window and reports
+what that function says, including which refusal — `RATE_LIMITED` and
+`IP_BLOCKED` are two different conversations to have with a customer. The
+earlier version carried its own copy of the rule ("three misses in fifteen
+minutes") and was wrong in both directions: a device refused for *speed* has no
+misses and never appeared, which is the common case behind a shared campus NAT
+and therefore exactly the person phoning the shop; and a device whose three
+misses were twenty minutes apart was listed as blocked when it never was.
+
+The result is capped — 100 rows, 20 codes each — because the moment this screen
+is worth watching is a distributed attempt, which is also the moment the
+uncapped version is largest.
+
+The **global circuit breaker** cannot be shown here and cannot be lifted here: it
+refuses everyone, no per-address row expresses it, and `unblock_ip` clears one
+hash. It expires within the minute on its own, which is the only reason that is
+tolerable.
+
 `unblock_ip(ip_hash)` deletes the offending attempt rows. It was superadmin-only
 until 0035, which was the wrong tier: the person who takes the call from a
 customer who cannot open their own order is whoever is on shift, and a fix that

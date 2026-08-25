@@ -186,11 +186,19 @@ export function OrderCard({
       </div>
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.85rem] text-ink-muted">
+        {/* The name leads and is the only line here in full ink. It is what
+            gets called out when the box is ready, which is the entire reason
+            0034 made it required — collecting it and not showing it here would
+            leave the counter reading four characters out to a crowd. */}
+        {order.customer_name && (
+          <span className="font-medium break-words text-ink">{order.customer_name}</span>
+        )}
         <span className="break-words">
           {order.fulfillment === 'pickup'
             ? [order.point_name, order.slot_label].filter(Boolean).join(' · ')
             : [order.zone_name, order.delivery_location].filter(Boolean).join(' · ')}
         </span>
+        {order.customer_room && <span className="break-words">{order.customer_room}</span>}
         {order.customer_phone && (
           <span className="tnum">{order.customer_phone}</span>
         )}
